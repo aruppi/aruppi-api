@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
   res.json({
-    message: '🦄🌈✨👋🌎🌍🌏✨🌈🦄'
+    message: 'Tu~tu~ruuu! You have traveled to the API Black Hole'
   });
 });
 

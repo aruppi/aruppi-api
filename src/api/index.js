@@ -12,8 +12,8 @@ router.get('/', (req, res) => {
     entries: [
       {
         'Schedule': '/api/v1/schedule/:id',
-        'Top': '/top/:type/:subtype/:page',
-        'GetAllAnimes': '/getAllAnimes'
+        'Top': '/api/v1/top/:type/:subtype/:page',
+        'GetAllAnimes': '/api/v1/getAllAnimes'
       }
     ]
   });
