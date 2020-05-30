@@ -34,7 +34,7 @@ router.get('/top/:type/:subtype/:page' , (req, res) =>{
 
 });
 
-router.get('/getAllAnimes' , (req, res) =>{
+router.get('/allAnimes' , (req, res) =>{
 
     api.getAllAnimes()
         .then(animes =>{
@@ -47,7 +47,7 @@ router.get('/getAllAnimes' , (req, res) =>{
 
 });
 
-router.get('/getAnitakume' , (req, res) =>{
+router.get('/anitakume' , (req, res) =>{
 
     api.getAnitakume()
         .then(podcast =>{
@@ -60,7 +60,7 @@ router.get('/getAnitakume' , (req, res) =>{
 
 });
 
-router.get('/getNews' , (req, res) =>{
+router.get('/news' , (req, res) =>{
 
     api.getNews()
         .then(news =>{
@@ -89,7 +89,7 @@ router.get('/season/:year/:type' , (req, res) =>{
 
 });
 
-router.get('/getLastEpisodes' , (req, res) =>{
+router.get('/lastEpisodes' , (req, res) =>{
 
     api.getLastEpisodes()
         .then(episodes =>{
@@ -102,7 +102,7 @@ router.get('/getLastEpisodes' , (req, res) =>{
 
 });
 
-router.get('/getMovies/:type/:page' , (req, res) =>{
+router.get('/movies/:type/:page' , (req, res) =>{
 
     let type = req.params.type;
     let page = req.params.page;
@@ -118,7 +118,7 @@ router.get('/getMovies/:type/:page' , (req, res) =>{
 
 });
 
-router.get('/getOvas/:type/:page' , (req, res) =>{
+router.get('/ovas/:type/:page' , (req, res) =>{
 
     let type = req.params.type;
     let page = req.params.page;
@@ -134,7 +134,7 @@ router.get('/getOvas/:type/:page' , (req, res) =>{
 
 });
 
-router.get('/getSpecials/:type/:page' , (req, res) =>{
+router.get('/specials/:type/:page' , (req, res) =>{
 
     let type = req.params.type;
     let page = req.params.page;
@@ -150,7 +150,7 @@ router.get('/getSpecials/:type/:page' , (req, res) =>{
 
 });
 
-router.get('/getTv/:type/:page' , (req, res) =>{
+router.get('/tv/:type/:page' , (req, res) =>{
 
     let type = req.params.type;
     let page = req.params.page;

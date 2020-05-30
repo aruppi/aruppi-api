@@ -13,15 +13,15 @@ router.get('/', (req, res) => {
       {
         'Schedule': '/api/v2/schedule/:day',
         'Top': '/api/v2/top/:type/:subtype/:page',
-        'GetAllAnimes': '/api/v2/getAllAnimes',
-        'GetAnitakume': '/api/v2/getAnitakume',
-        'GetNews': '/api/v2/getNews',
+        'AllAnimes': '/api/v2/allAnimes',
+        'Anitakume': '/api/v2/anitakume',
+        'News': '/api/v2/news',
         'Season': '/api/v2/season/:year/:type',
-        'GetLastEpisodes': '/api/v2/getLastEpisodes',
-        'GetMovies': '/api/v2/getMovies',
-        'GetOvas': '/api/v2/getOvas',
-        'GetSpecials': '/api/v2/getSpecials',
-        'GetTv': '/api/v2/getTv'
+        'LastEpisodes': '/api/v2/lastEpisodes',
+        'Movies': '/api/v2/movies',
+        'Ovas': '/api/v2/ovas',
+        'Specials': '/api/v2/specials',
+        'Tv': '/api/v2/tv'
       }
     ]
   });
