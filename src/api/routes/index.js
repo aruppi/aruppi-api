@@ -47,4 +47,30 @@ router.get('/getAllAnimes' , (req, res) =>{
 
 });
 
+router.get('/getAnitakume' , (req, res) =>{
+
+    api.getAnitakume()
+        .then(podcast =>{
+            res.status(200).json({
+                podcast
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/getNews' , (req, res) =>{
+
+    api.getNews()
+        .then(news =>{
+            res.status(200).json({
+                news
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 module.exports = router;

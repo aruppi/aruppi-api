@@ -1,14 +1,13 @@
-const cheerio = require('cheerio');
-const cheerioTableparser = require('cheerio-tableparser');
+const rss = require('rss-to-json');
 const cloudscraper = require('cloudscraper');
 const {
-  BASE_ANIMEFLV         , BASE_JIKAN
+  BASE_ANIMEFLV, BASE_JIKAN, BASE_IVOOX, BASE_KUDASAI, BASE_PALOMITRON
 } = require('./urls');
 
 const schedule = async (day) =>{
 
   const data = await cloudscraper.get(`${BASE_JIKAN}schedule/${day}`);
-  let body = "";
+  let body;
 
   switch (day) {
     case "monday":
@@ -58,8 +57,85 @@ const getAllAnimes = async () =>{
 
 };
 
+const getAnitakume = async () =>{
+
+  const promises = []
+
+  await rss.load(BASE_IVOOX).then(rss => {
+
+    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
+    body.map(doc =>{
+
+      let time = new Date(doc.created)
+      const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+      let day = time.getDate()
+      let month = monthNames[time.getMonth()]
+      let year = time.getFullYear()
+      let date
+
+      if(month < 10){
+        date = `${day} de 0${month} de ${year}`
+      }else{
+        date = `${day} de ${month} de ${year}`
+      }
+
+      promises.push({
+        title: doc.title,
+        duration: doc.itunes_duration,
+        created: date,
+        mp3: doc.enclosures.map(x => x.url)
+      });
+    });
+
+  });
+
+  return Promise.all(promises);
+
+};
+
+const getNews = async () =>{
+
+  const promises = []
+
+  await rss.load(BASE_KUDASAI).then(rss => {
+
+    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
+    body.map(doc =>{
+
+      promises.push({
+        title: doc.title,
+        url: doc.link,
+        author: 'Kudasai',
+        content: doc.content_encoded
+      });
+    });
+
+  });
+
+  await rss.load(BASE_PALOMITRON).then(rss => {
+
+    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
+    body.map(doc =>{
+
+      promises.push({
+        title: doc.title,
+        url: doc.link,
+        author: 'Palomitron',
+        content: doc.description
+      });
+    });
+
+  });
+
+  return Promise.all(promises);
+
+};
+
 module.exports = {
   schedule,
   top,
-  getAllAnimes
+  getAllAnimes,
+  getAnitakume,
+  getNews
 };

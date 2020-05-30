@@ -13,7 +13,9 @@ router.get('/', (req, res) => {
       {
         'Schedule': '/api/v1/schedule/:id',
         'Top': '/api/v1/top/:type/:subtype/:page',
-        'GetAllAnimes': '/api/v1/getAllAnimes'
+        'GetAllAnimes': '/api/v1/getAllAnimes',
+        'GetAnitakume': '/api/v1/getAnitakume',
+        'GetNews': '/api/v1/getNews'
       }
     ]
   });

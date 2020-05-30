@@ -40,7 +40,7 @@ const urlify = async(text) =>{
 
 module.exports = {
   MergeRecursive,
+  millisecondsToDate,
   imageUrlToBase64,
-  urlify,
-  decodeZippyURL
+  urlify
 }
