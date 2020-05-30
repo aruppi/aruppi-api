@@ -73,4 +73,33 @@ router.get('/getNews' , (req, res) =>{
 
 });
 
+router.get('/season/:year/:type' , (req, res) =>{
+
+    let year = req.params.year;
+    let type = req.params.type;
+
+    api.season(year, type)
+        .then(season =>{
+            res.status(200).json({
+                season
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/getLastEpisodes' , (req, res) =>{
+
+    api.getLastEpisodes()
+        .then(episodes =>{
+            res.status(200).json({
+                episodes
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 module.exports = router;

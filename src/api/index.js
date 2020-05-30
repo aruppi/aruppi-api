@@ -7,15 +7,17 @@ router.get('/', (req, res) => {
   res.json({
     message: 'Aruppi API - 🎏',
     author: 'Jéluchu',
-    version: '1.0.0',
+    version: '2.0.0',
     credits: 'The bitch loves APIs that offers data to Aruppi App',
     entries: [
       {
-        'Schedule': '/api/v1/schedule/:id',
-        'Top': '/api/v1/top/:type/:subtype/:page',
-        'GetAllAnimes': '/api/v1/getAllAnimes',
-        'GetAnitakume': '/api/v1/getAnitakume',
-        'GetNews': '/api/v1/getNews'
+        'Schedule': '/api/v2/schedule/:day',
+        'Top': '/api/v2/top/:type/:subtype/:page',
+        'GetAllAnimes': '/api/v2/getAllAnimes',
+        'GetAnitakume': '/api/v2/getAnitakume',
+        'GetNews': '/api/v2/getNews',
+        'Season': '/api/v2/season/:year/:type',
+        'GetLastEpisodes': '/api/v2/getLastEpisodes'
       }
     ]
   });
