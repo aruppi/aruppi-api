@@ -182,6 +182,107 @@ const getLastEpisodes = async () =>{
 
 };
 
+const getMovies = async (type, page) =>{
+
+  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Movies/${type}/${page}`);
+  let body = JSON.parse(data).movies;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      id: doc.id,
+      title: doc.title,
+      banner: doc.banner,
+      image: doc.poster,
+      synopsis: doc.synopsis,
+      status: doc.debut,
+      rate: doc.rating,
+      genres: doc.genres.map(x => x),
+      episodes: doc.episodes.map(x => x)
+    });
+  });
+
+  return Promise.all(promises);
+
+};
+
+const getOvas = async (type, page) =>{
+
+  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Ova/${type}/${page}`);
+  let body = JSON.parse(data).ova;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      id: doc.id,
+      title: doc.title,
+      banner: doc.banner,
+      image: doc.poster,
+      synopsis: doc.synopsis,
+      status: doc.debut,
+      rate: doc.rating,
+      genres: doc.genres.map(x => x),
+      episodes: doc.episodes.map(x => x)
+    });
+  });
+
+  return Promise.all(promises);
+
+};
+
+
+const getSpecials = async (type, page) =>{
+
+  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Special/${type}/${page}`);
+  let body = JSON.parse(data).special;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      id: doc.id,
+      title: doc.title,
+      banner: doc.banner,
+      image: doc.poster,
+      synopsis: doc.synopsis,
+      status: doc.debut,
+      rate: doc.rating,
+      genres: doc.genres.map(x => x),
+      episodes: doc.episodes.map(x => x)
+    });
+  });
+
+  return Promise.all(promises);
+
+};
+
+const getTv = async (type, page) =>{
+
+  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Tv/${type}/${page}`);
+  let body = JSON.parse(data).tv;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      id: doc.id,
+      title: doc.title,
+      banner: doc.banner,
+      image: doc.poster,
+      synopsis: doc.synopsis,
+      status: doc.debut,
+      rate: doc.rating,
+      genres: doc.genres.map(x => x),
+      episodes: doc.episodes.map(x => x)
+    });
+  });
+
+  return Promise.all(promises);
+
+};
+
 module.exports = {
   schedule,
   top,
@@ -189,5 +290,9 @@ module.exports = {
   getAnitakume,
   getNews,
   season,
-  getLastEpisodes
+  getLastEpisodes,
+  getMovies,
+  getOvas,
+  getSpecials,
+  getTv
 };

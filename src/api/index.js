@@ -17,7 +17,11 @@ router.get('/', (req, res) => {
         'GetAnitakume': '/api/v2/getAnitakume',
         'GetNews': '/api/v2/getNews',
         'Season': '/api/v2/season/:year/:type',
-        'GetLastEpisodes': '/api/v2/getLastEpisodes'
+        'GetLastEpisodes': '/api/v2/getLastEpisodes',
+        'GetMovies': '/api/v2/getMovies',
+        'GetOvas': '/api/v2/getOvas',
+        'GetSpecials': '/api/v2/getSpecials',
+        'GetTv': '/api/v2/getTv'
       }
     ]
   });

@@ -54,7 +54,6 @@
     "node-fetch": "^2.6.0",
     "npm": "^6.14.5",
     "request": "^2.88.0",
-    "rss-parser": "^3.8.0",
     "rss-to-json": "^1.1.1"
   }
 }
