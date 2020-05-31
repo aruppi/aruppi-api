@@ -18,10 +18,11 @@ router.get('/', (req, res) => {
         'News': '/api/v2/news',
         'Season': '/api/v2/season/:year/:type',
         'LastEpisodes': '/api/v2/lastEpisodes',
-        'Movies': '/api/v2/movies',
-        'Ovas': '/api/v2/ovas',
-        'Specials': '/api/v2/specials',
-        'Tv': '/api/v2/tv'
+        'Movies': '/api/v2/movies/:type/:page',
+        'Ovas': '/api/v2/ovas/:type/:page',
+        'Specials': '/api/v2/specials/:type/:page',
+        'Tv': '/api/v2/tv/:type/:page',
+        'MoreInfo': '/api/v2/moreInfo/:title'
       }
     ]
   });

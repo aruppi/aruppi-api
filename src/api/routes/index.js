@@ -166,4 +166,19 @@ router.get('/tv/:type/:page' , (req, res) =>{
 
 });
 
+router.get('/moreInfo/:title' , (req, res) =>{
+
+    let title = req.params.title;
+
+    api.getMoreInfo(title)
+        .then(info =>{
+            res.status(200).json({
+                info
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 module.exports = router;

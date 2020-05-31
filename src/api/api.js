@@ -1,5 +1,15 @@
 const rss = require('rss-to-json');
 const cloudscraper = require('cloudscraper');
+const animeflv = require("animeflv-scrapper");
+
+const {
+  animeflvInfo,
+  imageUrlToBase64,
+  getAnimeCharacters,
+  getAnimeVideoPromo,
+  animeExtraInfo
+} = require('../utils/index');
+
 const {
   BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_KUDASAI, BASE_PALOMITRON
 } = require('./urls');
@@ -233,7 +243,6 @@ const getOvas = async (type, page) =>{
 
 };
 
-
 const getSpecials = async (type, page) =>{
 
   const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Special/${type}/${page}`);
@@ -284,6 +293,50 @@ const getTv = async (type, page) =>{
 
 };
 
+const getMoreInfo = async (title) =>{
+
+  const promises = []
+  let animeTitle =""
+  let animeId = ""
+
+  await animeflv.searchAnime(title).then(data => {
+    data.forEach(function (anime) {
+          if (anime.label === title) {
+            animeTitle = anime.label
+            animeId = anime.animeId
+          }
+        }
+    )
+  });
+
+  try{
+    promises.push(await animeflvInfo(animeId).then(async extra => ({
+      title: animeTitle || null,
+      poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+      synopsis: extra.animeExtraInfo[0].synopsis || null,
+      status: extra.animeExtraInfo[0].debut || null,
+      type: extra.animeExtraInfo[0].type || null,
+      rating: extra.animeExtraInfo[0].rating || null,
+      genres: extra.genres || null,
+      episodes: extra.listByEps || null,
+      moreInfo: await animeExtraInfo(title).then(info =>{
+        return info || null
+      }),
+      promo: await getAnimeVideoPromo(title).then(promo =>{
+        return promo || null
+      }),
+      characters: await getAnimeCharacters(animeTitle).then(characters =>{
+        return characters || null
+      })
+    })));
+
+  }catch(err){
+    console.log(err)
+  }
+
+  return Promise.all(promises);
+};
+
 module.exports = {
   schedule,
   top,
@@ -295,5 +348,6 @@ module.exports = {
   getMovies,
   getOvas,
   getSpecials,
-  getTv
+  getTv,
+  getMoreInfo
 };
