@@ -119,11 +119,9 @@ const getAnimeCharacters = async(title) =>{
     let name = charactersNames[k];
     let characterImg = charactersImages[k];
     characters.push({
-      character:{
         id: id,
         name: name,
         image: characterImg
-      }
     });
   });
 
