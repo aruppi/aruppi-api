@@ -153,7 +153,8 @@ const season = async (year, type) =>{
     promises.push({
       title: doc.title,
       malid: doc.mal_id,
-      image: doc.image_url
+      image: doc.image_url,
+      genres: doc.genres.map(x => x.name)
     });
   });
 
