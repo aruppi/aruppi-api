@@ -1,6 +1,6 @@
 const cloudscraper = require('cloudscraper')
-const imageToBase64 = require("image-to-base64");
 const cheerio = require('cheerio');
+const base64 = require('node-base64-image');
 
 const {
   BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL
@@ -236,12 +236,7 @@ const animeExtraInfo = async(title) =>{
 };
 
 const imageUrlToBase64 = async(url) => {
-
-  let base64image = ""
-
-  await imageToBase64(url).then((response) => {base64image = response})
-
-  return base64image.toString("base64");
+  return await base64.encode(url, {string:true});
 };
 
 /*const imageUrlToBase64 = async(url) => {

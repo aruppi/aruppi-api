@@ -50,7 +50,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "helmet": "^3.22.0",
-    "image-to-base64": "^2.1.0",
+    "node-base64-image": "^2.0.1",
     "npm": "^6.14.5",
     "request": "^2.88.0",
     "rss-to-json": "^1.1.1"
