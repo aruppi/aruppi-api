@@ -60,7 +60,7 @@ const animeflvInfo = async(id) =>{
     });
     const AnimeThumbnailsId = anime_info_ids[0].split(',')[0].split('"')[1];
     const animeId = id;
-    let nextEpisodeDate = anime_info_ids[0][3] || null
+    let nextEpisodeDate = anime_info_ids[0].split('"')[7] || null
     const amimeTempList = [];
     for(const [key , value] of Object.entries(anime_eps_data)){
       let episode = anime_eps_data[key].map(x => x[0]);
