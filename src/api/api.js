@@ -337,6 +337,24 @@ const getMoreInfo = async (title) =>{
   return Promise.all(promises);
 };
 
+const getAnimeServers = async (id) => {
+
+  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`);
+  let body = JSON.parse(data).servers;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      id: doc.title.toLowerCase(),
+      url: doc.code
+    });
+  });
+
+  return Promise.all(promises);
+
+};
+
 module.exports = {
   schedule,
   top,
@@ -349,5 +367,6 @@ module.exports = {
   getOvas,
   getSpecials,
   getTv,
-  getMoreInfo
+  getMoreInfo,
+  getAnimeServers
 };

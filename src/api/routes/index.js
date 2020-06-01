@@ -181,4 +181,19 @@ router.get('/moreInfo/:title' , (req, res) =>{
 
 });
 
+router.get('/getAnimeServers/:id([^/]+/[^/]+)' , (req, res) =>{
+
+    let id = req.params.id;
+
+    api.getAnimeServers(id)
+        .then(servers =>{
+            res.status(200).json({
+                servers
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 module.exports = router;

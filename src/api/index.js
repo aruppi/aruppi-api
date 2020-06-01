@@ -22,7 +22,8 @@ router.get('/', (req, res) => {
         'Ovas': '/api/v2/ovas/:type/:page',
         'Specials': '/api/v2/specials/:type/:page',
         'Tv': '/api/v2/tv/:type/:page',
-        'MoreInfo': '/api/v2/moreInfo/:title'
+        'MoreInfo': '/api/v2/moreInfo/:title',
+        'GetAnimeServers': '/api/v2/getAnimeServers/:id'
       }
     ]
   });
