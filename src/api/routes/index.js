@@ -174,9 +174,9 @@ router.get('/moreInfo/:title' , (req, res) =>{
         .then(info =>{
             if (info.length > 0) {
                 res.status(200).json({
-                    info: JSON.parse(JSON.stringify(info))
+                    info
                 });
-            } else { res.status(404) }
+            } else { res.status(400) }
         }).catch((err) =>{
         console.error(err);
     });
