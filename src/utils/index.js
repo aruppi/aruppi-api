@@ -236,6 +236,15 @@ const animeExtraInfo = async(title) =>{
 };
 
 const imageUrlToBase64 = async(url) => {
+
+  let base64image = ""
+
+  await imageToBase64(url).then((response) => {base64image = response})
+
+  return base64image.toString("base64");
+};
+
+/*const imageUrlToBase64 = async(url) => {
   let res = await cloudscraper({
     url,
     method: "GET",
@@ -243,7 +252,7 @@ const imageUrlToBase64 = async(url) => {
   });
 
   return Buffer.from(res).toString("base64");
-};
+};*/
 
 const MergeRecursive = (obj1 , obj2) => {
   for(var p in obj2) {
