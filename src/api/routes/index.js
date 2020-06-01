@@ -176,7 +176,7 @@ router.get('/moreInfo/:title' , (req, res) =>{
                 res.status(200).json({
                     info
                 });
-            }
+            } else { res.status(404) }
         }).catch((err) =>{
         console.error(err);
     });
@@ -191,6 +191,21 @@ router.get('/getAnimeServers/:id([^/]+/[^/]+)' , (req, res) =>{
         .then(servers =>{
             res.status(200).json({
                 servers
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/search/:title' , (req, res) =>{
+
+    let title = req.params.title;
+
+    api.search(title)
+        .then(search =>{
+            res.status(200).json({
+                search
             });
         }).catch((err) =>{
         console.error(err);

@@ -7,7 +7,8 @@ const {
   imageUrlToBase64,
   getAnimeCharacters,
   getAnimeVideoPromo,
-  animeExtraInfo
+  animeExtraInfo,
+  searchAnime
 } = require('../utils/index');
 
 const {
@@ -355,6 +356,10 @@ const getAnimeServers = async (id) => {
 
 };
 
+const search = async (title) =>{
+  return await searchAnime(title);
+};
+
 module.exports = {
   schedule,
   top,
@@ -368,5 +373,6 @@ module.exports = {
   getSpecials,
   getTv,
   getMoreInfo,
-  getAnimeServers
+  getAnimeServers,
+  search
 };

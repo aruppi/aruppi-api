@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const base64 = require('node-base64-image');
 
 const {
-  BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL
+  BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL
 } = require('../api/urls');
 
 const animeflvInfo = async(id) =>{
@@ -239,15 +239,32 @@ const imageUrlToBase64 = async(url) => {
   return await base64.encode(url, {string:true});
 };
 
-/*const imageUrlToBase64 = async(url) => {
-  let res = await cloudscraper({
-    url,
-    method: "GET",
-    encoding: null
-  });
+const search = async() =>{ }
 
-  return Buffer.from(res).toString("base64");
-};*/
+const searchAnime = async(query) => {
+
+  const res = await cloudscraper(`${SEARCH_URL}${query}`);
+  const body = await res;
+  const $ = cheerio.load(body);
+  const promises = [];
+
+  $('div.Container ul.ListAnimes li article').each((index , element) =>{
+    const $element = $(element);
+    const id = $element.find('div.Description a.Button').attr('href').slice(1);
+    const title = $element.find('a h3').text();
+    let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
+
+    promises.push(search().then(async extra => ({
+      id: id || null,
+      title: title || null,
+      image: await imageUrlToBase64(poster) || null
+    })));
+
+  })
+
+  return Promise.all(promises);
+
+};
 
 const MergeRecursive = (obj1 , obj2) => {
   for(var p in obj2) {
@@ -282,6 +299,7 @@ module.exports = {
   getAnimeVideoPromo,
   animeExtraInfo,
   imageUrlToBase64,
+  searchAnime,
   MergeRecursive,
   urlify
 }

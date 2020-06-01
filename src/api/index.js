@@ -23,7 +23,8 @@ router.get('/', (req, res) => {
         'Specials': '/api/v2/specials/:type/:page',
         'Tv': '/api/v2/tv/:type/:page',
         'MoreInfo': '/api/v2/moreInfo/:title',
-        'GetAnimeServers': '/api/v2/getAnimeServers/:id'
+        'GetAnimeServers': '/api/v2/getAnimeServers/:id',
+        'Search': '/api/v2/search/:title'
       }
     ]
   });
