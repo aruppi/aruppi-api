@@ -279,11 +279,6 @@ const transformUrlServer = async(urlReal) =>{
         body = await res;
         urlReal[i].code = JSON.parse(body).file
         break;
-      case "fembed": // Fembed
-        res = await cloudscraper(urlReal[i].code.replace("/v/", "/api/source/"), {method: 'POST'});
-        body = await res;
-        urlReal[i].code = JSON.parse(body).data[0].file
-        break;
       case "natsuki": // Natsuki
         res = await cloudscraper(urlReal[i].code.replace("embed","check"));
         body = await res;
