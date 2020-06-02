@@ -300,37 +300,81 @@ const getMoreInfo = async (title) =>{
   const promises = []
   let animeTitle =""
   let animeId = ""
+  let animeType = ""
 
   await animeflv.searchAnime(title).then(data => {
     data.forEach(function (anime) {
-          if (anime.label === title) {
-            animeTitle = anime.label
+          if (anime.label.split('\t')[0] === title.split('\t')[0] || anime.label === `${title} (TV)`) {
+            if (anime.label.includes('(TV)', 0)) { animeTitle = anime.label.split('\t')[0].replace(' (TV)', '') }
+            else { animeTitle = anime.label.split('\t')[0] }
             animeId = anime.animeId
+            animeType = anime.type.toLowerCase()
           }
         }
     )
   });
 
   try{
-    promises.push(await animeflvInfo(animeId).then(async extra => ({
-      title: animeTitle || null,
-      poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-      synopsis: extra.animeExtraInfo[0].synopsis || null,
-      status: extra.animeExtraInfo[0].debut || null,
-      type: extra.animeExtraInfo[0].type || null,
-      rating: extra.animeExtraInfo[0].rating || null,
-      genres: extra.genres || null,
-      episodes: extra.listByEps || null,
-      moreInfo: await animeExtraInfo(title).then(info =>{
-        return info || null
-      }),
-      promo: await getAnimeVideoPromo(title).then(promo =>{
-        return promo || null
-      }),
-      characters: await getAnimeCharacters(animeTitle).then(characters =>{
-        return characters || null
-      })
-    })));
+
+    switch (animeType) {
+
+      case "anime":
+          promises.push(await animeflvInfo(animeId).then(async extra => ({
+            title: animeTitle || null,
+            poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+            synopsis: extra.animeExtraInfo[0].synopsis || null,
+            status: extra.animeExtraInfo[0].debut || null,
+            type: extra.animeExtraInfo[0].type || null,
+            rating: extra.animeExtraInfo[0].rating || null,
+            genres: extra.genres || null,
+            episodes: extra.listByEps || null,
+            moreInfo: await animeExtraInfo(title).then(info =>{
+              return info || null
+            }),
+            promo: await getAnimeVideoPromo(title).then(promo =>{
+              return promo || null
+            }),
+            characters: await getAnimeCharacters(animeTitle).then(characters =>{
+              return characters || null
+            })
+          })));
+        break;
+      case "película":
+          promises.push(await animeflvInfo(animeId).then(async extra => ({
+            title: animeTitle || null,
+            poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+            synopsis: extra.animeExtraInfo[0].synopsis || null,
+            status: extra.animeExtraInfo[0].debut || null,
+            type: extra.animeExtraInfo[0].type || null,
+            rating: extra.animeExtraInfo[0].rating || null,
+            genres: extra.genres || null,
+            episodes: extra.listByEps || null,
+          })));
+        break;
+      case "ova":
+        promises.push(await animeflvInfo(animeId).then(async extra => ({
+          title: animeTitle || null,
+          poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+          synopsis: extra.animeExtraInfo[0].synopsis || null,
+          status: extra.animeExtraInfo[0].debut || null,
+          type: extra.animeExtraInfo[0].type || null,
+          rating: extra.animeExtraInfo[0].rating || null,
+          genres: extra.genres || null,
+          episodes: extra.listByEps || null,
+        })));
+        break;
+      default:
+        promises.push(await animeflvInfo(animeId).then(async extra => ({
+          title: animeTitle || null,
+          poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+          synopsis: extra.animeExtraInfo[0].synopsis || null,
+          status: extra.animeExtraInfo[0].debut || null,
+          type: extra.animeExtraInfo[0].type || null,
+          rating: extra.animeExtraInfo[0].rating || null,
+          genres: extra.genres || null,
+          episodes: extra.listByEps || null,
+        })));
+    }
 
   }catch(err){
     console.log(err)

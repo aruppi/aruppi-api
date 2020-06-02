@@ -236,6 +236,7 @@ const animeExtraInfo = async(title) =>{
 };
 
 const imageUrlToBase64 = async(url) => {
+  Buffer.clear
   return await base64.encode(url, {string:true});
 };
 
@@ -253,10 +254,12 @@ const searchAnime = async(query) => {
     const id = $element.find('div.Description a.Button').attr('href').slice(1);
     const title = $element.find('a h3').text();
     let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
+    const type = $element.find('div.Description p span.Type').text();
 
     promises.push(search().then(async extra => ({
       id: id || null,
       title: title || null,
+      type: type || null,
       image: await imageUrlToBase64(poster) || null
     })));
 
@@ -272,19 +275,22 @@ const transformUrlServer = async(urlReal) =>{
   let body
   const promises = []
 
-  for(i = 0; i< urlReal.length -1; i++){
+  for(i = 0; i <= urlReal.length -1; i++){
     switch (urlReal[i].server) {
       case "amus": // Izanagi
         res = await cloudscraper(urlReal[i].code.replace("embed","check"));
         body = await res;
         urlReal[i].code = JSON.parse(body).file
+        urlReal[i].direct = true
         break;
       case "natsuki": // Natsuki
         res = await cloudscraper(urlReal[i].code.replace("embed","check"));
         body = await res;
         urlReal[i].code = JSON.parse(body).file
+        urlReal[i].direct = true
         break;
       default:
+        urlReal[i].direct = false
         break;
     }
   }
@@ -292,7 +298,8 @@ const transformUrlServer = async(urlReal) =>{
   urlReal.map(doc =>{
     promises.push({
       id: doc.title.toLowerCase(),
-      url: doc.code
+      url: doc.code,
+      direct: doc.direct
     });
   });
 
