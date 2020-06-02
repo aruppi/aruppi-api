@@ -8,7 +8,8 @@ const {
   getAnimeCharacters,
   getAnimeVideoPromo,
   animeExtraInfo,
-  searchAnime
+  searchAnime,
+  transformUrlServer
 } = require('../utils/index');
 
 const {
@@ -342,17 +343,8 @@ const getAnimeServers = async (id) => {
 
   const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`);
   let body = JSON.parse(data).servers;
-  const promises = []
 
-  body.map(doc =>{
-
-    promises.push({
-      id: doc.title.toLowerCase(),
-      url: doc.code
-    });
-  });
-
-  return Promise.all(promises);
+  return Promise.all(await transformUrlServer(body));
 
 };
 

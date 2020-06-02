@@ -266,32 +266,43 @@ const searchAnime = async(query) => {
 
 };
 
-const MergeRecursive = (obj1 , obj2) => {
-  for(var p in obj2) {
-    try{
-      // Property in destination object set; update its value.
-      if(obj2[p].constructor == Object){
-        obj1[p] = MergeRecursive(obj1[p], obj2[p]);
-      }else{
-        obj1[p] = obj2[p];
-      }
-    }catch(e){
-      // Property in destination object not set; create it and set its value.
-      obj1[p] = obj2[p];
+const transformUrlServer = async(urlReal) =>{
+
+  let res
+  let body
+  const promises = []
+
+  for(i = 0; i< urlReal.length -1; i++){
+    switch (urlReal[i].server) {
+      case "amus": // Izanagi
+        res = await cloudscraper(urlReal[i].code.replace("embed","check"));
+        body = await res;
+        urlReal[i].code = JSON.parse(body).file
+        break;
+      case "fembed": // Fembed
+        res = await cloudscraper(urlReal[i].code.replace("/v/", "/api/source/"), {method: 'POST'});
+        body = await res;
+        urlReal[i].code = JSON.parse(body).data[0].file
+        break;
+      case "natsuki": // Natsuki
+        res = await cloudscraper(urlReal[i].code.replace("embed","check"));
+        body = await res;
+        urlReal[i].code = JSON.parse(body).file
+        break;
+      default:
+        break;
     }
   }
-  return obj1;
-}
 
-const urlify = async(text) =>{
-  const urls = [];
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  text.replace(urlRegex , (url) =>{
-    urls.push(url)
+  urlReal.map(doc =>{
+    promises.push({
+      id: doc.title.toLowerCase(),
+      url: doc.code
+    });
   });
-  return Promise.all(urls);
-};
 
+  return promises;
+}
 
 module.exports = {
   animeflvInfo,
@@ -300,6 +311,5 @@ module.exports = {
   animeExtraInfo,
   imageUrlToBase64,
   searchAnime,
-  MergeRecursive,
-  urlify
+  transformUrlServer
 }
