@@ -154,13 +154,14 @@ const getNews = async () =>{
 
     const body = JSON.parse(JSON.stringify(rss, null, 3)).items
     body.map(doc =>{
-      console.log(doc)
+
       promises.push({
         title: doc.title,
         url: doc.link,
         author: 'Ramen para dos',
         content: doc.content
       });
+
     });
 
   });

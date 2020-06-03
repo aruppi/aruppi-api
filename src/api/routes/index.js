@@ -171,11 +171,24 @@ router.get('/moreInfo/:title' , (req, res) =>{
     let title = req.params.title;
 
     api.getMoreInfo(title)
-        .then(info =>{
-            console.log(info)
+        .then(body =>{
+
+            const data = JSON.stringify(body);
+            const myEscapedJSONString = data
+                .replace(/\\n/g, "\\n")
+                .replace(/\\'/g, "\\'")
+                .replace(/\\"/g, '\\"')
+                .replace(/\\&/g, "\\&")
+                .replace(/\\r/g, "\\r")
+                .replace(/\\t/g, "\\t")
+                .replace(/\\b/g, "\\b")
+                .replace(/\\f/g, "\\f");
+
+            const info = JSON.parse(myEscapedJSONString)
+
             if (info.length > 0) {
                 res.status(200).json({
-                    info: info
+                    info
                 });
             } else { res.status(400) }
         }).catch((err) =>{
