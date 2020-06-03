@@ -172,10 +172,11 @@ router.get('/moreInfo/:title' , (req, res) =>{
 
     api.getMoreInfo(title)
         .then(info =>{
+            console.log(info)
             if (info.length > 0) {
-                res.status(200).json(
-                    JSON.parse(JSON.stringify(info[0]))
-                );
+                res.status(200).json({
+                    info: info
+                });
             } else { res.status(400) }
         }).catch((err) =>{
         console.error(err);

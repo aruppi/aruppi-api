@@ -13,7 +13,7 @@ const {
 } = require('../utils/index');
 
 const {
-  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_KUDASAI, BASE_PALOMITRON
+  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_KUDASAI, BASE_PALOMITRON, BASE_RAMENPARADOS
 } = require('./urls');
 
 const schedule = async (day) =>{
@@ -145,6 +145,21 @@ const getNews = async () =>{
         url: doc.link,
         author: 'Palomitron',
         content: doc.description
+      });
+    });
+
+  });
+
+  await rss.load(BASE_RAMENPARADOS).then(rss => {
+
+    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
+    body.map(doc =>{
+      console.log(doc)
+      promises.push({
+        title: doc.title,
+        url: doc.link,
+        author: 'Ramen para dos',
+        content: doc.content
       });
     });
 
