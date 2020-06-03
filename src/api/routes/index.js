@@ -171,8 +171,9 @@ router.get('/moreInfo/:title' , (req, res) =>{
     let title = req.params.title;
 
     api.getMoreInfo(title)
-        .then(info =>{
-            if (info.length > 0) {
+        .then(data =>{
+            if (data.length > 0) {
+                let info = JSON.parse(JSON.stringify(data))
                 res.status(200).json({
                     info
                 });
