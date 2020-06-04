@@ -10,7 +10,8 @@ const animeflvInfo = async (id, index) =>{
   try{
 
     const res = await cloudscraper(`${BASE_ANIMEFLV}anime/${id}`);
-    const $ = cheerio.load(res);
+    const body = await res;
+    const $ = cheerio.load(body);
     const scripts = $('script');
     const anime_info_ids = [];
     const anime_eps_data = [];
@@ -236,8 +237,7 @@ const animeExtraInfo = async(title) =>{
 };
 
 const imageUrlToBase64 = async(url) => {
-  Buffer.clear
-  return base64.encode(url, {string:true});
+  return await base64.encode(url, {string:true});
 };
 
 const search = async() =>{ }
