@@ -41,10 +41,8 @@
     "url": "https://github.com/aruppi/aruppi-api.git"
   },
   "dependencies": {
-    "animeflv-scrapper": "^0.2.12",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
-    "cheerio-tableparser": "^1.0.1",
     "cloudscraper": "^4.6.0",
     "compose-middleware": "^5.0.1",
     "cors": "^2.8.5",

@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const api = require('../api');
 
+const { BASE_KUDASAI, BASE_PALOMITRON, BASE_RAMENPARADOS } = require('../urls');
+
 router.get('/schedule/:day' , (req, res) =>{
 
-    let day = req.params.day;
+    let day = {current: req.params.day}
 
     api.schedule(day)
         .then(day =>{
@@ -62,7 +64,13 @@ router.get('/anitakume' , (req, res) =>{
 
 router.get('/news' , (req, res) =>{
 
-    api.getNews()
+    let pagesRss = [
+        { url: BASE_KUDASAI,        author: 'Kudasai',          content: 'content_encoded'  },
+        { url: BASE_PALOMITRON,     author: 'Palomitron',       content: 'description'      },
+        { url: BASE_RAMENPARADOS,   author: 'Ramen para dos',   content: 'content'          }
+    ];
+
+    api.getNews(pagesRss)
         .then(news =>{
             res.status(200).json({
                 news
@@ -104,10 +112,11 @@ router.get('/lastEpisodes' , (req, res) =>{
 
 router.get('/movies/:type/:page' , (req, res) =>{
 
-    let type = req.params.type;
+    let type = {url: 'Movies', prop: 'movies'}
+    let subType = req.params.type;
     let page = req.params.page;
 
-    api.getMovies(type, page)
+    api.getSpecials(type, subType, page)
         .then(movies =>{
             res.status(200).json({
                 movies
@@ -120,10 +129,11 @@ router.get('/movies/:type/:page' , (req, res) =>{
 
 router.get('/ovas/:type/:page' , (req, res) =>{
 
-    let type = req.params.type;
+    let type = {url: 'Ova', prop: 'ova'}
+    let subType = req.params.type;
     let page = req.params.page;
 
-    api.getOvas(type, page)
+    api.getSpecials(type, subType, page)
         .then(ovas =>{
             res.status(200).json({
                 ovas
@@ -136,10 +146,11 @@ router.get('/ovas/:type/:page' , (req, res) =>{
 
 router.get('/specials/:type/:page' , (req, res) =>{
 
-    let type = req.params.type;
+    let type = {url: 'Special', prop: 'special'}
+    let subType = req.params.type;
     let page = req.params.page;
 
-    api.getSpecials(type, page)
+    api.getSpecials(type, subType, page)
         .then(specials =>{
             res.status(200).json({
                 specials
@@ -152,10 +163,11 @@ router.get('/specials/:type/:page' , (req, res) =>{
 
 router.get('/tv/:type/:page' , (req, res) =>{
 
-    let type = req.params.type;
+    let type = {url: 'Tv', prop: 'tv'}
+    let subType = req.params.type;
     let page = req.params.page;
 
-    api.getSpecials(type, page)
+    api.getSpecials(type, subType, page)
         .then(tv =>{
             res.status(200).json({
                 tv
@@ -171,26 +183,10 @@ router.get('/moreInfo/:title' , (req, res) =>{
     let title = req.params.title;
 
     api.getMoreInfo(title)
-        .then(body =>{
-
-            const data = JSON.stringify(body);
-            const myEscapedJSONString = data
-                .replace(/\\n/g, "\\n")
-                .replace(/\\'/g, "\\'")
-                .replace(/\\"/g, '\\"')
-                .replace(/\\&/g, "\\&")
-                .replace(/\\r/g, "\\r")
-                .replace(/\\t/g, "\\t")
-                .replace(/\\b/g, "\\b")
-                .replace(/\\f/g, "\\f");
-
-            const info = JSON.parse(myEscapedJSONString)
-
-            if (info.length > 0) {
-                res.status(200).json({
-                    info
-                });
-            } else { res.status(400) }
+        .then(info =>{
+            res.status(200).json({
+                info
+            });
         }).catch((err) =>{
         console.error(err);
     });
@@ -227,5 +223,34 @@ router.get('/search/:title' , (req, res) =>{
 
 });
 
+router.get('/images/:query' , (req, res) =>{
+
+    let query = { title: req.params.query, count: '51', type: 'images', safesearch: '1', country: 'es_ES', uiv: '4'  };
+
+    api.getImages(query)
+        .then(images =>{
+            res.status(200).json({
+                images
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/videos/:channelId' , (req, res) =>{
+
+    let channelId = { id: req.params.channelId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
+
+    api.getYoutubeVideos(channelId)
+        .then(videos =>{
+            res.status(200).json({
+                videos
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
 
 module.exports = router;

@@ -1,6 +1,5 @@
 const rss = require('rss-to-json');
 const cloudscraper = require('cloudscraper');
-const animeflv = require("animeflv-scrapper");
 
 const {
   animeflvInfo,
@@ -13,40 +12,14 @@ const {
 } = require('../utils/index');
 
 const {
-  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_KUDASAI, BASE_PALOMITRON, BASE_RAMENPARADOS
+  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE
 } = require('./urls');
 
 const schedule = async (day) =>{
 
-  const data = await cloudscraper.get(`${BASE_JIKAN}schedule/${day}`);
+  const data = await cloudscraper.get(`${BASE_JIKAN}schedule/${day.current}`);
+  const body = JSON.parse(data)[day.current]
   const promises = []
-  let body;
-
-  switch (day) {
-    case "monday":
-      body = JSON.parse(data).monday;
-      break;
-    case "tuesday":
-      body = JSON.parse(data).tuesday;
-      break;
-    case "wednesday":
-      body = JSON.parse(data).wednesday;
-      break;
-    case "thursday":
-      body = JSON.parse(data).thursday;
-      break;
-    case "friday":
-      body = JSON.parse(data).friday;
-      break;
-    case "saturday":
-      body = JSON.parse(data).saturday;
-      break;
-    case "sunday":
-      body = JSON.parse(data).sunday;
-      break;
-    default:
-      body = JSON.parse(data).monday;
-  }
 
   body.map(doc =>{
 
@@ -55,27 +28,32 @@ const schedule = async (day) =>{
       malid: doc.mal_id,
       image: doc.image_url
     });
+
   });
 
-  return Promise.all(promises);
+  return promises;
 
 };
 
 const top = async (type, subtype, page) =>{
 
   const data = await cloudscraper.get(`${BASE_JIKAN}top/${type}/${page}/${subtype}`);
-  let body = JSON.parse(data).top;
 
-  return Promise.all(body);
+  return JSON.parse(data).top;
 
 };
 
 const getAllAnimes = async () =>{
 
   const data = await cloudscraper.get(`${BASE_ANIMEFLV}api/animes/list`);
-  let body = JSON.parse(data);
-
-  return Promise.all(body);
+  const body = JSON.parse(data);
+  return body.map(item => ({
+    index: item[0],
+    animeId: item[3],
+    title: item[1],
+    id: item[2],
+    type: item[4]
+  }));
 
 };
 
@@ -112,61 +90,35 @@ const getAnitakume = async () =>{
 
   });
 
-  return Promise.all(promises);
+  return promises;
 
 };
 
-const getNews = async () =>{
+const getNews = async (pageRss) =>{
 
   const promises = []
 
-  await rss.load(BASE_KUDASAI).then(rss => {
+  for(let i = 0; i <= pageRss.length -1; i++) {
 
-    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
-    body.map(doc =>{
+    await rss.load(pageRss[i].url).then(rss => {
 
-      promises.push({
-        title: doc.title,
-        url: doc.link,
-        author: 'Kudasai',
-        content: doc.content_encoded
-      });
-    });
+      const body = JSON.parse(JSON.stringify(rss, null, 3)).items
+      body.map(doc => {
 
-  });
+        promises.push({
+          title: doc.title,
+          url: doc.link,
+          author: pageRss[i].author,
+          content: doc[pageRss[i].content]
+        });
 
-  await rss.load(BASE_PALOMITRON).then(rss => {
-
-    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
-    body.map(doc =>{
-
-      promises.push({
-        title: doc.title,
-        url: doc.link,
-        author: 'Palomitron',
-        content: doc.description
-      });
-    });
-
-  });
-
-  await rss.load(BASE_RAMENPARADOS).then(rss => {
-
-    const body = JSON.parse(JSON.stringify(rss, null, 3)).items
-    body.map(doc =>{
-
-      promises.push({
-        title: doc.title,
-        url: doc.link,
-        author: 'Ramen para dos',
-        content: doc.content
       });
 
     });
 
-  });
+  }
 
-  return Promise.all(promises);
+  return promises;
 
 };
 
@@ -186,7 +138,7 @@ const season = async (year, type) =>{
     });
   });
 
-  return Promise.all(promises);
+  return promises;
 
 };
 
@@ -207,14 +159,14 @@ const getLastEpisodes = async () =>{
     });
   });
 
-  return Promise.all(promises);
+  return promises;
 
 };
 
-const getMovies = async (type, page) =>{
+const getSpecials = async (type, subType, page) =>{
 
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Movies/${type}/${page}`);
-  let body = JSON.parse(data).movies;
+  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}${type.url}/${subType}/${page}`);
+  let body = JSON.parse(data)[type.prop];
   const promises = []
 
   body.map(doc =>{
@@ -232,110 +184,40 @@ const getMovies = async (type, page) =>{
     });
   });
 
-  return Promise.all(promises);
+  return promises;
 
 };
 
-const getOvas = async (type, page) =>{
-
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Ova/${type}/${page}`);
-  let body = JSON.parse(data).ova;
-  const promises = []
-
-  body.map(doc =>{
-
-    promises.push({
-      id: doc.id,
-      title: doc.title,
-      banner: doc.banner,
-      image: doc.poster,
-      synopsis: doc.synopsis,
-      status: doc.debut,
-      rate: doc.rating,
-      genres: doc.genres.map(x => x),
-      episodes: doc.episodes.map(x => x)
-    });
-  });
-
-  return Promise.all(promises);
-
-};
-
-const getSpecials = async (type, page) =>{
-
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Special/${type}/${page}`);
-  let body = JSON.parse(data).special;
-  const promises = []
-
-  body.map(doc =>{
-
-    promises.push({
-      id: doc.id,
-      title: doc.title,
-      banner: doc.banner,
-      image: doc.poster,
-      synopsis: doc.synopsis,
-      status: doc.debut,
-      rate: doc.rating,
-      genres: doc.genres.map(x => x),
-      episodes: doc.episodes.map(x => x)
-    });
-  });
-
-  return Promise.all(promises);
-
-};
-
-const getTv = async (type, page) =>{
-
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}Tv/${type}/${page}`);
-  let body = JSON.parse(data).tv;
-  const promises = []
-
-  body.map(doc =>{
-
-    promises.push({
-      id: doc.id,
-      title: doc.title,
-      banner: doc.banner,
-      image: doc.poster,
-      synopsis: doc.synopsis,
-      status: doc.debut,
-      rate: doc.rating,
-      genres: doc.genres.map(x => x),
-      episodes: doc.episodes.map(x => x)
-    });
-  });
-
-  return Promise.all(promises);
-
-};
 
 const getMoreInfo = async (title) =>{
 
   const promises = []
-  let animeTitle =""
-  let animeId = ""
-  let animeType = ""
+  let animeTitle = ''
+  let animeId = ''
+  let animeType = ''
+  let animeIndex = ''
 
-  await animeflv.searchAnime(title).then(data => {
+  await getAllAnimes().then(data => {
     data.forEach(function (anime) {
-          if (anime.label.split('\t')[0] === title.split('\t')[0] || anime.label === `${title} (TV)`) {
-            if (anime.label.includes('(TV)', 0)) { animeTitle = anime.label.split('\t')[0].replace(' (TV)', '') }
-            else { animeTitle = anime.label.split('\t')[0] }
-            animeId = anime.animeId
+          if (anime.title.split('\t')[0] === title.split('\t')[0] || anime.title === `${title} (TV)`) {
+            if (anime.title.includes('(TV)', 0)) { animeTitle = anime.title.split('\t')[0].replace(' (TV)', '') }
+            else { animeTitle = anime.title.split('\t')[0] }
+            animeId = anime.id
+            animeIndex = anime.index
             animeType = anime.type.toLowerCase()
           }
         }
     )
   });
 
+
+
   try{
 
     switch (animeType) {
 
-      case "anime":
-          promises.push(await animeflvInfo(animeId).then(async extra => ({
+      case "tv":
+          promises.push(await animeflvInfo(animeId, animeIndex).then(async extra => ({
             title: animeTitle || null,
             poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
             synopsis: extra.animeExtraInfo[0].synopsis || null,
@@ -355,7 +237,7 @@ const getMoreInfo = async (title) =>{
             })
           })));
         break;
-      case "película":
+      case "movie":
           promises.push(await animeflvInfo(animeId).then(async extra => ({
             title: animeTitle || null,
             poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
@@ -396,7 +278,8 @@ const getMoreInfo = async (title) =>{
     console.log(err)
   }
 
-  return Promise.all(promises);
+  return promises;
+
 };
 
 const getAnimeServers = async (id) => {
@@ -404,12 +287,52 @@ const getAnimeServers = async (id) => {
   const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`);
   let body = JSON.parse(data).servers;
 
-  return Promise.all(await transformUrlServer(body));
+  return await transformUrlServer(body);
 
 };
 
-const search = async (title) =>{
-  return await searchAnime(title);
+const search = async (title) =>{ return await searchAnime(title); };
+
+const getImages = async (query) => {
+
+  const data = await cloudscraper.get(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`);
+  const body = JSON.parse(data).data.result.items;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      type: doc.thumb_type,
+      thumbnail: `https:${doc.thumbnail}`,
+      fullsize: `https:${doc.media_fullsize}`
+    });
+
+  });
+
+  return promises;
+
+};
+
+const getYoutubeVideos = async (channelId) => {
+
+  const data = await cloudscraper.get(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`);
+  const body = JSON.parse(data)[channelId.prop];
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      title: doc.snippet.title,
+      videoId: doc.id.videoId,
+      thumbDefault: doc.snippet.thumbnails.default.url,
+      thumbMedium: doc.snippet.thumbnails.medium.url,
+      thumbHigh: doc.snippet.thumbnails.high.url
+    });
+
+  });
+
+  return promises;
+
 };
 
 module.exports = {
@@ -420,11 +343,10 @@ module.exports = {
   getNews,
   season,
   getLastEpisodes,
-  getMovies,
-  getOvas,
   getSpecials,
-  getTv,
   getMoreInfo,
   getAnimeServers,
-  search
+  search,
+  getImages,
+  getYoutubeVideos
 };

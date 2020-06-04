@@ -6,11 +6,11 @@ const {
   BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL
 } = require('../api/urls');
 
-const animeflvInfo = async(id) =>{
+const animeflvInfo = async (id, index) =>{
   try{
+
     const res = await cloudscraper(`${BASE_ANIMEFLV}anime/${id}`);
-    const body = await res;
-    const $ = cheerio.load(body);
+    const $ = cheerio.load(res);
     const scripts = $('script');
     const anime_info_ids = [];
     const anime_eps_data = [];
@@ -18,7 +18,6 @@ const animeflvInfo = async(id) =>{
     const genres = [];
     let listByEps;
 
-    let animeTitle = $('body div.Wrapper div.Body div div.Ficha.fchlt div.Container h2.Title').text();
     let poster = `${BASE_ANIMEFLV}` + $('body div div div div div aside div.AnimeCover div.Image figure img').attr('src')
     const banner = poster.replace('covers' , 'banners').trim();
     let synopsis = $('body div div div div div main section div.Description p').text().trim();
@@ -28,7 +27,6 @@ const animeflvInfo = async(id) =>{
 
 
     animeExtraInfo.push({
-      title: animeTitle,
       poster: poster,
       banner: banner,
       synopsis: synopsis,
@@ -48,8 +46,8 @@ const animeflvInfo = async(id) =>{
       const $script = $(scripts[k]);
       const contents = $script.html();
       if((contents || '').includes('var anime_info = [')) {
-        let anime_info = contents.split('var anime_info = ')[1].split(';')[0];
-        let dat_anime_info = JSON.parse(JSON.stringify(anime_info));//JSON.parse(anime_info);
+        let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
+        let dat_anime_info = JSON.parse(anime_info);
         anime_info_ids.push(dat_anime_info);
       }
       if((contents || '').includes('var episodes = [')) {
@@ -58,9 +56,10 @@ const animeflvInfo = async(id) =>{
         anime_eps_data.push(eps_data);
       }
     });
-    const AnimeThumbnailsId = anime_info_ids[0].split(',')[0].split('"')[1];
+    const AnimeThumbnailsId = index;
     const animeId = id;
-    let nextEpisodeDate = anime_info_ids[0].split('"')[7] || null
+    let nextEpisodeDate = anime_info_ids[0][3] || null;
+
     const amimeTempList = [];
     for(const [key , value] of Object.entries(anime_eps_data)){
       let episode = anime_eps_data[key].map(x => x[0]);
@@ -74,7 +73,7 @@ const animeflvInfo = async(id) =>{
       let id = data[1];
       let imagePreview = `${BASE_EPISODE_IMG_URL}${AnimeThumbnailsId}/${episode}/th_3.jpg`
       let link = `${id}/${animeId}-${episode}`
-      // @ts-ignore
+
       animeListEps.push({
         episode: episode,
         id: link,
@@ -88,6 +87,7 @@ const animeflvInfo = async(id) =>{
   }catch(err){
     console.error(err)
   }
+
 };
 
 const getAnimeCharacters = async(title) =>{
@@ -237,7 +237,7 @@ const animeExtraInfo = async(title) =>{
 
 const imageUrlToBase64 = async(url) => {
   Buffer.clear
-  return await base64.encode(url, {string:true});
+  return base64.encode(url, {string:true});
 };
 
 const search = async() =>{ }
@@ -277,13 +277,13 @@ const transformUrlServer = async(urlReal) =>{
 
   for(i = 0; i <= urlReal.length -1; i++){
     switch (urlReal[i].server) {
-      case "amus": // Izanagi
+      case "amus":
         res = await cloudscraper(urlReal[i].code.replace("embed","check"));
         body = await res;
         urlReal[i].code = JSON.parse(body).file
         urlReal[i].direct = true
         break;
-      case "natsuki": // Natsuki
+      case "natsuki":
         res = await cloudscraper(urlReal[i].code.replace("embed","check"));
         body = await res;
         urlReal[i].code = JSON.parse(body).file

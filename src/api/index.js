@@ -24,7 +24,9 @@ router.get('/', (req, res) => {
         'Tv': '/api/v2/tv/:type/:page',
         'MoreInfo': '/api/v2/moreInfo/:title',
         'GetAnimeServers': '/api/v2/getAnimeServers/:id',
-        'Search': '/api/v2/search/:title'
+        'Search': '/api/v2/search/:title',
+        'Images': '/api/v2/images/:query',
+        'Videos': '/api/v2/videos/:channelId'
       }
     ]
   });
