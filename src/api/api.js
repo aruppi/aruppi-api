@@ -174,6 +174,7 @@ const getSpecials = async (type, subType, page) =>{
     promises.push({
       id: doc.id,
       title: doc.title,
+      type: doc.type,
       banner: doc.banner,
       image: doc.poster,
       synopsis: doc.synopsis,
