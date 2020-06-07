@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const api = require('../api');
 
-const { BASE_KUDASAI, BASE_PALOMITRON, BASE_RAMENPARADOS } = require('../urls');
+const { BASE_KUDASAI, BASE_PALOMITRON, BASE_RAMENPARADOS, BASE_CRUNCHYROLL } = require('../urls');
 
 router.get('/schedule/:day' , (req, res) =>{
 
@@ -67,7 +67,8 @@ router.get('/news' , (req, res) =>{
     let pagesRss = [
         { url: BASE_KUDASAI,        author: 'Kudasai',          content: 'content_encoded'  },
         { url: BASE_PALOMITRON,     author: 'Palomitron',       content: 'description'      },
-        { url: BASE_RAMENPARADOS,   author: 'Ramen para dos',   content: 'content'          }
+        { url: BASE_RAMENPARADOS,   author: 'Ramen para dos',   content: 'content'          },
+        { url: BASE_CRUNCHYROLL,    author: 'Crunchyroll',      content: 'content_encoded'  }
     ];
 
     api.getNews(pagesRss)
@@ -246,6 +247,19 @@ router.get('/videos/:channelId' , (req, res) =>{
         .then(videos =>{
             res.status(200).json({
                 videos
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/radio' , (req, res) =>{
+
+    api.getRadioStations()
+        .then(stations =>{
+            res.status(200).json({
+                stations
             });
         }).catch((err) =>{
         console.error(err);

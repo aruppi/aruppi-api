@@ -7,6 +7,7 @@ module.exports = {
   BASE_KUDASAI: 'https://somoskudasai.com/feed/',
   BASE_PALOMITRON: 'https://elpalomitron.com/category/animemanga/feed/',
   BASE_RAMENPARADOS: 'https://ramenparados.com/category/noticias/anime/feed/',
+  BASE_CRUNCHYROLL: 'https://www.crunchyroll.com/newsrss?lang=esES',
   SEARCH_URL: 'https://animeflv.net/browse?q=',
   BASE_EPISODE_IMG_URL: 'https://cdn.animeflv.net/screenshots/',
   BASE_QWANT: 'https://api.qwant.com/search/images?'

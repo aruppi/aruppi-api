@@ -336,6 +336,10 @@ const getYoutubeVideos = async (channelId) => {
 
 };
 
+const getRadioStations = async () => {
+  return require('../assets/radiostations.json');
+}
+
 module.exports = {
   schedule,
   top,
@@ -349,5 +353,6 @@ module.exports = {
   getAnimeServers,
   search,
   getImages,
-  getYoutubeVideos
+  getYoutubeVideos,
+  getRadioStations
 };
