@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const base64 = require('node-base64-image');
 
 const {
-  BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL
+    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, BASE_ARUPPI
 } = require('../api/urls');
 
 const animeflvInfo = async (id, index) =>{
