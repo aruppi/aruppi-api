@@ -8,7 +8,8 @@ const {
   getAnimeVideoPromo,
   animeExtraInfo,
   searchAnime,
-  transformUrlServer
+  transformUrlServer,
+  obtainPreviewNews
 } = require('../utils/index');
 
 const {
@@ -109,6 +110,7 @@ const getNews = async (pageRss) =>{
           title: doc.title,
           url: doc.link,
           author: pageRss[i].author,
+          thumbnail: obtainPreviewNews(doc[pageRss[i].content]),
           content: doc[pageRss[i].content]
         });
 

@@ -1,4 +1,5 @@
 module.exports = {
+  BASE_ARUPPI: 'https://aruppi.jeluchu.xyz/',
   BASE_ANIMEFLV: 'https://animeflv.net/',
   BASE_ANIMEFLV_JELU: 'https://aruppi.jeluchu.xyz/apis/animeflv/v1/',
   BASE_YOUTUBE: 'https://aruppi.jeluchu.xyz/apis/youtube/v3/search?channelId=',

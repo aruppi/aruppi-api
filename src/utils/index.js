@@ -306,6 +306,34 @@ const transformUrlServer = async(urlReal) =>{
   return promises;
 }
 
+const obtainPreviewNews = (encoded) => {
+
+    let image;
+
+    if (encoded.includes('<img src=')) {
+        image = encoded
+                  .substring(encoded.indexOf("<img src=\""), encoded.indexOf("\" alt"))
+                  .substring(10).replace("http", "https")
+                  .replace("httpss", "https")
+
+    } else if (encoded.includes('<img')) {
+        image = encoded.split("src=")[1].split(" class=")[0].replace("\"", "")
+    } else if (encoded.includes('https://www.youtube.com/embed/')) {
+        let getSecondThumb = encoded.split('https://www.youtube.com/embed/')[1].split('?feature')[0]
+        image = `https://img.youtube.com/vi/${getSecondThumb}/0.jpg`
+    } else if (encoded.includes('https://www.dailymotion.com/')) {
+        let getDailymotionThumb = encoded
+                                    .substring(encoded.indexOf("\" src=\""), encoded.indexOf("\" a"))
+                                    .substring(47)
+        image = `https://www.dailymotion.com/thumbnail/video/${getDailymotionThumb}`
+    } else {
+        let number = Math.floor(Math.random() * 30);
+        image = `${BASE_ARUPPI}news/${number}.png`
+    }
+
+    return image;
+}
+
 module.exports = {
   animeflvInfo,
   getAnimeCharacters,
@@ -313,5 +341,6 @@ module.exports = {
   animeExtraInfo,
   imageUrlToBase64,
   searchAnime,
-  transformUrlServer
+    transformUrlServer,
+    obtainPreviewNews
 }

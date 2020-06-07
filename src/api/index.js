@@ -26,7 +26,8 @@ router.get('/', (req, res) => {
         'GetAnimeServers': '/api/v2/getAnimeServers/:id',
         'Search': '/api/v2/search/:title',
         'Images': '/api/v2/images/:query',
-        'Videos': '/api/v2/videos/:channelId'
+        'Videos': '/api/v2/videos/:channelId',
+        'Radios': '/api/v2/radio'
       }
     ]
   });
