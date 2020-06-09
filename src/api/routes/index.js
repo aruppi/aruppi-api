@@ -267,4 +267,48 @@ router.get('/radio' , (req, res) =>{
 
 });
 
+router.get('/themes/:title' , (req, res) =>{
+
+    let title = req.params.title;
+
+    api.getOpAndEd(title)
+        .then(themes =>{
+            res.status(200).json({
+                themes
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/themeSeason/:year/:season?', (req, res) =>{
+
+    let year = req.params.year;
+    let season = req.params.season
+
+    api.getThemesSeason(year, season)
+        .then(themes =>{
+            res.status(200).json({
+                themes
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+router.get('/randomTheme', (req, res) =>{
+
+    api.getRandomTheme()
+        .then(random =>{
+            res.status(200).json({
+                random
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 module.exports = router;

@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const base64 = require('node-base64-image');
 
 const {
-    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, BASE_ARUPPI
+    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, BASE_ARUPPI, BASE_THEMEMOE
 } = require('../api/urls');
 
 const animeflvInfo = async (id, index) =>{
@@ -334,6 +334,72 @@ const obtainPreviewNews = (encoded) => {
     return image;
 }
 
+const structureThemes = async (body, indv, task) => {
+
+    const promises = []
+    let themes
+    let respFinal
+
+    if (task === 0) {
+        for(let i = 0; i <= body.length -1; i++) {
+
+            if (indv === true) {
+                const data = await cloudscraper.get(`${BASE_THEMEMOE}themes/${body[i]}`);
+                respFinal = JSON.parse(data)
+                themes = await getThemes(respFinal[0].themes)
+            } else {
+                respFinal = body
+                themes = await getThemes(body[0].themes)
+            }
+
+            respFinal.map(doc => {
+
+                promises.push({
+                    title: doc.name,
+                    season: doc.season,
+                    year: doc.year,
+                    themes: themes,
+                });
+
+            });
+        }
+    } else {
+        respFinal = body
+        themes = await getThemes(respFinal.themes)
+
+        promises.push({
+            title: respFinal.name,
+            season: respFinal.season,
+            year: respFinal.year,
+            themes: themes,
+        });
+
+    }
+
+
+
+    return promises;
+
+};
+
+const getThemes = async (themes) => {
+
+    let promises = []
+
+    themes.map(doc => {
+
+        promises.push({
+            name: doc.themeName,
+            type: doc.themeType,
+            video: doc.mirror.mirrorURL
+        });
+
+    });
+
+    return promises;
+
+};
+
 module.exports = {
   animeflvInfo,
   getAnimeCharacters,
@@ -342,5 +408,7 @@ module.exports = {
   imageUrlToBase64,
   searchAnime,
     transformUrlServer,
-    obtainPreviewNews
+    obtainPreviewNews,
+    structureThemes,
+    getThemes
 }

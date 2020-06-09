@@ -27,7 +27,10 @@ router.get('/', (req, res) => {
         'Search': '/api/v2/search/:title',
         'Images': '/api/v2/images/:query',
         'Videos': '/api/v2/videos/:channelId',
-        'Radios': '/api/v2/radio'
+        'Radios': '/api/v2/radio',
+        'Themes': '/api/v2/themes/:title',
+        'Season Themes': '/api/v2/themeSeason/:year/:season?',
+        'Random Theme': '/api/v2/randomTheme'
       }
     ]
   });

@@ -11,5 +11,6 @@ module.exports = {
   BASE_CRUNCHYROLL: 'https://www.crunchyroll.com/newsrss?lang=esES',
   SEARCH_URL: 'https://animeflv.net/browse?q=',
   BASE_EPISODE_IMG_URL: 'https://cdn.animeflv.net/screenshots/',
-  BASE_QWANT: 'https://api.qwant.com/search/images?'
+  BASE_QWANT: 'https://api.qwant.com/search/images?',
+  BASE_THEMEMOE: 'https://themes.moe/api/'
 };

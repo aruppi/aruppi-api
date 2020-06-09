@@ -9,11 +9,12 @@ const {
   animeExtraInfo,
   searchAnime,
   transformUrlServer,
-  obtainPreviewNews
+  obtainPreviewNews,
+  structureThemes
 } = require('../utils/index');
 
 const {
-  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE
+  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE
 } = require('./urls');
 
 const schedule = async (day) =>{
@@ -342,6 +343,39 @@ const getRadioStations = async () => {
   return require('../assets/radiostations.json');
 }
 
+const getOpAndEd = async (title) => {
+
+  const data = await cloudscraper.get(`${BASE_THEMEMOE}anime/search/${title}`);
+  const body = JSON.parse(data);
+
+  return await structureThemes(body, true, 0)
+
+};
+
+const getThemesSeason = async (year, season) => {
+
+  let data
+
+  if (season === undefined) {
+    data = await cloudscraper.get(`${BASE_THEMEMOE}seasons/${year}`);
+  } else {
+    data = await cloudscraper.get(`${BASE_THEMEMOE}seasons/${year}/${season}`);
+  }
+  const body = JSON.parse(data);
+
+  return await structureThemes(body, false, 0)
+
+};
+
+const getRandomTheme = async () => {
+
+  const data = await cloudscraper.get(`${BASE_THEMEMOE}roulette`);
+  const body = JSON.parse(data);
+
+  return await structureThemes(body, true)
+
+};
+
 module.exports = {
   schedule,
   top,
@@ -356,5 +390,8 @@ module.exports = {
   search,
   getImages,
   getYoutubeVideos,
-  getRadioStations
+  getRadioStations,
+  getOpAndEd,
+  getThemesSeason,
+  getRandomTheme
 };
