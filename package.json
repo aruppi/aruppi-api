@@ -49,6 +49,7 @@
     "express": "^4.16.4",
     "helmet": "^3.22.0",
     "node-base64-image": "^2.0.1",
+    "request": "^2.88.2",
     "rss-to-json": "^1.1.1"
   }
 }
