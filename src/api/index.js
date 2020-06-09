@@ -30,7 +30,8 @@ router.get('/', (req, res) => {
         'Radios': '/api/v2/radio',
         'Themes': '/api/v2/themes/:title',
         'Season Themes': '/api/v2/themeSeason/:year/:season?',
-        'Random Theme': '/api/v2/randomTheme'
+        'Random Theme': '/api/v2/randomTheme',
+        'Artists Theme': '/api/v2/artists/:id?'
       }
     ]
   });

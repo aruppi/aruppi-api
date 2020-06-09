@@ -311,4 +311,19 @@ router.get('/randomTheme', (req, res) =>{
 
 });
 
+router.get('/artists/:id?', (req, res) =>{
+
+    let id = req.params.id;
+
+    api.getArtist(id)
+        .then(artists =>{
+            res.status(200).json({
+                artists
+            });
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 module.exports = router;

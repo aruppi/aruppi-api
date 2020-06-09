@@ -317,7 +317,7 @@ const obtainPreviewNews = (encoded) => {
                   .replace("httpss", "https")
 
     } else if (encoded.includes('<img')) {
-        image = encoded.split("src=")[1].split(" class=")[0].replace("\"", "")
+        image = encoded.split("src=")[1].split(" class=")[0].replace("\"", '').replace('\"','')
     } else if (encoded.includes('https://www.youtube.com/embed/')) {
         let getSecondThumb = encoded.split('https://www.youtube.com/embed/')[1].split('?feature')[0]
         image = `https://img.youtube.com/vi/${getSecondThumb}/0.jpg`
@@ -363,7 +363,19 @@ const structureThemes = async (body, indv, task) => {
 
             });
         }
+    } else if (task === 1) {
+        respFinal = body
+        themes = await getHeaderTheme(respFinal.themes)
+
+        promises.push({
+            title: respFinal.artistName,
+            season: respFinal.season,
+            year: respFinal.year,
+            series: themes,
+        });
+
     } else {
+
         respFinal = body
         themes = await getThemes(respFinal.themes)
 
@@ -376,7 +388,27 @@ const structureThemes = async (body, indv, task) => {
 
     }
 
+    return promises;
 
+};
+
+const getHeaderTheme = async (series) => {
+
+    let promises = []
+    let data
+
+    for(let i = 0; i <= series.length -1; i++) {
+
+        data = await getThemes(series[i].themes)
+
+        promises.push({
+            title: series[i].name,
+            season: series[i].season,
+            year: series[i].year,
+            themes: data,
+        });
+
+    }
 
     return promises;
 

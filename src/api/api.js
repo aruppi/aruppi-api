@@ -376,6 +376,38 @@ const getRandomTheme = async () => {
 
 };
 
+const getArtist = async (id) => {
+
+  let data
+  let body
+  let promises = []
+
+  if (id === undefined) {
+
+    data = await cloudscraper.get(`${BASE_THEMEMOE}artists`);
+    body = JSON.parse(data);
+
+    body.map(doc => {
+
+      promises.push({
+        id: doc.artistID,
+        name: doc.artistName
+      })
+
+    });
+
+    return promises;
+
+  } else {
+
+    data = await cloudscraper.get(`${BASE_THEMEMOE}artists/${id}`);
+    body = JSON.parse(data);
+
+    return await structureThemes(body, false, 1)
+  }
+
+};
+
 module.exports = {
   schedule,
   top,
@@ -393,5 +425,6 @@ module.exports = {
   getRadioStations,
   getOpAndEd,
   getThemesSeason,
-  getRandomTheme
+  getRandomTheme,
+  getArtist
 };
