@@ -7,7 +7,7 @@ const {
 } = require('../api/urls');
 
 const animeflvInfo = async (id, index) => {
-    
+
     let poster = ""
     let banner = ""
     let synopsis = ""
@@ -15,100 +15,96 @@ const animeflvInfo = async (id, index) => {
     let debut = ""
     let type = ""
 
-    do {
+    try {
 
-        try {
+        const res = await cloudscraper(`${BASE_ANIMEFLV}anime/${id}`);
+        const body = await res;
 
-            const res = await cloudscraper(`${BASE_ANIMEFLV}anime/${id}`);
-            const body = await res;
-            const $ = cheerio.load(body);
-            const scripts = $('script');
-            const anime_info_ids = [];
-            const anime_eps_data = [];
-            const animeExtraInfo = [];
-            const genres = [];
-            let listByEps;
+        const $ = await cheerio.load(body);
+        const scripts = $('script');
+        const anime_info_ids = [];
+        const anime_eps_data = [];
+        const animeExtraInfo = [];
+        const genres = [];
+        let listByEps;
 
-            poster = `${BASE_ANIMEFLV}` + $('body div div div div div aside div.AnimeCover div.Image figure img').attr('src')
-            banner = poster.replace('covers', 'banners').trim();
-            synopsis = $('body div div div div div main section div.Description p').text().trim();
-            rating = $('body div div div.Ficha.fchlt div.Container div.vtshr div.Votes span#votes_prmd').text();
-            debut = $('body div.Wrapper div.Body div div.Container div.BX.Row.BFluid.Sp20 aside.SidebarA.BFixed p.AnmStts').text();
-            type = $('body div.Wrapper div.Body div div.Ficha.fchlt div.Container span.Type').text()
+        poster = `${BASE_ANIMEFLV}` + $('body div div div div div aside div.AnimeCover div.Image figure img').attr('src')
+        banner = poster.replace('covers', 'banners').trim();
+        synopsis = $('body div div div div div main section div.Description p').text().trim();
+        rating = $('body div div div.Ficha.fchlt div.Container div.vtshr div.Votes span#votes_prmd').text();
+        debut = $('body div.Wrapper div.Body div div.Container div.BX.Row.BFluid.Sp20 aside.SidebarA.BFixed p.AnmStts').text();
+        type = $('body div.Wrapper div.Body div div.Ficha.fchlt div.Container span.Type').text()
 
-            animeExtraInfo.push({
-                poster: poster,
-                banner: banner,
-                synopsis: synopsis,
-                rating: rating,
-                debut: debut,
-                type: type,
-            })
+        animeExtraInfo.push({
+            poster: poster,
+            banner: banner,
+            synopsis: synopsis,
+            rating: rating,
+            debut: debut,
+            type: type,
+        })
 
-            $('main.Main section.WdgtCn nav.Nvgnrs a').each((index, element) => {
-                const $element = $(element);
-                const genre = $element.attr('href').split('=')[1] || null;
-                genres.push(genre);
-            });
+        $('main.Main section.WdgtCn nav.Nvgnrs a').each((index, element) => {
+            const $element = $(element);
+            const genre = $element.attr('href').split('=')[1] || null;
+            genres.push(genre);
+        });
 
 
-            Array.from({length: scripts.length}, (v, k) => {
-                const $script = $(scripts[k]);
-                const contents = $script.html();
-                if ((contents || '').includes('var anime_info = [')) {
-                    let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
-                    let dat_anime_info = JSON.parse(anime_info);
-                    anime_info_ids.push(dat_anime_info);
-                }
-                if ((contents || '').includes('var episodes = [')) {
-                    let episodes = contents.split('var episodes = ')[1].split(';')[0];
-                    let eps_data = JSON.parse(episodes)
-                    anime_eps_data.push(eps_data);
-                }
-            });
-            const AnimeThumbnailsId = index;
-            const animeId = id;
-            let nextEpisodeDate
-
-            if (anime_info_ids.length > 0) {
-                if (anime_info_ids[0].length === 4) {
-                    nextEpisodeDate = anime_info_ids[0][3]
-                } else {
-                    nextEpisodeDate = null
-                }
+        Array.from({length: scripts.length}, (v, k) => {
+            const $script = $(scripts[k]);
+            const contents = $script.html();
+            if ((contents || '').includes('var anime_info = [')) {
+                let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
+                let dat_anime_info = JSON.parse(anime_info);
+                anime_info_ids.push(dat_anime_info);
             }
-
-            const amimeTempList = [];
-            for (const [key, value] of Object.entries(anime_eps_data)) {
-                let episode = anime_eps_data[key].map(x => x[0]);
-                let episodeId = anime_eps_data[key].map(x => x[1]);
-                amimeTempList.push(episode, episodeId);
+            if ((contents || '').includes('var episodes = [')) {
+                let episodes = contents.split('var episodes = ')[1].split(';')[0];
+                let eps_data = JSON.parse(episodes)
+                anime_eps_data.push(eps_data);
             }
-            const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
-            Array.from({length: amimeTempList[1].length}, (v, k) => {
-                let data = amimeTempList.map(x => x[k]);
-                let episode = data[0];
-                let id = data[1];
-                let imagePreview = `${BASE_EPISODE_IMG_URL}${AnimeThumbnailsId}/${episode}/th_3.jpg`
-                let link = `${id}/${animeId}-${episode}`
+        });
+        const AnimeThumbnailsId = index;
+        const animeId = id;
+        let nextEpisodeDate
 
-                animeListEps.push({
-                    episode: episode,
-                    id: link,
-                    imagePreview: imagePreview
-                })
-            })
-
-            listByEps = animeListEps;
-
-            return {listByEps, genres, animeExtraInfo};
-
-        } catch (err) {
-            console.error(err)
+        if (anime_info_ids.length > 0) {
+            if (anime_info_ids[0].length === 4) {
+                nextEpisodeDate = anime_info_ids[0][3]
+            } else {
+                nextEpisodeDate = null
+            }
         }
 
-    } while (poster === "" && banner === "" && synopsis === "" && rating === "" && debut === "" && type === "")
+        const amimeTempList = [];
+        for (const [key, value] of Object.entries(anime_eps_data)) {
+            let episode = anime_eps_data[key].map(x => x[0]);
+            let episodeId = anime_eps_data[key].map(x => x[1]);
+            amimeTempList.push(episode, episodeId);
+        }
+        const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
+        Array.from({length: amimeTempList[1].length}, (v, k) => {
+            let data = amimeTempList.map(x => x[k]);
+            let episode = data[0];
+            let id = data[1];
+            let imagePreview = `${BASE_EPISODE_IMG_URL}${AnimeThumbnailsId}/${episode}/th_3.jpg`
+            let link = `${id}/${animeId}-${episode}`
 
+            animeListEps.push({
+                episode: episode,
+                id: link,
+                imagePreview: imagePreview
+            })
+        })
+
+        listByEps = animeListEps;
+
+        return {listByEps, genres, animeExtraInfo};
+
+    } catch (err) {
+        console.error(err)
+    }
 
 };
 
@@ -268,7 +264,7 @@ const searchAnime = async (query) => {
 
     const res = await cloudscraper(`${SEARCH_URL}${query}`);
     const body = await res;
-    const $ = cheerio.load(body);
+    const $ = await cheerio.load(body);
     const promises = [];
 
     $('div.Container ul.ListAnimes li article').each((index, element) => {
@@ -336,18 +332,18 @@ const obtainPreviewNews = (encoded) => {
         image = encoded.substring(encoded.indexOf("<img title=\""), encoded.indexOf("\" alt")).split('src=\"')[1]
     } else if (encoded.includes('<img src=')) {
         image = encoded
-                  .substring(encoded.indexOf("<img src=\""), encoded.indexOf("\" alt"))
-                  .substring(10).replace("http", "https")
-                  .replace("httpss", "https")
+            .substring(encoded.indexOf("<img src=\""), encoded.indexOf("\" alt"))
+            .substring(10).replace("http", "https")
+            .replace("httpss", "https")
     } else if (encoded.includes('<img')) {
-        image = encoded.split("src=")[1].split(" class=")[0].replace("\"", '').replace('\"','')
+        image = encoded.split("src=")[1].split(" class=")[0].replace("\"", '').replace('\"', '')
     } else if (encoded.includes('https://www.youtube.com/embed/')) {
         let getSecondThumb = encoded.split('https://www.youtube.com/embed/')[1].split('?feature')[0]
         image = `https://img.youtube.com/vi/${getSecondThumb}/0.jpg`
     } else if (encoded.includes('https://www.dailymotion.com/')) {
         let getDailymotionThumb = encoded
-                                    .substring(encoded.indexOf("\" src=\""), encoded.indexOf("\" a"))
-                                    .substring(47)
+            .substring(encoded.indexOf("\" src=\""), encoded.indexOf("\" a"))
+            .substring(47)
         image = `https://www.dailymotion.com/thumbnail/video/${getDailymotionThumb}`
     } else {
         let number = Math.floor(Math.random() * 30);
@@ -364,7 +360,7 @@ const structureThemes = async (body, indv, task) => {
     let respFinal
 
     if (task === 0) {
-        for(let i = 0; i <= body.length -1; i++) {
+        for (let i = 0; i <= body.length - 1; i++) {
 
             if (indv === true) {
                 const data = await cloudscraper.get(`${BASE_THEMEMOE}themes/${body[i]}`);
@@ -420,7 +416,7 @@ const getHeaderTheme = async (series) => {
     let promises = []
     let data
 
-    for(let i = 0; i <= series.length -1; i++) {
+    for (let i = 0; i <= series.length - 1; i++) {
 
         data = await getThemes(series[i].themes)
 
