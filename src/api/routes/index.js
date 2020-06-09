@@ -185,9 +185,13 @@ router.get('/moreInfo/:title' , (req, res) =>{
 
     api.getMoreInfo(title)
         .then(info =>{
-            res.status(200).json({
-                info
-            });
+            if (info.length > 0) {
+                res.status(200).json({
+                    info
+                });
+            } else (
+                res.status(404).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
