@@ -310,7 +310,9 @@ const obtainPreviewNews = (encoded) => {
 
     let image;
 
-    if (encoded.includes('<img src=')) {
+    if (encoded.includes('<img title=')) {
+        image = encoded.substring(encoded.indexOf("<img title=\""), encoded.indexOf("\" alt")).split('src=\"')[1]
+    } else if (encoded.includes('<img src=')) {
         image = encoded
                   .substring(encoded.indexOf("<img src=\""), encoded.indexOf("\" alt"))
                   .substring(10).replace("http", "https")
