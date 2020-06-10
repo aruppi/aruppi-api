@@ -1,5 +1,5 @@
 const rss = require('rss-to-json');
-const cloudscraper = require('cloudscraper');
+const html = require('got');
 
 const {
   animeflvInfo,
@@ -10,17 +10,18 @@ const {
   searchAnime,
   transformUrlServer,
   obtainPreviewNews,
-  structureThemes
+  structureThemes,
+  getAnimes
 } = require('../utils/index');
 
 const {
-  BASE_ANIMEFLV, BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE
+  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE
 } = require('./urls');
 
 const schedule = async (day) =>{
 
-  const data = await cloudscraper.get(`${BASE_JIKAN}schedule/${day.current}`);
-  const body = JSON.parse(data)[day.current]
+  const data = await html(`${BASE_JIKAN}schedule/${day.current}`).json();
+  const body = data[day.current];
   const promises = []
 
   body.map(doc =>{
@@ -38,18 +39,15 @@ const schedule = async (day) =>{
 };
 
 const top = async (type, subtype, page) =>{
-
-  const data = await cloudscraper.get(`${BASE_JIKAN}top/${type}/${page}/${subtype}`);
-
-  return JSON.parse(data).top;
-
+  const data = await html(`${BASE_JIKAN}top/${type}/${page}/${subtype}`).json();
+  return data.top;
 };
 
 const getAllAnimes = async () =>{
 
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV}api/animes/list`);
-  const body = JSON.parse(data);
-  return body.map(item => ({
+  let data = await getAnimes()
+
+  return data.map(item => ({
     index: item[0],
     animeId: item[3],
     title: item[1],
@@ -127,8 +125,8 @@ const getNews = async (pageRss) =>{
 
 const season = async (year, type) =>{
 
-  const data = await cloudscraper.get(`${BASE_JIKAN}season/${year}/${type}`);
-  let body = JSON.parse(data).anime;
+  const data = await html(`${BASE_JIKAN}season/${year}/${type}`).json();
+  let body = data.anime;
   const promises = []
 
   body.map(doc =>{
@@ -147,8 +145,8 @@ const season = async (year, type) =>{
 
 const getLastEpisodes = async () =>{
 
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`);
-  let body = JSON.parse(data).episodes;
+  const data = await html(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`).json();
+  let body = data.episodes;
   const promises = []
 
   body.map(doc =>{
@@ -168,8 +166,8 @@ const getLastEpisodes = async () =>{
 
 const getSpecials = async (type, subType, page) =>{
 
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}${type.url}/${subType}/${page}`);
-  let body = JSON.parse(data)[type.prop];
+  const data = await html(`${BASE_ANIMEFLV_JELU}${type.url}/${subType}/${page}`).json();
+  let body = data[type.prop];
   const promises = []
 
   body.map(doc =>{
@@ -214,47 +212,10 @@ const getMoreInfo = async (title) =>{
     )
   });
 
-
-
   try{
 
-    switch (animeType) {
-
-      case "tv":
-          promises.push(await animeflvInfo(animeId, animeIndex).then(async extra => ({
-            title: animeTitle || null,
-            poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-            synopsis: extra.animeExtraInfo[0].synopsis || null,
-            status: extra.animeExtraInfo[0].debut || null,
-            type: extra.animeExtraInfo[0].type || null,
-            rating: extra.animeExtraInfo[0].rating || null,
-            genres: extra.genres || null,
-            episodes: extra.listByEps || null,
-            moreInfo: await animeExtraInfo(title).then(info =>{
-              return info || null
-            }),
-            promo: await getAnimeVideoPromo(title).then(promo =>{
-              return promo || null
-            }),
-            characters: await getAnimeCharacters(animeTitle).then(characters =>{
-              return characters || null
-            })
-          })));
-        break;
-      case "movie":
-          promises.push(await animeflvInfo(animeId).then(async extra => ({
-            title: animeTitle || null,
-            poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-            synopsis: extra.animeExtraInfo[0].synopsis || null,
-            status: extra.animeExtraInfo[0].debut || null,
-            type: extra.animeExtraInfo[0].type || null,
-            rating: extra.animeExtraInfo[0].rating || null,
-            genres: extra.genres || null,
-            episodes: extra.listByEps || null,
-          })));
-        break;
-      case "ova":
-        promises.push(await animeflvInfo(animeId).then(async extra => ({
+    if (animeType === 'tv') {
+        promises.push(await animeflvInfo(animeId, animeIndex).then(async extra => ({
           title: animeTitle || null,
           poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
           synopsis: extra.animeExtraInfo[0].synopsis || null,
@@ -263,19 +224,27 @@ const getMoreInfo = async (title) =>{
           rating: extra.animeExtraInfo[0].rating || null,
           genres: extra.genres || null,
           episodes: extra.listByEps || null,
+          moreInfo: await animeExtraInfo(title).then(info =>{
+            return info || null
+          }),
+          promo: await getAnimeVideoPromo(title).then(promo =>{
+            return promo || null
+          }),
+          characters: await getAnimeCharacters(animeTitle).then(characters =>{
+            return characters || null
+          })
         })));
-        break;
-      default:
-        promises.push(await animeflvInfo(animeId).then(async extra => ({
-          title: animeTitle || null,
-          poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-          synopsis: extra.animeExtraInfo[0].synopsis || null,
-          status: extra.animeExtraInfo[0].debut || null,
-          type: extra.animeExtraInfo[0].type || null,
-          rating: extra.animeExtraInfo[0].rating || null,
-          genres: extra.genres || null,
-          episodes: extra.listByEps || null,
-        })));
+    } else {
+      promises.push(await animeflvInfo(animeId).then(async extra => ({
+        title: animeTitle || null,
+        poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+        synopsis: extra.animeExtraInfo[0].synopsis || null,
+        status: extra.animeExtraInfo[0].debut || null,
+        type: extra.animeExtraInfo[0].type || null,
+        rating: extra.animeExtraInfo[0].rating || null,
+        genres: extra.genres || null,
+        episodes: extra.listByEps || null,
+      })));
     }
 
   }catch(err){
@@ -288,8 +257,8 @@ const getMoreInfo = async (title) =>{
 
 const getAnimeServers = async (id) => {
 
-  const data = await cloudscraper.get(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`);
-  let body = JSON.parse(data).servers;
+  const data = await html(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`).json();
+  let body = data.servers;
 
   return await transformUrlServer(body);
 
@@ -299,8 +268,8 @@ const search = async (title) =>{ return await searchAnime(title); };
 
 const getImages = async (query) => {
 
-  const data = await cloudscraper.get(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`);
-  const body = JSON.parse(data).data.result.items;
+  const data = await html(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`).json();
+  const body = data.data.result.items;
   const promises = []
 
   body.map(doc =>{
@@ -319,8 +288,8 @@ const getImages = async (query) => {
 
 const getYoutubeVideos = async (channelId) => {
 
-  const data = await cloudscraper.get(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`);
-  const body = JSON.parse(data)[channelId.prop];
+  const data = await html(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`).json();
+  const body = data[channelId.prop];
   const promises = []
 
   body.map(doc =>{
@@ -344,12 +313,8 @@ const getRadioStations = async () => {
 }
 
 const getOpAndEd = async (title) => {
-
-  const data = await cloudscraper.get(`${BASE_THEMEMOE}anime/search/${title}`);
-  const body = JSON.parse(data);
-
-  return await structureThemes(body, true, 0)
-
+  const data = await html(`${BASE_THEMEMOE}anime/search/${title}`).json();
+  return await structureThemes(data, true, 0)
 };
 
 const getThemesSeason = async (year, season) => {
@@ -357,37 +322,29 @@ const getThemesSeason = async (year, season) => {
   let data
 
   if (season === undefined) {
-    data = await cloudscraper.get(`${BASE_THEMEMOE}seasons/${year}`);
+    data = await html(`${BASE_THEMEMOE}seasons/${year}`).json();
   } else {
-    data = await cloudscraper.get(`${BASE_THEMEMOE}seasons/${year}/${season}`);
+    data = await html(`${BASE_THEMEMOE}seasons/${year}/${season}`).json();
   }
-  const body = JSON.parse(data);
 
-  return await structureThemes(body, false, 0)
+  return await structureThemes(data, false, 0)
 
 };
 
 const getRandomTheme = async () => {
-
-  const data = await cloudscraper.get(`${BASE_THEMEMOE}roulette`);
-  const body = JSON.parse(data);
-
-  return await structureThemes(body, true)
-
+  const data = await html(`${BASE_THEMEMOE}roulette`).json();
+  return await structureThemes(data, true)
 };
 
 const getArtist = async (id) => {
 
   let data
-  let body
   let promises = []
 
   if (id === undefined) {
 
-    data = await cloudscraper.get(`${BASE_THEMEMOE}artists`);
-    body = JSON.parse(data);
-
-    body.map(doc => {
+    data = await html(`${BASE_THEMEMOE}artists`).json();
+    data.map(doc => {
 
       promises.push({
         id: doc.artistID,
@@ -399,11 +356,8 @@ const getArtist = async (id) => {
     return promises;
 
   } else {
-
-    data = await cloudscraper.get(`${BASE_THEMEMOE}artists/${id}`);
-    body = JSON.parse(data);
-
-    return await structureThemes(body, false, 1)
+    data = await html(`${BASE_THEMEMOE}artists/${id}`).json();
+    return await structureThemes(data, false, 1)
   }
 
 };

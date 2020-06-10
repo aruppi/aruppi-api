@@ -10,9 +10,13 @@ router.get('/schedule/:day' , (req, res) =>{
 
     api.schedule(day)
         .then(day =>{
-            res.status(200).json({
-                day
-            });
+            if (day.length > 0) {
+                res.status(200).json({
+                    day
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -27,9 +31,13 @@ router.get('/top/:type/:subtype/:page' , (req, res) =>{
 
     api.top(type, subtype, page)
         .then(top =>{
-            res.status(200).json({
-                top
-            });
+            if (top.length > 0) {
+                res.status(200).json({
+                    top
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -40,9 +48,13 @@ router.get('/allAnimes' , (req, res) =>{
 
     api.getAllAnimes()
         .then(animes =>{
-            res.status(200).json({
-                animes
-            });
+            if (animes.length > 0) {
+                res.status(200).json({
+                    animes
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -53,9 +65,13 @@ router.get('/anitakume' , (req, res) =>{
 
     api.getAnitakume()
         .then(podcast =>{
-            res.status(200).json({
-                podcast
-            });
+            if (podcast.length > 0) {
+                res.status(200).json({
+                    podcast
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -73,9 +89,13 @@ router.get('/news' , (req, res) =>{
 
     api.getNews(pagesRss)
         .then(news =>{
-            res.status(200).json({
-                news
-            });
+            if (news.length > 0) {
+                res.status(200).json({
+                    news
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -89,9 +109,13 @@ router.get('/season/:year/:type' , (req, res) =>{
 
     api.season(year, type)
         .then(season =>{
-            res.status(200).json({
-                season
-            });
+            if (season.length > 0) {
+                res.status(200).json({
+                    season
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -102,9 +126,13 @@ router.get('/lastEpisodes' , (req, res) =>{
 
     api.getLastEpisodes()
         .then(episodes =>{
-            res.status(200).json({
-                episodes
-            });
+            if (episodes.length > 0) {
+                res.status(200).json({
+                    episodes
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -119,9 +147,13 @@ router.get('/movies/:type/:page' , (req, res) =>{
 
     api.getSpecials(type, subType, page)
         .then(movies =>{
-            res.status(200).json({
-                movies
-            });
+            if (movies.length > 0) {
+                res.status(200).json({
+                    movies
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -136,9 +168,13 @@ router.get('/ovas/:type/:page' , (req, res) =>{
 
     api.getSpecials(type, subType, page)
         .then(ovas =>{
-            res.status(200).json({
-                ovas
-            });
+            if (ovas.length > 0) {
+                res.status(200).json({
+                    ovas
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -153,9 +189,13 @@ router.get('/specials/:type/:page' , (req, res) =>{
 
     api.getSpecials(type, subType, page)
         .then(specials =>{
-            res.status(200).json({
-                specials
-            });
+            if (specials.length > 0) {
+                res.status(200).json({
+                    specials
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -170,9 +210,13 @@ router.get('/tv/:type/:page' , (req, res) =>{
 
     api.getSpecials(type, subType, page)
         .then(tv =>{
-            res.status(200).json({
-                tv
-            });
+            if (tv.length > 0) {
+                res.status(200).json({
+                    tv
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -190,7 +234,7 @@ router.get('/moreInfo/:title' , (req, res) =>{
                     info
                 });
             } else (
-                res.status(404).json({ message: 'Aruppi lost in the shell'})
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
             )
         }).catch((err) =>{
         console.error(err);
@@ -204,9 +248,13 @@ router.get('/getAnimeServers/:id([^/]+/[^/]+)' , (req, res) =>{
 
     api.getAnimeServers(id)
         .then(servers =>{
-            res.status(200).json({
-                servers
-            });
+            if (servers.length > 0) {
+                res.status(200).json({
+                    servers
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -219,9 +267,13 @@ router.get('/search/:title' , (req, res) =>{
 
     api.search(title)
         .then(search =>{
-            res.status(200).json({
-                search
-            });
+            if (search.length > 0) {
+                res.status(200).json({
+                    search
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -234,9 +286,13 @@ router.get('/images/:query' , (req, res) =>{
 
     api.getImages(query)
         .then(images =>{
-            res.status(200).json({
-                images
-            });
+            if (images.length > 0) {
+                res.status(200).json({
+                    images
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -249,9 +305,13 @@ router.get('/videos/:channelId' , (req, res) =>{
 
     api.getYoutubeVideos(channelId)
         .then(videos =>{
-            res.status(200).json({
-                videos
-            });
+            if (videos.length > 0) {
+                res.status(200).json({
+                    videos
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -262,9 +322,13 @@ router.get('/radio' , (req, res) =>{
 
     api.getRadioStations()
         .then(stations =>{
-            res.status(200).json({
-                stations
-            });
+            if (stations.length > 0) {
+                res.status(200).json({
+                    stations
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -277,9 +341,13 @@ router.get('/themes/:title' , (req, res) =>{
 
     api.getOpAndEd(title)
         .then(themes =>{
-            res.status(200).json({
-                themes
-            });
+            if (themes.length > 0) {
+                res.status(200).json({
+                    themes
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -293,9 +361,13 @@ router.get('/themeSeason/:year/:season?', (req, res) =>{
 
     api.getThemesSeason(year, season)
         .then(themes =>{
-            res.status(200).json({
-                themes
-            });
+            if (themes.length > 0) {
+                res.status(200).json({
+                    themes
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -306,9 +378,13 @@ router.get('/randomTheme', (req, res) =>{
 
     api.getRandomTheme()
         .then(random =>{
-            res.status(200).json({
-                random
-            });
+            if (random.length > 0) {
+                res.status(200).json({
+                    random
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });
@@ -321,9 +397,13 @@ router.get('/artists/:id?', (req, res) =>{
 
     api.getArtist(id)
         .then(artists =>{
-            res.status(200).json({
-                artists
-            });
+            if (artists.length > 0) {
+                res.status(200).json({
+                    artists
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
         }).catch((err) =>{
         console.error(err);
     });

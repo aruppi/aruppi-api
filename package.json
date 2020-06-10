@@ -30,8 +30,8 @@
     }
   ],
   "engines": {
-    "node": ">= 10.16.x",
-    "npm": ">= 6.9.x"
+    "node": ">= 12.17.x",
+    "npm": ">= 6.14.x"
   },
   "bugs": {
     "url": "https://github.com/aruppi/aruppi-api/issues"
@@ -47,6 +47,7 @@
     "compose-middleware": "^5.0.1",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "got": "^11.3.0",
     "helmet": "^3.22.0",
     "node-base64-image": "^2.0.1",
     "request": "^2.88.2",

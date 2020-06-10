@@ -15,6 +15,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 
 app.get('/', (req, res) => {
+  res.redirect('/api/')
+});
+
+app.get('/api/', (req, res) => {
   res.json({
     message: 'Tu~tu~ruuu! You have traveled to the API Black Hole'
   });

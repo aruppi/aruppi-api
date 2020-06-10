@@ -1,6 +1,7 @@
 const cloudscraper = require('cloudscraper')
 const cheerio = require('cheerio');
 const base64 = require('node-base64-image');
+const html = require('got');
 
 const {
     BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, BASE_ARUPPI, BASE_THEMEMOE
@@ -15,12 +16,19 @@ const animeflvInfo = async (id, index) => {
     let debut = ""
     let type = ""
 
+    let res
+    let $
+
     try {
 
-        const res = await cloudscraper(`${BASE_ANIMEFLV}anime/${id}`);
-        const body = await res;
+        try {
+            res = await html(`${BASE_ANIMEFLV}anime/${id}`);
+            $ = await cheerio.load(res.body);
+        } catch (error) {
+            res = await cloudscraper.get(`${BASE_ANIMEFLV}anime/${id}`);
+            $ = await cheerio.load(res)
+        }
 
-        const $ = await cheerio.load(body);
         const scripts = $('script');
         const anime_info_ids = [];
         const anime_eps_data = [];
@@ -109,15 +117,14 @@ const animeflvInfo = async (id, index) => {
 };
 
 const getAnimeCharacters = async (title) => {
-    const res = await cloudscraper(`${BASE_JIKAN}search/anime?q=${title}`);
-    const matchAnime = JSON.parse(res).results.filter(x => x.title === title);
+    const res = await html(`${BASE_JIKAN}search/anime?q=${title}`).json();
+    const matchAnime = res.results.filter(x => x.title === title);
     const malId = matchAnime[0].mal_id;
 
     if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const jikanCharactersURL = `${BASE_JIKAN}anime/${malId}/characters_staff`;
-    const data = await cloudscraper.get(jikanCharactersURL);
-    let body = JSON.parse(data).characters;
+    const data = await html(`${BASE_JIKAN}anime/${malId}/characters_staff`).json();
+    let body = data.characters;
 
     if (typeof body === 'undefined') return null;
 
@@ -147,15 +154,14 @@ const getAnimeCharacters = async (title) => {
 };
 
 const getAnimeVideoPromo = async (title) => {
-    const res = await cloudscraper(`${BASE_JIKAN}search/anime?q=${title}`);
-    const matchAnime = JSON.parse(res).results.filter(x => x.title === title);
+    const res = await html(`${BASE_JIKAN}search/anime?q=${title}`).json();
+    const matchAnime = res.results.filter(x => x.title === title);
     const malId = matchAnime[0].mal_id;
 
     if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const jikanCharactersURL = `${BASE_JIKAN}anime/${malId}/videos`;
-    const data = await cloudscraper.get(jikanCharactersURL);
-    const body = JSON.parse(data).promo;
+    const data = await html(`${BASE_JIKAN}anime/${malId}/videos`).json();
+    const body = data.promo;
     const promises = [];
 
     body.map(doc => {
@@ -170,67 +176,35 @@ const getAnimeVideoPromo = async (title) => {
 };
 
 const animeExtraInfo = async (title) => {
-    const res = await cloudscraper(`${BASE_JIKAN}search/anime?q=${title}`);
-    const matchAnime = JSON.parse(res).results.filter(x => x.title === title);
+    const res = await html(`${BASE_JIKAN}search/anime?q=${title}`).json();
+    const matchAnime = res.results.filter(x => x.title === title);
     const malId = matchAnime[0].mal_id;
 
     if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const animeDetails = `${BASE_JIKAN}anime/${malId}`;
-    const data = await cloudscraper.get(animeDetails);
-    const body = Array(JSON.parse(data));
+    const data = await html(`${BASE_JIKAN}anime/${malId}`).json();
+    const body = Array(data);
     const promises = [];
 
     body.map(doc => {
 
-        let airDay
-
-        switch (doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()) {
-            case "mondays":
-                airDay = "Lunes";
-                break;
-            case "monday":
-                airDay = "Lunes";
-                break;
-            case "tuesdays":
-                airDay = "Martes";
-                break;
-            case "tuesday":
-                airDay = "Martes";
-                break;
-            case "wednesdays":
-                airDay = "Miércoles";
-                break;
-            case "wednesday":
-                airDay = "Miércoles";
-                break;
-            case "thursdays":
-                airDay = "Jueves";
-                break;
-            case "thursday":
-                airDay = "Jueves";
-                break;
-            case "fridays":
-                airDay = "Viernes";
-                break;
-            case "friday":
-                airDay = "Viernes";
-                break;
-            case "saturdays":
-                airDay = "Sábados";
-                break;
-            case "saturday":
-                airDay = "Sábados";
-                break;
-            case "sundays":
-                airDay = "Domingos";
-                break;
-            case "sunday":
-                airDay = "Domingos";
-                break;
-            default:
-                airDay = "Sin emisión";
-        }
+        let airDay = {
+            'mondays': 'Lunes',
+            'monday': 'Lunes',
+            'tuesdays': 'Martes',
+            'tuesday': 'Martes',
+            'wednesdays': 'Miércoles',
+            'wednesday': 'Miércoles',
+            'thursdays': 'Jueves',
+            'thursday': 'Jueves',
+            'fridays': 'Viernes',
+            'friday': 'Viernes',
+            'saturdays': 'Sábados',
+            'saturday': 'Sábados',
+            'sundays': 'Domingos',
+            'sunday': 'Domingos',
+            'default': 'Sin emisión'
+        };
 
         promises.push({
             titleJapanese: doc.title_japanese,
@@ -240,9 +214,9 @@ const animeExtraInfo = async (title) => {
                 from: doc.aired.from,
                 to: doc.aired.to
             },
-            duration: doc.duration.split('per')[0].replace(" ", ""),
+            duration: doc.duration.split('per')[0],
             rank: doc.rank,
-            broadcast: airDay,
+            broadcast: airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()],
             producers: doc.producers.map(x => x.name) || null,
             licensors: doc.licensors.map(x => x.name) || null,
             studios: doc.studios.map(x => x.name) || null,
@@ -257,15 +231,21 @@ const imageUrlToBase64 = async (url) => {
     return await base64.encode(url, {string: true});
 };
 
-const search = async () => {
-}
+const search = async () => {}
 
 const searchAnime = async (query) => {
 
-    const res = await cloudscraper(`${SEARCH_URL}${query}`);
-    const body = await res;
-    const $ = await cheerio.load(body);
-    const promises = [];
+    let res
+    let $
+    let promises = []
+
+    try {
+        res = await html(`${SEARCH_URL}${query}`);
+        $ = await cheerio.load(res.body);
+    } catch (error) {
+        res = await cloudscraper.get(`${SEARCH_URL}${query}`);
+        $ = await cheerio.load(res)
+    }
 
     $('div.Container ul.ListAnimes li article').each((index, element) => {
         const $element = $(element);
@@ -274,7 +254,7 @@ const searchAnime = async (query) => {
         let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
         const type = $element.find('div.Description p span.Type').text();
 
-        promises.push(search().then(async extra => ({
+        promises.push(search().then(async () => ({
             id: id || null,
             title: title || null,
             type: type || null,
@@ -290,21 +270,18 @@ const searchAnime = async (query) => {
 const transformUrlServer = async (urlReal) => {
 
     let res
-    let body
     const promises = []
 
     for (i = 0; i <= urlReal.length - 1; i++) {
         switch (urlReal[i].server) {
             case "amus":
-                res = await cloudscraper(urlReal[i].code.replace("embed", "check"));
-                body = await res;
-                urlReal[i].code = JSON.parse(body).file
+                res = await html(urlReal[i].code.replace("embed", "check")).json();
+                urlReal[i].code = res.file
                 urlReal[i].direct = true
                 break;
             case "natsuki":
-                res = await cloudscraper(urlReal[i].code.replace("embed", "check"));
-                body = await res;
-                urlReal[i].code = JSON.parse(body).file
+                res = await html(urlReal[i].code.replace("embed", "check")).json();
+                urlReal[i].code = res.file
                 urlReal[i].direct = true
                 break;
             default:
@@ -357,21 +334,20 @@ const structureThemes = async (body, indv, task) => {
 
     const promises = []
     let themes
-    let respFinal
+    let data
 
     if (task === 0) {
         for (let i = 0; i <= body.length - 1; i++) {
 
             if (indv === true) {
-                const data = await cloudscraper.get(`${BASE_THEMEMOE}themes/${body[i]}`);
-                respFinal = JSON.parse(data)
-                themes = await getThemes(respFinal[0].themes)
+                data = await html(`${BASE_THEMEMOE}themes/${body[i]}`).json();
+                themes = await getThemes(data[0].themes)
             } else {
-                respFinal = body
+                data = body
                 themes = await getThemes(body[0].themes)
             }
 
-            respFinal.map(doc => {
+            data.map(doc => {
 
                 promises.push({
                     title: doc.name,
@@ -383,25 +359,26 @@ const structureThemes = async (body, indv, task) => {
             });
         }
     } else if (task === 1) {
-        respFinal = body
-        themes = await getHeaderTheme(respFinal.themes)
+
+        data = body
+        themes = await getHeaderTheme(data.themes)
 
         promises.push({
-            title: respFinal.artistName,
-            season: respFinal.season,
-            year: respFinal.year,
+            title: data.artistName,
+            season: data.season,
+            year: data.year,
             series: themes,
         });
 
     } else {
 
-        respFinal = body
-        themes = await getThemes(respFinal.themes)
+        data = body
+        themes = await getThemes(data.themes)
 
         promises.push({
-            title: respFinal.name,
-            season: respFinal.season,
-            year: respFinal.year,
+            title: data.name,
+            season: data.season,
+            year: data.year,
             themes: themes,
         });
 
@@ -451,6 +428,22 @@ const getThemes = async (themes) => {
 
 };
 
+const getAnimes = async () => {
+
+    let res
+    let data
+
+    try {
+        data = await html(`${BASE_ANIMEFLV}api/animes/list`).json();
+    } catch (error) {
+        res = await cloudscraper.get(`${BASE_ANIMEFLV}api/animes/list`);
+        data = JSON.parse(res);
+    }
+
+    return data;
+
+};
+
 module.exports = {
     animeflvInfo,
     getAnimeCharacters,
@@ -461,5 +454,6 @@ module.exports = {
     transformUrlServer,
     obtainPreviewNews,
     structureThemes,
-    getThemes
+    getThemes,
+    getAnimes
 }
