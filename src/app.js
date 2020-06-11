@@ -26,7 +26,7 @@ app.get('/api/', (req, res) => {
 
 app.get('/api/v1', (req, res) => {
   res.json({
-    message: 'Sorry, version (api/v1) is deprecated, if you want to see content go to api/v2'
+    message: 'Sorry, version v1 is deprecated, if you want to see content go to v2'
   });
 });
 
