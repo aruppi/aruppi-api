@@ -17,6 +17,7 @@ router.get('/', (req, res) => {
         'Anitakume': '/api/v2/anitakume',
         'News': '/api/v2/news',
         'Season': '/api/v2/season/:year/:type',
+        'All Seasons': '/api/v2/allSeasons',
         'LastEpisodes': '/api/v2/lastEpisodes',
         'Movies': '/api/v2/movies/:type/:page',
         'Ovas': '/api/v2/ovas/:type/:page',

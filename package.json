@@ -1,6 +1,6 @@
 {
   "name": "aruppi",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Aruppi is a custom API to obtain data from the Japanese culture for the mobile app",
   "main": "./src/api/api.js",
   "scripts": {
@@ -40,6 +40,7 @@
     "type": "git",
     "url": "https://github.com/aruppi/aruppi-api.git"
   },
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",

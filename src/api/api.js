@@ -143,6 +143,24 @@ const season = async (year, type) =>{
 
 };
 
+const allSeasons = async () =>{
+
+  const data = await html(`${BASE_JIKAN}season/archive`).json();
+  let body = data.archive;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      year: doc.year,
+      seasons: doc.seasons,
+    });
+  });
+
+  return promises;
+
+};
+
 const getLastEpisodes = async () =>{
 
   const data = await html(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`).json();
@@ -369,6 +387,7 @@ module.exports = {
   getAnitakume,
   getNews,
   season,
+  allSeasons,
   getLastEpisodes,
   getSpecials,
   getMoreInfo,
