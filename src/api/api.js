@@ -161,6 +161,25 @@ const allSeasons = async () =>{
 
 };
 
+const laterSeasons = async () =>{
+
+  const data = await html(`${BASE_JIKAN}season/later`).json();
+  let body = data.anime;
+  const promises = []
+
+  body.map(doc =>{
+
+    promises.push({
+      malid: doc.mal_id,
+      title: doc.title,
+      image: doc.image_url
+    });
+  });
+
+  return promises;
+
+};
+
 const getLastEpisodes = async () =>{
 
   const data = await html(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`).json();
@@ -388,6 +407,7 @@ module.exports = {
   getNews,
   season,
   allSeasons,
+  laterSeasons,
   getLastEpisodes,
   getSpecials,
   getMoreInfo,

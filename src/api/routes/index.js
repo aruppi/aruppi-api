@@ -139,6 +139,23 @@ router.get('/allSeasons' , (req, res) =>{
 
 });
 
+router.get('/laterSeasons' , (req, res) =>{
+
+    api.laterSeasons()
+        .then(archive =>{
+            if (archive.length > 0) {
+                res.status(200).json({
+                    archive
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 router.get('/lastEpisodes' , (req, res) =>{
 
     api.getLastEpisodes()
