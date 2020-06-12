@@ -11,7 +11,8 @@ const {
   transformUrlServer,
   obtainPreviewNews,
   structureThemes,
-  getAnimes
+  getAnimes,
+  helper
 } = require('../utils/index');
 
 const {
@@ -186,18 +187,19 @@ const getLastEpisodes = async () =>{
   let body = data.episodes;
   const promises = []
 
-  body.map(doc =>{
+  body.map(doc => {
 
-    promises.push({
-      id: doc.id,
-      title: doc.title,
-      image: doc.poster,
-      episode: doc.episode,
-      servers: doc.servers.map(x => x)
-    });
+    promises.push(helper().then(async () => ({
+       id: doc.id,
+       title: doc.title,
+       image: doc.poster,
+       episode: doc.episode,
+       servers: await transformUrlServer(JSON.parse(JSON.stringify(doc.servers)))
+     })));
+
   });
 
-  return promises;
+  return Promise.all(promises);
 
 };
 
@@ -226,7 +228,6 @@ const getSpecials = async (type, subType, page) =>{
   return promises;
 
 };
-
 
 const getMoreInfo = async (title) =>{
 

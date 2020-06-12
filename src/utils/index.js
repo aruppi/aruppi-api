@@ -231,7 +231,7 @@ const imageUrlToBase64 = async (url) => {
     return await base64.encode(url, {string: true});
 };
 
-const search = async () => {}
+const helper = async () => {}
 
 const searchAnime = async (query) => {
 
@@ -254,7 +254,7 @@ const searchAnime = async (query) => {
         let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
         const type = $element.find('div.Description p span.Type').text();
 
-        promises.push(search().then(async () => ({
+        promises.push(helper().then(async () => ({
             id: id || null,
             title: title || null,
             type: type || null,
@@ -272,21 +272,13 @@ const transformUrlServer = async (urlReal) => {
     let res
     const promises = []
 
-    for (i = 0; i <= urlReal.length - 1; i++) {
-        switch (urlReal[i].server) {
-            case "amus":
-                res = await html(urlReal[i].code.replace("embed", "check")).json();
-                urlReal[i].code = res.file
-                urlReal[i].direct = true
-                break;
-            case "natsuki":
-                res = await html(urlReal[i].code.replace("embed", "check")).json();
-                urlReal[i].code = res.file
-                urlReal[i].direct = true
-                break;
-            default:
-                urlReal[i].direct = false
-                break;
+    for (const index in urlReal) {
+        if (urlReal[index].server === 'amus' || urlReal[index].server === 'natsuki') {
+            res = await html(urlReal[index].code.replace("embed", "check")).json();
+            urlReal[index].code = res.file || null
+            urlReal[index].direct = true
+        } else {
+            urlReal[index].direct = false
         }
     }
 
@@ -455,5 +447,6 @@ module.exports = {
     obtainPreviewNews,
     structureThemes,
     getThemes,
-    getAnimes
+    getAnimes,
+    helper
 }
