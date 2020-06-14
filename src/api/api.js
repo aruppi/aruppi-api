@@ -237,16 +237,41 @@ const getMoreInfo = async (title) =>{
   let animeType = ''
   let animeIndex = ''
 
+  let seriesTitle
+  let position
+
+  const titles = [
+    { animeflv: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen 2nd Season', myanimelist: 'Kaguya-sama wa Kokurasetai?: Tensai-tachi no Renai Zunousen', alternative: 'Kaguya-sama wa Kokurasetai'},
+    { animeflv: 'Naruto Shippuden', myanimelist: 'Naruto: Shippuuden' },
+    { animeflv: 'Rock Lee no Seishun Full-Power Ninden', myanimelist: 'Naruto SD: Rock Lee no Seishun Full-Power Ninden' }
+  ];
+
+  for (let name in titles) {
+    if (title === titles[name].animeflv || title === titles[name].myanimelist || title === titles[name].alternative) {
+      seriesTitle = titles[name].animeflv
+      position = name
+    }
+  }
+
+  if (seriesTitle === undefined) {
+    seriesTitle = title
+  }
+
   await getAllAnimes().then(data => {
     data.forEach(function (anime) {
-          if (anime.title.split('\t')[0] === title.split('\t')[0] || anime.title === `${title} (TV)`) {
+          if (anime.title.split('\t')[0] === seriesTitle.split('\t')[0] || anime.title === `${seriesTitle} (TV)`) {
             if (anime.title.includes('(TV)', 0)) { animeTitle = anime.title.split('\t')[0].replace(' (TV)', '') }
             else { animeTitle = anime.title.split('\t')[0] }
             animeId = anime.id
             animeIndex = anime.index
             animeType = anime.type.toLowerCase()
+
+            if (position !== undefined) {
+              seriesTitle = titles[position].myanimelist
+            }
+
           }
-        }
+    }
     )
   });
 
@@ -262,13 +287,13 @@ const getMoreInfo = async (title) =>{
           rating: extra.animeExtraInfo[0].rating || null,
           genres: extra.genres || null,
           episodes: extra.listByEps || null,
-          moreInfo: await animeExtraInfo(title).then(info =>{
+          moreInfo: await animeExtraInfo(seriesTitle).then(info =>{
             return info || null
           }),
-          promo: await getAnimeVideoPromo(title).then(promo =>{
+          promo: await getAnimeVideoPromo(seriesTitle).then(promo =>{
             return promo || null
           }),
-          characters: await getAnimeCharacters(animeTitle).then(characters =>{
+          characters: await getAnimeCharacters(seriesTitle).then(characters =>{
             return characters || null
           })
         })));
