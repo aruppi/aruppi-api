@@ -1,6 +1,6 @@
 {
   "name": "aruppi",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Aruppi is a custom API to obtain data from the Japanese culture for the mobile app",
   "main": "./src/api/api.js",
   "scripts": {
@@ -44,14 +44,12 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
-    "cloudscraper": "^4.6.0",
     "compose-middleware": "^5.0.1",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "got": "^11.3.0",
     "helmet": "^3.22.0",
-    "node-base64-image": "^2.0.1",
-    "request": "^2.88.2",
+    "hooman": "^1.2.5",
     "rss-to-json": "^1.1.1"
   }
 }

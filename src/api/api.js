@@ -257,22 +257,24 @@ const getMoreInfo = async (title) =>{
     seriesTitle = title
   }
 
-  await getAllAnimes().then(data => {
-    data.forEach(function (anime) {
-          if (anime.title.split('\t')[0] === seriesTitle.split('\t')[0] || anime.title === `${seriesTitle} (TV)`) {
-            if (anime.title.includes('(TV)', 0)) { animeTitle = anime.title.split('\t')[0].replace(' (TV)', '') }
-            else { animeTitle = anime.title.split('\t')[0] }
-            animeId = anime.id
-            animeIndex = anime.index
-            animeType = anime.type.toLowerCase()
+  await getAllAnimes().then(animes => {
 
-            if (position !== undefined) {
-              seriesTitle = titles[position].myanimelist
-            }
+    for (const i in animes) {
+      if (animes[i].title.split('\t')[0] === seriesTitle.split('\t')[0] || animes[i].title === `${seriesTitle} (TV)`) {
+        if (animes[i].title.includes('(TV)', 0)) { animeTitle = animes[i].title.split('\t')[0].replace(' (TV)', '') }
+        else { animeTitle = animes[i].title.split('\t')[0] }
+        animeId = animes[i].id
+        animeIndex = animes[i].index
+        animeType = animes[i].type.toLowerCase()
 
-          }
+        if (position !== undefined) {
+          seriesTitle = titles[position].myanimelist
+        }
+
+        break;
+
+      }
     }
-    )
   });
 
   try{

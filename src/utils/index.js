@@ -1,7 +1,6 @@
-const cloudscraper = require('cloudscraper')
 const cheerio = require('cheerio');
-const base64 = require('node-base64-image');
 const html = require('got');
+const hooman = require('hooman');
 
 const {
     BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, BASE_ARUPPI, BASE_THEMEMOE
@@ -25,8 +24,8 @@ const animeflvInfo = async (id, index) => {
             res = await html(`${BASE_ANIMEFLV}anime/${id}`);
             $ = await cheerio.load(res.body);
         } catch (error) {
-            res = await cloudscraper.get(`${BASE_ANIMEFLV}anime/${id}`);
-            $ = await cheerio.load(res)
+            res = await hooman.get(`${BASE_ANIMEFLV}anime/${id}`);
+            $ = await cheerio.load(res.body)
         }
 
         const scripts = $('script');
@@ -228,7 +227,8 @@ const animeExtraInfo = async (title) => {
 };
 
 const imageUrlToBase64 = async (url) => {
-    return await base64.encode(url, {string: true});
+    let img = await hooman.get(url)
+    return img.rawBody.toString('base64');
 };
 
 const helper = async () => {}
@@ -243,8 +243,8 @@ const searchAnime = async (query) => {
         res = await html(`${SEARCH_URL}${query}`);
         $ = await cheerio.load(res.body);
     } catch (error) {
-        res = await cloudscraper.get(`${SEARCH_URL}${query}`);
-        $ = await cheerio.load(res)
+        res = await hooman.get(`${SEARCH_URL}${query}`);
+        $ = await cheerio.load(res.body)
     }
 
     $('div.Container ul.ListAnimes li article').each((index, element) => {
@@ -428,8 +428,8 @@ const getAnimes = async () => {
     try {
         data = await html(`${BASE_ANIMEFLV}api/animes/list`).json();
     } catch (error) {
-        res = await cloudscraper.get(`${BASE_ANIMEFLV}api/animes/list`);
-        data = JSON.parse(res);
+        res = await hooman.get(`${BASE_ANIMEFLV}api/animes/list`)
+        data = JSON.parse(res.body);
     }
 
     return data;
