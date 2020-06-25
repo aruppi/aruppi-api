@@ -270,11 +270,17 @@ const searchAnime = async (query) => {
 const transformUrlServer = async (urlReal) => {
 
     let res
+    let data
     const promises = []
 
     for (const index in urlReal) {
         if (urlReal[index].server === 'amus' || urlReal[index].server === 'natsuki') {
-            res = await html(urlReal[index].code.replace("embed", "check")).json();
+            try {
+                res = await html(urlReal[index].code.replace("embed", "check")).json();
+            } catch (e) {
+                data = await hooman.get(urlReal[index].code.replace("embed", "check"));
+                res = JSON.parse(data.body)
+            }
             urlReal[index].code = res.file || null
             urlReal[index].direct = true
         } else {
