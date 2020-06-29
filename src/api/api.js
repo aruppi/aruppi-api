@@ -1,5 +1,8 @@
 const rss = require('rss-to-json');
-const html = require('got');
+
+const {
+  homgot
+} = require('../api/apiCall');
 
 const {
   animeflvInfo,
@@ -12,6 +15,7 @@ const {
   obtainPreviewNews,
   structureThemes,
   getAnimes,
+  getDirectory,
   helper
 } = require('../utils/index');
 
@@ -21,7 +25,8 @@ const {
 
 const schedule = async (day) =>{
 
-  const data = await html(`${BASE_JIKAN}schedule/${day.current}`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_JIKAN}schedule/${day.current}`, options);
   const body = data[day.current];
   const promises = []
 
@@ -40,7 +45,8 @@ const schedule = async (day) =>{
 };
 
 const top = async (type, subtype, page) =>{
-  const data = await html(`${BASE_JIKAN}top/${type}/${page}/${subtype}`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_JIKAN}top/${type}/${page}/${subtype}`, options);
   return data.top;
 };
 
@@ -57,6 +63,8 @@ const getAllAnimes = async () =>{
   }));
 
 };
+
+const getAllDirectory = async () =>{ return await getDirectory(); };
 
 const getAnitakume = async () =>{
 
@@ -126,7 +134,8 @@ const getNews = async (pageRss) =>{
 
 const season = async (year, type) =>{
 
-  const data = await html(`${BASE_JIKAN}season/${year}/${type}`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_JIKAN}season/${year}/${type}`, options);
   let body = data.anime;
   const promises = []
 
@@ -146,7 +155,8 @@ const season = async (year, type) =>{
 
 const allSeasons = async () =>{
 
-  const data = await html(`${BASE_JIKAN}season/archive`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_JIKAN}season/archive`, options);
   let body = data.archive;
   const promises = []
 
@@ -164,7 +174,8 @@ const allSeasons = async () =>{
 
 const laterSeasons = async () =>{
 
-  const data = await html(`${BASE_JIKAN}season/later`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_JIKAN}season/later`, options);
   let body = data.anime;
   const promises = []
 
@@ -183,7 +194,8 @@ const laterSeasons = async () =>{
 
 const getLastEpisodes = async () =>{
 
-  const data = await html(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`, options);
   let body = data.episodes;
   const promises = []
 
@@ -205,7 +217,8 @@ const getLastEpisodes = async () =>{
 
 const getSpecials = async (type, subType, page) =>{
 
-  const data = await html(`${BASE_ANIMEFLV_JELU}${type.url}/${subType}/${page}`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_ANIMEFLV_JELU}${type.url}/${subType}/${page}`, options);
   let body = data[type.prop];
   const promises = []
 
@@ -322,7 +335,8 @@ const getMoreInfo = async (title) =>{
 
 const getAnimeServers = async (id) => {
 
-  const data = await html(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, options);
   let body = data.servers;
 
   return await transformUrlServer(body);
@@ -333,7 +347,8 @@ const search = async (title) =>{ return await searchAnime(title); };
 
 const getImages = async (query) => {
 
-  const data = await html(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`, options);
   const body = data.data.result.items;
   const promises = []
 
@@ -353,7 +368,8 @@ const getImages = async (query) => {
 
 const getYoutubeVideos = async (channelId) => {
 
-  const data = await html(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`, options);
   const body = data[channelId.prop];
   const promises = []
 
@@ -378,18 +394,40 @@ const getRadioStations = async () => {
 }
 
 const getOpAndEd = async (title) => {
-  const data = await html(`${BASE_THEMEMOE}anime/search/${title}`).json();
+
+  let data
+
+  const special = [
+    { title: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen', code: 37999 },
+    { title: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen 2nd Season', code: 40591 },
+    { title: 'Princess Connect! Re:Dive', code: 39292 },
+    { title: 'Shachou, Battle no Jikan Desu!', code: 40783 }
+  ];
+
+  for (let name in special) {
+    if (title === special[name].title) {
+      data = JSON.parse("[" + special[name].code + "]")
+      break;
+    }
+  }
+
+  if (data === undefined) {
+    let options = { parse: true }
+    data = await homgot(`${BASE_THEMEMOE}anime/search/${title}`, options);
+  }
+
   return await structureThemes(data, true, 0)
 };
 
 const getThemesSeason = async (year, season) => {
 
   let data
+  let options = { parse: true }
 
   if (season === undefined) {
-    data = await html(`${BASE_THEMEMOE}seasons/${year}`).json();
+    data = await homgot(`${BASE_THEMEMOE}seasons/${year}`, options);
   } else {
-    data = await html(`${BASE_THEMEMOE}seasons/${year}/${season}`).json();
+    data = await homgot(`${BASE_THEMEMOE}seasons/${year}/${season}`, options);
   }
 
   return await structureThemes(data, false, 0)
@@ -397,7 +435,8 @@ const getThemesSeason = async (year, season) => {
 };
 
 const getRandomTheme = async () => {
-  const data = await html(`${BASE_THEMEMOE}roulette`).json();
+  let options = { parse: true }
+  const data = await homgot(`${BASE_THEMEMOE}roulette`, options);
   return await structureThemes(data, true)
 };
 
@@ -405,10 +444,11 @@ const getArtist = async (id) => {
 
   let data
   let promises = []
+  let options = { parse: true }
 
   if (id === undefined) {
 
-    data = await html(`${BASE_THEMEMOE}artists`).json();
+    data = await homgot(`${BASE_THEMEMOE}artists`, options);
     data.map(doc => {
 
       promises.push({
@@ -421,7 +461,7 @@ const getArtist = async (id) => {
     return promises;
 
   } else {
-    data = await html(`${BASE_THEMEMOE}artists/${id}`).json();
+    data = await homgot(`${BASE_THEMEMOE}artists/${id}`, options);
     return await structureThemes(data, false, 1)
   }
 
@@ -431,6 +471,7 @@ module.exports = {
   schedule,
   top,
   getAllAnimes,
+  getAllDirectory,
   getAnitakume,
   getNews,
   season,

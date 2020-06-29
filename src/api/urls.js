@@ -10,6 +10,7 @@ module.exports = {
   BASE_RAMENPARADOS: 'https://ramenparados.com/category/noticias/anime/feed/',
   BASE_CRUNCHYROLL: 'https://www.crunchyroll.com/newsrss?lang=esES',
   SEARCH_URL: 'https://animeflv.net/browse?q=',
+  SEARCH_DIRECTORY: 'https://animeflv.net/browse?order=title&page=',
   BASE_EPISODE_IMG_URL: 'https://cdn.animeflv.net/screenshots/',
   BASE_QWANT: 'https://api.qwant.com/search/images?',
   BASE_THEMEMOE: 'https://themes.moe/api/'

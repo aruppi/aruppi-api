@@ -1,10 +1,10 @@
-const cheerio = require('cheerio');
-const html = require('got');
-const hooman = require('hooman');
+const {
+    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, SEARCH_DIRECTORY, BASE_ARUPPI, BASE_THEMEMOE
+} = require('../api/urls');
 
 const {
-    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, BASE_ARUPPI, BASE_THEMEMOE
-} = require('../api/urls');
+    homgot
+} = require('../api/apiCall');
 
 const animeflvInfo = async (id, index) => {
 
@@ -14,19 +14,12 @@ const animeflvInfo = async (id, index) => {
     let rating = ""
     let debut = ""
     let type = ""
-
-    let res
     let $
 
     try {
 
-        try {
-            res = await html(`${BASE_ANIMEFLV}anime/${id}`);
-            $ = await cheerio.load(res.body);
-        } catch (error) {
-            res = await hooman.get(`${BASE_ANIMEFLV}anime/${id}`);
-            $ = await cheerio.load(res.body)
-        }
+        let options = { scrapy: true }
+        $ = await homgot(`${BASE_ANIMEFLV}anime/${id}`, options);
 
         const scripts = $('script');
         const anime_info_ids = [];
@@ -116,13 +109,16 @@ const animeflvInfo = async (id, index) => {
 };
 
 const getAnimeCharacters = async (title) => {
-    const res = await html(`${BASE_JIKAN}search/anime?q=${title}`).json();
+
+    let options = { parse: true }
+
+    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
     const matchAnime = res.results.filter(x => x.title === title);
     const malId = matchAnime[0].mal_id;
 
     if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const data = await html(`${BASE_JIKAN}anime/${malId}/characters_staff`).json();
+    const data = await homgot(`${BASE_JIKAN}anime/${malId}/characters_staff`, options);
     let body = data.characters;
 
     if (typeof body === 'undefined') return null;
@@ -153,13 +149,15 @@ const getAnimeCharacters = async (title) => {
 };
 
 const getAnimeVideoPromo = async (title) => {
-    const res = await html(`${BASE_JIKAN}search/anime?q=${title}`).json();
+
+    let options = { parse: true }
+    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
     const matchAnime = res.results.filter(x => x.title === title);
     const malId = matchAnime[0].mal_id;
 
     if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const data = await html(`${BASE_JIKAN}anime/${malId}/videos`).json();
+    const data = await homgot(`${BASE_JIKAN}anime/${malId}/videos`, options);
     const body = data.promo;
     const promises = [];
 
@@ -175,13 +173,15 @@ const getAnimeVideoPromo = async (title) => {
 };
 
 const animeExtraInfo = async (title) => {
-    const res = await html(`${BASE_JIKAN}search/anime?q=${title}`).json();
+
+    let options = { parse: true }
+    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
     const matchAnime = res.results.filter(x => x.title === title);
     const malId = matchAnime[0].mal_id;
 
     if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const data = await html(`${BASE_JIKAN}anime/${malId}`).json();
+    const data = await homgot(`${BASE_JIKAN}anime/${malId}`, options);
     const body = Array(data);
     const promises = [];
 
@@ -227,7 +227,7 @@ const animeExtraInfo = async (title) => {
 };
 
 const imageUrlToBase64 = async (url) => {
-    let img = await hooman.get(url)
+    let img = await homgot(url)
     return img.rawBody.toString('base64');
 };
 
@@ -235,18 +235,11 @@ const helper = async () => {}
 
 const searchAnime = async (query) => {
 
-    let res
     let $
     let promises = []
 
-    try {
-        res = await html(`${SEARCH_URL}${query}`);
-        $ = await cheerio.load(res.body);
-    } catch (error) {
-        res = await hooman.get(`${SEARCH_URL}${query}`);
-        $ = await cheerio.load(res.body)
-    }
-
+    let options = { scrapy: true }
+    $ = await homgot(`${SEARCH_URL}${query}`, options);
     $('div.Container ul.ListAnimes li article').each((index, element) => {
         const $element = $(element);
         const id = $element.find('div.Description a.Button').attr('href').slice(1);
@@ -275,12 +268,10 @@ const transformUrlServer = async (urlReal) => {
 
     for (const index in urlReal) {
         if (urlReal[index].server === 'amus' || urlReal[index].server === 'natsuki') {
-            try {
-                res = await html(urlReal[index].code.replace("embed", "check")).json();
-            } catch (e) {
-                data = await hooman.get(urlReal[index].code.replace("embed", "check"));
-                res = JSON.parse(data.body)
-            }
+
+            let options = { parse: true }
+            res = await homgot(urlReal[index].code.replace("embed", "check"), options);
+
             urlReal[index].code = res.file || null
             urlReal[index].direct = true
         } else {
@@ -338,7 +329,8 @@ const structureThemes = async (body, indv, task) => {
         for (let i = 0; i <= body.length - 1; i++) {
 
             if (indv === true) {
-                data = await html(`${BASE_THEMEMOE}themes/${body[i]}`).json();
+                let options = { parse: true }
+                data = await homgot(`${BASE_THEMEMOE}themes/${body[i]}`, options);
                 themes = await getThemes(data[0].themes)
             } else {
                 data = body
@@ -427,19 +419,44 @@ const getThemes = async (themes) => {
 };
 
 const getAnimes = async () => {
+    let options = { parse: true }
+    return await homgot(`${BASE_ANIMEFLV}api/animes/list`, options);
+};
 
-    let res
-    let data
 
-    try {
-        data = await html(`${BASE_ANIMEFLV}api/animes/list`).json();
-    } catch (error) {
-        res = await hooman.get(`${BASE_ANIMEFLV}api/animes/list`)
-        data = JSON.parse(res.body);
+const getDirectory = async () => {
+
+    let $
+    let promises = []
+
+    let options = { scrapy: true }
+    $ = await homgot(`${SEARCH_URL}`, options);
+    const lastPage = $('body div.Wrapper div.Container main div.NvCnAnm ul li a')[11].children[0].data
+
+    for (let i = 1; i <= lastPage; i++) {
+
+        let options = { scrapy: true }
+        $ = await homgot(`${SEARCH_DIRECTORY}${i}`, options);
+
+        $('div.Container ul.ListAnimes li article').each((index, element) => {
+            const $element = $(element);
+            const id = $element.find('div.Description a.Button').attr('href').slice(1);
+            const title = $element.find('a h3').text();
+            let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
+            const type = $element.find('div.Description p span.Type').text();
+
+            promises.push(helper().then(async () => ({
+                id: id || null,
+                title: title || null,
+                type: type || null,
+                image: await imageUrlToBase64(poster) || null
+            })));
+
+        })
+
     }
 
-    return data;
-
+    return Promise.all(promises);
 };
 
 module.exports = {
@@ -454,5 +471,6 @@ module.exports = {
     structureThemes,
     getThemes,
     getAnimes,
+    getDirectory,
     helper
 }

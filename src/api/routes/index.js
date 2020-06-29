@@ -61,6 +61,23 @@ router.get('/allAnimes' , (req, res) =>{
 
 });
 
+router.get('/allDirectory' , (req, res) =>{
+
+    api.getAllDirectory()
+        .then(directory =>{
+            if (directory.length > 0) {
+                res.status(200).json({
+                    directory
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 router.get('/anitakume' , (req, res) =>{
 
     api.getAnitakume()
