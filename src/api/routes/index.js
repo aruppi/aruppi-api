@@ -461,4 +461,22 @@ router.get('/artists/:id?', (req, res) =>{
 
 });
 
+router.get('/getByGenres/:genre/:order/:page?' , (req , res) =>{
+    let genre = req.params.genre;
+    let order = req.params.order;
+    let page = req.params.page;
+    api.getAnimeGenres(genre, order , page)
+        .then(animes =>{
+            if (animes.length > 0) {
+                res.status(200).json({
+                    animes
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+});
+
 module.exports = router;

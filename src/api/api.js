@@ -20,7 +20,7 @@ const {
 } = require('../utils/index');
 
 const {
-  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE
+  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE, GENRES_URL
 } = require('./urls');
 
 const schedule = async (day) =>{
@@ -467,6 +467,45 @@ const getArtist = async (id) => {
 
 };
 
+const getAnimeGenres = async(genre, order, page) => {
+
+  let $
+  let promises = []
+  let options = { scrapy: true }
+
+  if (page !== undefined) {
+    $ = await homgot(`${GENRES_URL}genre%5B%5D=${genre}&order=${order}&page=${page}`,options)
+  } else {
+    $ = await homgot(`${GENRES_URL}genre%5B%5D=${genre}&order=${order}`,options)
+  }
+
+
+  $('div.Container ul.ListAnimes li article').each((index , element) =>{
+    const $element = $(element);
+    const id = $element.find('div.Description a.Button').attr('href').slice(1);
+    const title = $element.find('a h3').text();
+    const poster = $element.find('a div.Image figure img').attr('src');
+    const banner = poster.replace('covers' , 'banners').trim();
+    const type = $element.find('div.Description p span.Type').text();
+    const synopsis = $element.find('div.Description p').eq(1).text().trim();
+    const rating = $element.find('div.Description p span.Vts').text();
+
+    promises.push(helper().then(async () => ({
+      id: id || null,
+      title: title || null,
+      poster: await imageUrlToBase64(poster) || null,
+      banner: banner || null,
+      synopsis: synopsis || null,
+      type: type || null,
+      rating: rating || null
+    })))
+
+  })
+
+  return Promise.all(promises);
+
+};
+
 module.exports = {
   schedule,
   top,
@@ -488,5 +527,6 @@ module.exports = {
   getOpAndEd,
   getThemesSeason,
   getRandomTheme,
-  getArtist
+  getArtist,
+  getAnimeGenres
 };
