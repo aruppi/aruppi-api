@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
   res.json({
     message: 'Aruppi API - 🎏',
     author: 'Jéluchu',
-    version: '2.4.0',
+    version: '2.5.0',
     credits: 'The bitch loves APIs that offers data to Aruppi App',
     entries: [
       {
@@ -32,8 +32,9 @@ router.get('/', (req, res) => {
         'Images': '/api/v2/images/:query',
         'Videos': '/api/v2/videos/:channelId',
         'Radios': '/api/v2/radio',
+        'All Themes': '/api/v2/allThemes',
         'Themes': '/api/v2/themes/:title',
-        'Season Themes': '/api/v2/themeSeason/:year/:season?',
+        'Year Themes': '/api/v2/themesYear/:year?',
         'Random Theme': '/api/v2/randomTheme',
         'Artists Theme': '/api/v2/artists/:id?'
       }

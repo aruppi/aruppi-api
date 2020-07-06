@@ -19,8 +19,11 @@ const {
   helper
 } = require('../utils/index');
 
+const ThemeParser = require('../utils/animetheme');
+const parserThemes = new ThemeParser()
+
 const {
-  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE, GENRES_URL
+  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, GENRES_URL
 } = require('./urls');
 
 const schedule = async (day) =>{
@@ -394,75 +397,46 @@ const getRadioStations = async () => {
 }
 
 const getOpAndEd = async (title) => {
-
-  let data
-
-  const special = [
-    { title: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen', code: 37999 },
-    { title: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen 2nd Season', code: 40591 },
-    { title: 'Princess Connect! Re:Dive', code: 39292 },
-    { title: 'Shachou, Battle no Jikan Desu!', code: 40783 }
-  ];
-
-  for (let name in special) {
-    if (title === special[name].title) {
-      data = JSON.parse("[" + special[name].code + "]")
-      break;
-    }
-  }
-
-  if (data === undefined) {
-    let options = { parse: true }
-    data = await homgot(`${BASE_THEMEMOE}anime/search/${title}`, options);
-  }
-
-  return await structureThemes(data, true, 0)
+  let data = await parserThemes.serie(title)
+  return await structureThemes(data, true)
 };
 
-const getThemesSeason = async (year, season) => {
+const getThemesYear = async (year) => {
+  let data = []
 
-  let data
-  let options = { parse: true }
-
-  if (season === undefined) {
-    data = await homgot(`${BASE_THEMEMOE}seasons/${year}`, options);
+  if (year === undefined) {
+    return await parserThemes.allYears();
   } else {
-    data = await homgot(`${BASE_THEMEMOE}seasons/${year}/${season}`, options);
+    data = await parserThemes.year(year)
+    return await structureThemes(data, false)
   }
-
-  return await structureThemes(data, false, 0)
 
 };
 
 const getRandomTheme = async () => {
-  let options = { parse: true }
-  const data = await homgot(`${BASE_THEMEMOE}roulette`, options);
-  return await structureThemes(data, true)
+
+  let promise = []
+  let data = await parserThemes.random()
+  let random = Math.round(Math.random()*(data.themes.length - 1));
+
+  promise.push({
+    name: data.title,
+    title: data.themes[random].name.split('"')[1] || null,
+    link: data.themes[random].link
+  })
+
+  return promise;
 };
 
 const getArtist = async (id) => {
 
   let data
-  let promises = []
-  let options = { parse: true }
 
   if (id === undefined) {
-
-    data = await homgot(`${BASE_THEMEMOE}artists`, options);
-    data.map(doc => {
-
-      promises.push({
-        id: doc.artistID,
-        name: doc.artistName
-      })
-
-    });
-
-    return promises;
-
+    return await parserThemes.artists();
   } else {
-    data = await homgot(`${BASE_THEMEMOE}artists/${id}`, options);
-    return await structureThemes(data, false, 1)
+    data = await parserThemes.artist(id)
+    return await structureThemes(data, false)
   }
 
 };
@@ -506,6 +480,11 @@ const getAnimeGenres = async(genre, order, page) => {
 
 };
 
+const getAllThemes = async () => {
+  let data = await parserThemes.all()
+  return await structureThemes(data, false)
+};
+
 module.exports = {
   schedule,
   top,
@@ -525,8 +504,9 @@ module.exports = {
   getYoutubeVideos,
   getRadioStations,
   getOpAndEd,
-  getThemesSeason,
+  getThemesYear,
   getRandomTheme,
   getArtist,
-  getAnimeGenres
+  getAnimeGenres,
+  getAllThemes
 };

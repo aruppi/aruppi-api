@@ -1,5 +1,5 @@
 const {
-    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, SEARCH_DIRECTORY, BASE_ARUPPI, BASE_THEMEMOE
+    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, SEARCH_DIRECTORY, BASE_ARUPPI
 } = require('../api/urls');
 
 const {
@@ -319,58 +319,33 @@ const obtainPreviewNews = (encoded) => {
     return image;
 }
 
-const structureThemes = async (body, indv, task) => {
+const structureThemes = async (body, indv) => {
 
     const promises = []
     let themes
-    let data
 
-    if (task === 0) {
-        for (let i = 0; i <= body.length - 1; i++) {
-
-            if (indv === true) {
-                let options = { parse: true }
-                data = await homgot(`${BASE_THEMEMOE}themes/${body[i]}`, options);
-                themes = await getThemes(data[0].themes)
-            } else {
-                data = body
-                themes = await getThemes(body[0].themes)
-            }
-
-            data.map(doc => {
-
-                promises.push({
-                    title: doc.name,
-                    season: doc.season,
-                    year: doc.year,
-                    themes: themes,
-                });
-
-            });
-        }
-    } else if (task === 1) {
-
-        data = body
-        themes = await getHeaderTheme(data.themes)
+    if (indv === true) {
+        themes = await getThemesData(body.themes)
 
         promises.push({
-            title: data.artistName,
-            season: data.season,
-            year: data.year,
-            series: themes,
+            title: body.title,
+            year: body.year,
+            themes: themes,
         });
 
     } else {
 
-        data = body
-        themes = await getThemes(data.themes)
+        for (let i = 0; i <= body.length - 1; i++) {
 
-        promises.push({
-            title: data.name,
-            season: data.season,
-            year: data.year,
-            themes: themes,
-        });
+            themes = await getThemesData(body[i].themes)
+
+            promises.push({
+                title: body[i].title,
+                year: body[i].year,
+                themes: themes,
+            });
+
+        }
 
     }
 
@@ -378,20 +353,18 @@ const structureThemes = async (body, indv, task) => {
 
 };
 
-const getHeaderTheme = async (series) => {
+
+const getThemesData = async (themes) => {
 
     let promises = []
-    let data
 
-    for (let i = 0; i <= series.length - 1; i++) {
-
-        data = await getThemes(series[i].themes)
+    for (let i = 0; i <= themes.length - 1; i++) {
 
         promises.push({
-            title: series[i].name,
-            season: series[i].season,
-            year: series[i].year,
-            themes: data,
+            title: themes[i].name.split('"')[1] || 'Remasterización',
+            type: themes[i].name.split('"')[0] || 'OP/ED',
+            episodes: themes[i].episodes || null,
+            video: themes[i].link
         });
 
     }

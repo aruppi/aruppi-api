@@ -386,6 +386,24 @@ router.get('/radio' , (req, res) =>{
 
 });
 
+router.get('/allThemes', (req, res) =>{
+
+    api.getAllThemes()
+        .then(themes =>{
+            if (themes.length > 0) {
+                res.status(200).json({
+                    themes
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
+
 router.get('/themes/:title' , (req, res) =>{
 
     let title = req.params.title;
@@ -405,12 +423,12 @@ router.get('/themes/:title' , (req, res) =>{
 
 });
 
-router.get('/themeSeason/:year/:season?', (req, res) =>{
+router.get('/themesYear/:year?', (req, res) =>{
 
     let year = req.params.year;
     let season = req.params.season
 
-    api.getThemesSeason(year, season)
+    api.getThemesYear(year, season)
         .then(themes =>{
             if (themes.length > 0) {
                 res.status(200).json({

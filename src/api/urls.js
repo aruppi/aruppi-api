@@ -14,5 +14,5 @@ module.exports = {
   SEARCH_DIRECTORY: 'https://animeflv.net/browse?order=title&page=',
   BASE_EPISODE_IMG_URL: 'https://cdn.animeflv.net/screenshots/',
   BASE_QWANT: 'https://api.qwant.com/search/images?',
-  BASE_THEMEMOE: 'https://themes.moe/api/'
+  REDDIT_ANIMETHEMES: 'https://reddit.com/r/AnimeThemes/wiki/'
 };
