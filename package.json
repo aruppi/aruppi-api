@@ -1,6 +1,6 @@
 {
   "name": "aruppi",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "Aruppi is a custom API to obtain data from the Japanese culture for the mobile app",
   "main": "./src/api/api.js",
   "scripts": {
@@ -51,6 +51,7 @@
     "helmet": "^3.23.3",
     "hooman": "^1.2.5",
     "rss-to-json": "^1.1.1",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "node-fetch": "^2.6.0"
   }
 }

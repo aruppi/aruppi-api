@@ -1,10 +1,184 @@
 const {
-    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, SEARCH_DIRECTORY, BASE_ARUPPI
+    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, SEARCH_URL, SEARCH_DIRECTORY, BASE_ARUPPI, BASE_JKANIME, JKANIME_URL
 } = require('../api/urls');
 
 const {
     homgot
 } = require('../api/apiCall');
+
+
+function btoa(str) {
+    let buffer;
+    if (str instanceof Buffer) {
+        buffer = str;
+    }
+    else {
+        buffer = Buffer.from(str.toString(), 'binary');
+    }
+    return buffer.toString('base64');
+}
+
+global.btoa = btoa;
+
+async function videoServersJK(id) {
+
+    let options = { scrapy: true }
+    const $ =  await homgot(`${BASE_JKANIME}${id}`, options);
+
+    const scripts = $('script');
+    const totalEps = $('div#container div#reproductor-box div ul li').length;
+    const serverNames = [];
+    let servers = [];
+
+    $('div#container div#reproductor-box div ul li').each((index , element) =>{
+        const $element = $(element);
+        const serverName = $element.find('a').text();
+        serverNames.push(serverName);
+    })
+
+    for(let i = 0; i < scripts.length; i++){
+        const $script = $(scripts[i]);
+        const contents = $script.html();
+        try{
+
+            if ((contents || '').includes('var video = [];')) {
+                Array.from({length: totalEps} , (v , k) =>{
+                    let index = Number(k + 1);
+                    let videoPageURL = contents.split(`video[${index}] = \'<iframe class="player_conte" src="`)[1].split('"')[0];
+                    servers.push({iframe: videoPageURL});
+                });
+            }
+        }catch(err) {
+            return null;
+        }
+    }
+    let serverList = [];
+    let serverTempList = [];
+    for(const [key , value] of Object.entries(servers)) {
+        let video = await getVideoURL(value.iframe)
+        serverTempList.push(video);
+    }
+    Array.from({length: serverTempList.length} , (v , k) =>{
+        let name = serverNames[k];
+        let video = serverTempList[k];
+        serverList.push({server: name, video: video});
+    });
+    serverList = serverList.filter(function( obj ) {
+        return obj.server !== 'Xtreme S';
+    });
+
+    return await Promise.all(serverList);
+}
+
+async function getVideoURL(url) {
+
+    let options = { scrapy: true }
+    const $ =  await homgot(url, options);
+
+    const video = $('video');
+    if(video.length){
+        const src = $(video).find('source').attr('src');
+        return src || null;
+    }
+    else{
+
+        const scripts = $('script');
+        const l = global;
+        const ll = String;
+        const $script2 = $(scripts[1]).html();
+        eval($script2);
+        return l.ss || null;
+    }
+}
+
+
+const jkanimeInfo = async (id) => {
+
+    let poster = ""
+    let banner = ""
+    let synopsis = ""
+    let rating = ""
+    let debut = ""
+    let type = ""
+    let $
+
+    try {
+
+        let options = { scrapy: true }
+        $ = await homgot(`${BASE_JKANIME}${id}`, options);
+
+        const animeExtraInfo = [];
+        const genres = [];
+        let listByEps;
+
+        poster = $('div[id="container"] div.serie-info div.cap-portada')[0].children[1].attribs.src;
+        banner = $('div[id="container"] div.serie-info div.cap-portada')[0].children[1].attribs.src;
+        synopsis = $('div[id="container"] div.serie-info div.sinopsis-box p')[0].children[1].data;
+        rating = "Sin calificación"
+        debut = $('div[id="container"] div.serie-info div.info-content div')[6].children[3].children[0].children[0].data;
+        type = $('div[id="container"] div.serie-info div.info-content div')[0].children[3].children[0].data
+
+        animeExtraInfo.push({
+            poster: poster,
+            banner: banner,
+            synopsis: synopsis,
+            rating: rating,
+            debut: debut,
+            type: type,
+        })
+
+        let rawGenres = $('div[id="container"] div.serie-info div.info-content div')[1].children[3].children
+        for (let i = 0; i <= rawGenres.length -1; i++) {
+            if (rawGenres[i].name === 'a') {
+                const genre = rawGenres[i].children[0].data
+                genres.push(genre)
+            }
+        }
+
+        let nextEpisodeDate
+        let rawNextEpisode = $('div[id="container"] div.left-container div[id="proxep"] p')[0]
+        if (rawNextEpisode === undefined) {
+            nextEpisodeDate = null
+        } else {
+            if (rawNextEpisode.children[1].data === '  ') {
+                nextEpisodeDate = null
+            } else {
+                nextEpisodeDate = rawNextEpisode
+            }
+        }
+
+        const eps_temp_list = [];
+        let episodes_aired = '';
+        $('div#container div.left-container div.navigation a').each(async(index , element) => {
+            const $element = $(element);
+            const total_eps = $element.text();
+            eps_temp_list.push(total_eps);
+        })
+        try{episodes_aired = eps_temp_list[0].split('-')[1].trim();}catch(err){}
+
+        const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
+        for (let i = 0; i <= episodes_aired; i++) {
+                let episode = i;
+                let animeId = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src.split('/')[7].split('.jpg')[0];
+                let imagePreview = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src
+                let link = `${animeId}/${episode}`
+
+                animeListEps.push({
+                    episode: episode,
+                    id: link,
+                    imagePreview: imagePreview
+                })
+        }
+
+        listByEps = animeListEps;
+
+        return {listByEps, genres, animeExtraInfo};
+
+    } catch (err) {
+        console.error(err)
+    }
+
+};
 
 const animeflvInfo = async (id, index) => {
 
@@ -205,6 +379,13 @@ const animeExtraInfo = async (title) => {
             'default': 'Sin emisión'
         };
 
+        let broadcast
+        if (doc.broadcast === null) {
+            broadcast = null
+        } else {
+            broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
+        }
+
         promises.push({
             titleJapanese: doc.title_japanese,
             source: doc.source,
@@ -215,7 +396,7 @@ const animeExtraInfo = async (title) => {
             },
             duration: doc.duration.split('per')[0],
             rank: doc.rank,
-            broadcast: airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()],
+            broadcast: broadcast,
             producers: doc.producers.map(x => x.name) || null,
             licensors: doc.licensors.map(x => x.name) || null,
             studios: doc.studios.map(x => x.name) || null,
@@ -238,23 +419,56 @@ const searchAnime = async (query) => {
     let $
     let promises = []
 
-    let options = { scrapy: true }
-    $ = await homgot(`${SEARCH_URL}${query}`, options);
-    $('div.Container ul.ListAnimes li article').each((index, element) => {
-        const $element = $(element);
-        const id = $element.find('div.Description a.Button').attr('href').slice(1);
-        const title = $element.find('a h3').text();
-        let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
-        const type = $element.find('div.Description p span.Type').text();
+    const jkAnimeTitles = [
+        { title: 'BNA', search: 'BNA'},
+        { title: 'The God of High School', search: 'The god' }
+    ];
 
-        promises.push(helper().then(async () => ({
-            id: id || null,
-            title: title || null,
-            type: type || null,
-            image: await imageUrlToBase64(poster) || null
-        })));
+    let jkanime = false
+    let jkanimeName
+    for (let name in jkAnimeTitles) {
+        if (query === jkAnimeTitles[name].title) {
+            jkanime = true
+            jkanimeName = jkAnimeTitles[name].search
+        }
+    }
 
-    })
+    if (jkanime === false) {
+        let options = { scrapy: true }
+        $ = await homgot(`${SEARCH_URL}${query}`, options);
+        $('div.Container ul.ListAnimes li article').each((index, element) => {
+            const $element = $(element);
+            const id = $element.find('div.Description a.Button').attr('href').slice(1);
+            const title = $element.find('a h3').text();
+            let poster = $element.find('a div.Image figure img').attr('src') || $element.find('a div.Image figure img').attr('data-cfsrc');
+            const type = $element.find('div.Description p span.Type').text();
+
+            promises.push(helper().then(async () => ({
+                id: id || null,
+                title: title || null,
+                type: type || null,
+                image: await imageUrlToBase64(poster) || null
+            })));
+
+        })
+    } else {
+
+        let options = { scrapy: true }
+        $ = await homgot(`${JKANIME_URL}${jkanimeName}`, options);
+
+        $('.portada-box').each(function (index, element) {
+            const $element = $(element);
+            const title = $element.find('h2.portada-title a').attr('title');
+            const id = $element.find('a.let-link').attr('href').split('/')[3];
+            const poster = $element.find('a').children('img').attr('src');
+            promises.push(helper().then(async () => ({
+                id: id || null,
+                title: title || null,
+                type: 'Anime',
+                image: await imageUrlToBase64(poster) || null
+            })))
+        });
+    }
 
     return Promise.all(promises);
 
@@ -433,6 +647,7 @@ const getDirectory = async () => {
 };
 
 module.exports = {
+    jkanimeInfo,
     animeflvInfo,
     getAnimeCharacters,
     getAnimeVideoPromo,
@@ -445,5 +660,6 @@ module.exports = {
     getThemes,
     getAnimes,
     getDirectory,
-    helper
+    helper,
+    videoServersJK
 }

@@ -1,6 +1,7 @@
 module.exports = {
   BASE_ARUPPI: 'https://aruppi.jeluchu.xyz/',
   BASE_ANIMEFLV: 'https://animeflv.net/',
+  BASE_JKANIME: 'https://jkanime.net/',
   BASE_ANIMEFLV_JELU: 'https://aruppi.jeluchu.xyz/apis/animeflv/v1/',
   BASE_YOUTUBE: 'https://aruppi.jeluchu.xyz/apis/youtube/v3/search?channelId=',
   BASE_JIKAN: 'https://aruppi.jeluchu.xyz/apis/jikan/v3/',
@@ -10,6 +11,7 @@ module.exports = {
   BASE_RAMENPARADOS: 'https://ramenparados.com/category/noticias/anime/feed/',
   BASE_CRUNCHYROLL: 'https://www.crunchyroll.com/newsrss?lang=esES',
   SEARCH_URL: 'https://animeflv.net/browse?q=',
+  JKANIME_URL: 'https://jkanime.net/buscar/',
   GENRES_URL: 'https://animeflv.net/browse?',
   SEARCH_DIRECTORY: 'https://animeflv.net/browse?order=title&page=',
   BASE_EPISODE_IMG_URL: 'https://cdn.animeflv.net/screenshots/',
