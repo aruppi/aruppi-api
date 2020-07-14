@@ -481,7 +481,6 @@ const searchAnime = async (query) => {
 const transformUrlServer = async (urlReal) => {
 
     let res
-    let data
     const promises = []
 
     for (const index in urlReal) {
@@ -492,8 +491,6 @@ const transformUrlServer = async (urlReal) => {
 
             urlReal[index].code = res.file || null
             urlReal[index].direct = true
-        } else {
-            urlReal[index].direct = false
         }
     }
 
@@ -501,7 +498,7 @@ const transformUrlServer = async (urlReal) => {
         promises.push({
             id: doc.title.toLowerCase(),
             url: doc.code,
-            direct: doc.direct
+            direct: doc.direct || false
         });
     });
 
@@ -665,5 +662,6 @@ module.exports = {
     getAnimes,
     getDirectory,
     helper,
+    fixURL,
     videoServersJK
 }
