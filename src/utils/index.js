@@ -61,10 +61,14 @@ async function videoServersJK(id) {
     Array.from({length: serverTempList.length} , (v , k) =>{
         let name = serverNames[k];
         let video = serverTempList[k];
-        serverList.push({server: name, video: video});
+        serverList.push({
+            id: name.toLowerCase(),
+            url: video,
+            direct: true
+        });
     });
     serverList = serverList.filter(function( obj ) {
-        return obj.server !== 'Xtreme S';
+        return obj.id !== 'xtreme s';
     });
 
     return await Promise.all(serverList);
