@@ -161,7 +161,7 @@ const jkanimeInfo = async (id) => {
         try{episodes_aired = eps_temp_list[0].split('-')[1].trim();}catch(err){}
 
         const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
-        for (let i = 0; i <= episodes_aired; i++) {
+        for (let i = 1; i <= episodes_aired; i++) {
                 let episode = i;
                 let animeId = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src.split('/')[7].split('.jpg')[0];
                 let imagePreview = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src
