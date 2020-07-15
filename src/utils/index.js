@@ -662,6 +662,5 @@ module.exports = {
     getAnimes,
     getDirectory,
     helper,
-    fixURL,
     videoServersJK
 }
