@@ -95,7 +95,6 @@ async function getVideoURL(url) {
     }
 }
 
-
 const jkanimeInfo = async (id) => {
 
     let poster = ""
@@ -183,6 +182,23 @@ const jkanimeInfo = async (id) => {
     }
 
 };
+
+const animeflvGenres = async (id) => {
+
+    const promises = [];
+
+    let options = { scrapy: true }
+    let $ = await homgot(`${BASE_ANIMEFLV}${id}`, options);
+
+    $('main.Main section.WdgtCn nav.Nvgnrs a').each((index, element) => {
+        const $element = $(element);
+        const genre = $element.attr('href').split('=')[1] || null;
+        promises.push(genre);
+    });
+
+    return promises;
+
+}
 
 const animeflvInfo = async (id, index) => {
 
@@ -649,6 +665,7 @@ const getDirectory = async () => {
 
 module.exports = {
     jkanimeInfo,
+    animeflvGenres,
     animeflvInfo,
     getAnimeCharacters,
     getAnimeVideoPromo,

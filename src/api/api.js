@@ -6,6 +6,7 @@ const {
 
 const {
   jkanimeInfo,
+  animeflvGenres,
   animeflvInfo,
   imageUrlToBase64,
   getAnimeCharacters,
@@ -527,14 +528,15 @@ const getAnimeGenres = async(genre, order, page) => {
     const synopsis = $element.find('div.Description p').eq(1).text().trim();
     const rating = $element.find('div.Description p span.Vts').text();
 
-    promises.push(helper().then(async () => ({
+    promises.push(animeflvGenres(id).then(async genres => ({
       id: id || null,
       title: title || null,
       poster: await imageUrlToBase64(poster) || null,
       banner: banner || null,
       synopsis: synopsis || null,
       type: type || null,
-      rating: rating || null
+      rating: rating || null,
+      genres: genres || null
     })))
 
   })
