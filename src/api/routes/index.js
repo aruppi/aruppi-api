@@ -448,6 +448,7 @@ router.get('/randomTheme', (req, res) =>{
     api.getRandomTheme()
         .then(random =>{
             if (random.length > 0) {
+                res.set('Cache-Control', 'no-store');
                 res.status(200).json({
                     random
                 });
