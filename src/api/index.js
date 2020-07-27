@@ -1,13 +1,15 @@
 const express = require('express');
 const routes = require('./routes/index');
+const version = require('./../../package.json').version;
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   res.json({
     message: 'Aruppi API - 🎏',
     author: 'Jéluchu',
-    version: '2.6.4',
+    version: version,
     credits: 'The bitch loves APIs that offers data to Aruppi App',
     entries: [
       {
