@@ -6,7 +6,6 @@ const {
     homgot
 } = require('../api/apiCall');
 
-
 function btoa(str) {
     let buffer;
     if (str instanceof Buffer) {
@@ -26,11 +25,11 @@ async function videoServersJK(id) {
     const $ =  await homgot(`${BASE_JKANIME}${id}`, options);
 
     const scripts = $('script');
-    const totalEps = $('div#container div#reproductor-box div ul li').length;
+    const episodes = $('div#reproductor-box li');
     const serverNames = [];
     let servers = [];
 
-    $('div#container div#reproductor-box div ul li').each((index , element) =>{
+    episodes.each((index , element) =>{
         const $element = $(element);
         const serverName = $element.find('a').text();
         serverNames.push(serverName);
@@ -40,9 +39,8 @@ async function videoServersJK(id) {
         const $script = $(scripts[i]);
         const contents = $script.html();
         try{
-
             if ((contents || '').includes('var video = [];')) {
-                Array.from({length: totalEps} , (v , k) =>{
+                Array.from({length: episodes.length} , (v , k) =>{
                     let index = Number(k + 1);
                     let videoPageURL = contents.split(`video[${index}] = \'<iframe class="player_conte" src="`)[1].split('"')[0];
                     servers.push({iframe: videoPageURL});
@@ -52,24 +50,17 @@ async function videoServersJK(id) {
             return null;
         }
     }
+
     let serverList = [];
-    let serverTempList = [];
-    for(const [key , value] of Object.entries(servers)) {
-        let video = await getVideoURL(value.iframe)
-        serverTempList.push(video);
-    }
-    Array.from({length: serverTempList.length} , (v , k) =>{
-        let name = serverNames[k];
-        let video = serverTempList[k];
+    for(let server in servers) {
         serverList.push({
-            id: name.toLowerCase(),
-            url: video,
+            id: serverNames[server].toLowerCase(),
+            url: await getVideoURL(servers[server].iframe),
             direct: true
         });
-    });
-    serverList = serverList.filter(function( obj ) {
-        return obj.id !== 'xtreme s';
-    });
+    }
+
+    serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka' );
 
     return await Promise.all(serverList);
 }
@@ -304,127 +295,145 @@ const animeflvInfo = async (id, index) => {
 
 const getAnimeCharacters = async (title) => {
 
-    let options = { parse: true }
+    try {
+        let options = { parse: true }
 
-    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
-    const matchAnime = res.results.filter(x => x.title === title);
-    const malId = matchAnime[0].mal_id;
+        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
+        const matchAnime = res.results.filter(x => x.title === title);
+        const malId = matchAnime[0].mal_id;
 
-    if (typeof matchAnime[0].mal_id === 'undefined') return null;
+        if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const data = await homgot(`${BASE_JIKAN}anime/${malId}/characters_staff`, options);
-    let body = data.characters;
+        const data = await homgot(`${BASE_JIKAN}anime/${malId}/characters_staff`, options);
+        let body = data.characters;
 
-    if (typeof body === 'undefined') return null;
+        if (typeof body === 'undefined') return null;
 
-    const charactersId = body.map(doc => {
-        return doc.mal_id
-    })
-    const charactersNames = body.map(doc => {
-        return doc.name;
-    });
-    const charactersImages = body.map(doc => {
-        return doc.image_url
-    });
-
-    let characters = [];
-    Array.from({length: charactersNames.length}, (v, k) => {
-        const id = charactersId[k];
-        let name = charactersNames[k];
-        let characterImg = charactersImages[k];
-        characters.push({
-            id: id,
-            name: name,
-            image: characterImg
+        const charactersId = body.map(doc => {
+            return doc.mal_id
+        })
+        const charactersNames = body.map(doc => {
+            return doc.name;
         });
-    });
+        const charactersImages = body.map(doc => {
+            return doc.image_url
+        });
 
-    return Promise.all(characters);
+        let characters = [];
+        Array.from({length: charactersNames.length}, (v, k) => {
+            const id = charactersId[k];
+            let name = charactersNames[k];
+            let characterImg = charactersImages[k];
+            characters.push({
+                id: id,
+                name: name,
+                image: characterImg
+            });
+        });
+
+        return Promise.all(characters);
+    } catch (e) {
+        console.log(e.message)
+    }
+
 };
 
 const getAnimeVideoPromo = async (title) => {
 
-    let options = { parse: true }
-    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
-    const matchAnime = res.results.filter(x => x.title === title);
-    const malId = matchAnime[0].mal_id;
+    try {
+        let options = { parse: true }
+        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
+        const matchAnime = res.results.filter(x => x.title === title);
+        const malId = matchAnime[0].mal_id;
 
-    if (typeof matchAnime[0].mal_id === 'undefined') return null;
+        if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    const data = await homgot(`${BASE_JIKAN}anime/${malId}/videos`, options);
-    const body = data.promo;
-    const promises = [];
+        const data = await homgot(`${BASE_JIKAN}anime/${malId}/videos`, options);
+        const body = data.promo;
+        const promises = [];
 
-    body.map(doc => {
-        promises.push({
-            title: doc.title,
-            previewImage: doc.image_url,
-            videoURL: doc.video_url
+        body.map(doc => {
+            promises.push({
+                title: doc.title,
+                previewImage: doc.image_url,
+                videoURL: doc.video_url
+            });
         });
-    });
 
-    return Promise.all(promises);
+        return Promise.all(promises);
+    } catch (e) {
+        console.log(e.message)
+    }
+
 };
 
 const animeExtraInfo = async (title) => {
 
-    let options = { parse: true }
-    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
-    const matchAnime = res.results.filter(x => x.title === title);
-    const malId = matchAnime[0].mal_id;
+    try {
 
-    if (typeof matchAnime[0].mal_id === 'undefined') return null;
+        let options = { parse: true }
+        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, options);
+        const matchAnime = res.results.filter(x => x.title === title);
+        const malId = matchAnime[0].mal_id;
 
-    const data = await homgot(`${BASE_JIKAN}anime/${malId}`, options);
-    const body = Array(data);
-    const promises = [];
+        if (typeof matchAnime[0].mal_id === 'undefined') return null;
 
-    body.map(doc => {
+        const data = await homgot(`${BASE_JIKAN}anime/${malId}`, options);
+        const body = Array(data);
+        const promises = [];
 
-        let airDay = {
-            'mondays': 'Lunes',
-            'monday': 'Lunes',
-            'tuesdays': 'Martes',
-            'tuesday': 'Martes',
-            'wednesdays': 'Miércoles',
-            'wednesday': 'Miércoles',
-            'thursdays': 'Jueves',
-            'thursday': 'Jueves',
-            'fridays': 'Viernes',
-            'friday': 'Viernes',
-            'saturdays': 'Sábados',
-            'saturday': 'Sábados',
-            'sundays': 'Domingos',
-            'sunday': 'Domingos',
-            'default': 'Sin emisión'
-        };
+        body.map(doc => {
 
-        let broadcast
-        if (doc.broadcast === null) {
-            broadcast = null
-        } else {
-            broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
-        }
+            let airDay = {
+                'mondays': 'Lunes',
+                'monday': 'Lunes',
+                'tuesdays': 'Martes',
+                'tuesday': 'Martes',
+                'wednesdays': 'Miércoles',
+                'wednesday': 'Miércoles',
+                'thursdays': 'Jueves',
+                'thursday': 'Jueves',
+                'fridays': 'Viernes',
+                'friday': 'Viernes',
+                'saturdays': 'Sábados',
+                'saturday': 'Sábados',
+                'sundays': 'Domingos',
+                'sunday': 'Domingos',
+                'default': 'Sin emisión'
+            };
 
-        promises.push({
-            titleJapanese: doc.title_japanese,
-            source: doc.source,
-            totalEpisodes: doc.episodes,
-            aired: {
-                from: doc.aired.from,
-                to: doc.aired.to
-            },
-            duration: doc.duration.split('per')[0],
-            rank: doc.rank,
-            broadcast: broadcast,
-            producers: doc.producers.map(x => x.name) || null,
-            licensors: doc.licensors.map(x => x.name) || null,
-            studios: doc.studios.map(x => x.name) || null,
-            openingThemes: doc.opening_themes || null,
-            endingThemes: doc.ending_themes || null
+            let broadcast
+            if (doc.broadcast === null) {
+                broadcast = null
+            } else {
+                broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
+            }
+
+            promises.push({
+                titleJapanese: doc.title_japanese,
+                source: doc.source,
+                totalEpisodes: doc.episodes,
+                aired: {
+                    from: doc.aired.from,
+                    to: doc.aired.to
+                },
+                duration: doc.duration.split('per')[0],
+                rank: doc.rank,
+                broadcast: broadcast,
+                producers: doc.producers.map(x => x.name) || null,
+                licensors: doc.licensors.map(x => x.name) || null,
+                studios: doc.studios.map(x => x.name) || null,
+                openingThemes: doc.opening_themes || null,
+                endingThemes: doc.ending_themes || null
+            });
         });
-    });
-    return Promise.all(promises);
+        return Promise.all(promises);
+
+    } catch (e) {
+        console.log(e.message)
+    }
+
+
 };
 
 const imageUrlToBase64 = async (url) => {
@@ -441,7 +450,8 @@ const searchAnime = async (query) => {
 
     const jkAnimeTitles = [
         { title: 'BNA', search: 'BNA'},
-        { title: 'The God of High School', search: 'The god' }
+        { title: 'The God of High School', search: 'The god' },
+        { title: 'Ansatsu Kyoshitsu', search: 'Assassination Classroom' },
     ];
 
     let jkanime = false

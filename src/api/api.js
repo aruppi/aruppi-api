@@ -262,7 +262,14 @@ const getMoreInfo = async (title) =>{
   const jkAnimeTitles = [
     { title: 'The God of High School', id: 'the-god-of-high-school' },
     { title: 'Kami no Tou', id: 'kami-no-tou' },
-    { title: 'BNA', id: 'bna' }
+    { title: 'BNA', id: 'bna' },
+    { title: 'Ansatsu Kyoushitsu (TV)', id: 'ansatsu-kyoushitsu-tv' },
+    { title: 'Ansatsu Kyoushitsu (TV) 2nd Season', id: 'ansatsu-kyoushitsu-tv-2nd-season' }
+  ];
+
+  const jkMyAnimetitles = [
+    { jkanime: 'Ansatsu Kyoushitsu (TV)', myanimelist: 'Ansatsu Kyoushitsu'},
+    { jkanime: 'Ansatsu Kyoushitsu (TV) 2nd Season', myanimelist: 'Ansatsu Kyoushitsu 2nd Season' }
   ];
 
   let jkanime = false
@@ -272,7 +279,18 @@ const getMoreInfo = async (title) =>{
     if (title === jkAnimeTitles[name].title) {
       jkanime = true
       jkanimeID = jkAnimeTitles[name].id
-      jkanimeName = jkAnimeTitles[name].title
+
+      for (let name in jkMyAnimetitles) {
+        if (title === jkMyAnimetitles[name].jkanime || title === jkMyAnimetitles[name].myanimelist) {
+          jkanimeName = jkMyAnimetitles[name].myanimelist
+          position = name
+        }
+      }
+
+      if (jkanimeName === undefined) {
+        jkanimeName = jkAnimeTitles[name].title
+      }
+
     }
   }
 
@@ -281,7 +299,9 @@ const getMoreInfo = async (title) =>{
       { animeflv: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen 2nd Season', myanimelist: 'Kaguya-sama wa Kokurasetai?: Tensai-tachi no Renai Zunousen', alternative: 'Kaguya-sama wa Kokurasetai'},
       { animeflv: 'Naruto Shippuden', myanimelist: 'Naruto: Shippuuden' },
       { animeflv: 'Rock Lee no Seishun Full-Power Ninden', myanimelist: 'Naruto SD: Rock Lee no Seishun Full-Power Ninden' },
-      { animeflv: 'BAKI: dai reitaisai-hen', myanimelist: 'Baki 2nd Season' }
+      { animeflv: 'BAKI: dai reitaisai-hen', myanimelist: 'Baki 2nd Season' },
+      { animeflv: 'Hitoribocchi no ○○ Seikatsu', myanimelist: 'Hitoribocchi no Marumaru Seikatsu' },
+      { animeflv: 'Nekopara (TV)', myanimelist: 'Nekopara' }
     ];
 
     for (let name in titles) {
@@ -291,6 +311,7 @@ const getMoreInfo = async (title) =>{
       }
     }
 
+
     if (seriesTitle === undefined) {
       seriesTitle = title
     }
@@ -298,7 +319,10 @@ const getMoreInfo = async (title) =>{
     await getAllAnimes().then(animes => {
 
       for (const i in animes) {
-        if (animes[i].title.split('\t')[0] === seriesTitle.split('\t')[0] || animes[i].title === `${seriesTitle} (TV)`) {
+        if (animes[i].title.split('\t')[0] === seriesTitle.split('\t')[0] ||
+            animes[i].title === `${seriesTitle} (TV)` ||
+            animes[i].title.includes(seriesTitle.split('○')[0])
+        ) {
           if (animes[i].title.includes('(TV)', 0)) { animeTitle = animes[i].title.split('\t')[0].replace(' (TV)', '') }
           else { animeTitle = animes[i].title.split('\t')[0] }
           animeId = animes[i].id
@@ -384,7 +408,9 @@ const getAnimeServers = async (id) => {
   const jkAnimeIDs = [
     { id: 'the-god-of-high-school' },
     { id: 'kami-no-tou' },
-    { id: 'bna' }
+    { id: 'bna' },
+    { id: 'ansatsu-kyoushitsu-tv' },
+    { id: 'ansatsu-kyoushitsu-tv-2nd-season' }
   ];
 
   let jkanime = false
