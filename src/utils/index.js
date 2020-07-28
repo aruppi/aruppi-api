@@ -535,7 +535,9 @@ const obtainPreviewNews = (encoded) => {
 
     let image;
 
-    if (encoded.includes('<img title=')) {
+    if (encoded.includes('src="https://img1.ak.crunchyroll.com/')) {
+        image = `https://img1.ak.crunchyroll.com/${encoded.split('https://img1.ak.crunchyroll.com/')[1].split('.jpg')[0]}.jpg`
+    } else if (encoded.includes('<img title=')) {
         image = encoded.substring(encoded.indexOf("<img title=\""), encoded.indexOf("\" alt")).split('src=\"')[1]
     } else if (encoded.includes('<img src=')) {
         image = encoded
