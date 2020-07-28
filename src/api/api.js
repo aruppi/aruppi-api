@@ -301,7 +301,8 @@ const getMoreInfo = async (title) =>{
       { animeflv: 'Rock Lee no Seishun Full-Power Ninden', myanimelist: 'Naruto SD: Rock Lee no Seishun Full-Power Ninden' },
       { animeflv: 'BAKI: dai reitaisai-hen', myanimelist: 'Baki 2nd Season' },
       { animeflv: 'Hitoribocchi no ○○ Seikatsu', myanimelist: 'Hitoribocchi no Marumaru Seikatsu' },
-      { animeflv: 'Nekopara (TV)', myanimelist: 'Nekopara' }
+      { animeflv: 'Nekopara (TV)', myanimelist: 'Nekopara' },
+      { animeflv: 'Black Clover (TV)', myanimelist: 'Black Clover' }
     ];
 
     for (let name in titles) {
