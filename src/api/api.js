@@ -19,14 +19,15 @@ const {
   getAnimes,
   getDirectory,
   helper,
-  videoServersJK
+  videoServersJK,
+  getThemes
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
 const parserThemes = new ThemeParser()
 
 const {
-  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, GENRES_URL
+  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, GENRES_URL, BASE_THEMEMOE
 } = require('./urls');
 
 const schedule = async (day) =>{
@@ -507,13 +508,14 @@ const getThemesYear = async (year) => {
 const getRandomTheme = async () => {
 
   let promise = []
-  let data = await parserThemes.random()
-  let random = Math.round(Math.random()*(data.themes.length - 1));
+  let options = { parse: true }
+  const data = await homgot(`${BASE_THEMEMOE}roulette`, options);
+  let themes = await getThemes(data.themes)
 
   promise.push({
-    name: data.title,
-    title: data.themes[random].name.split('"')[1] || null,
-    link: data.themes[random].link
+    name: data.name,
+    title: themes[0].name,
+    link: themes[0].video
   })
 
   return promise;
