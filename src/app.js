@@ -14,8 +14,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-
-
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-store');
   res.redirect('/api/')

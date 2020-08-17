@@ -25,11 +25,9 @@ router.get('/schedule/:day' , (req, res) =>{
 
 router.get('/top/:type/:subtype/:page' , (req, res) =>{
 
-    let type = req.params.type;
-    let subtype = req.params.subtype;
-    let page = req.params.page;
+    let top = {type: req.params.type, subtype: req.params.subtype, page: req.params.page}
 
-    api.top(type, subtype, page)
+    api.top(top)
         .then(top =>{
             if (top.length > 0) {
                 res.status(200).json({
@@ -121,10 +119,9 @@ router.get('/news' , (req, res) =>{
 
 router.get('/season/:year/:type' , (req, res) =>{
 
-    let year = req.params.year;
-    let type = req.params.type;
+    let season = {year: req.params.year, type: req.params.type}
 
-    api.season(year, type)
+    api.season(season)
         .then(season =>{
             if (season.length > 0) {
                 res.status(200).json({
@@ -192,11 +189,9 @@ router.get('/lastEpisodes' , (req, res) =>{
 
 router.get('/movies/:type/:page' , (req, res) =>{
 
-    let type = {url: 'Movies', prop: 'movies'}
-    let subType = req.params.type;
-    let page = req.params.page;
+    let data = {url: 'Movies', prop: 'movies', type: req.params.type, page: req.params.page }
 
-    api.getSpecials(type, subType, page)
+    api.getSpecials(data)
         .then(movies =>{
             if (movies.length > 0) {
                 res.status(200).json({
@@ -213,11 +208,9 @@ router.get('/movies/:type/:page' , (req, res) =>{
 
 router.get('/ovas/:type/:page' , (req, res) =>{
 
-    let type = {url: 'Ova', prop: 'ova'}
-    let subType = req.params.type;
-    let page = req.params.page;
+    let data = {url: 'Ova', prop: 'ova', type: req.params.type, page: req.params.page }
 
-    api.getSpecials(type, subType, page)
+    api.getSpecials(data)
         .then(ovas =>{
             if (ovas.length > 0) {
                 res.status(200).json({
@@ -234,11 +227,9 @@ router.get('/ovas/:type/:page' , (req, res) =>{
 
 router.get('/specials/:type/:page' , (req, res) =>{
 
-    let type = {url: 'Special', prop: 'special'}
-    let subType = req.params.type;
-    let page = req.params.page;
+    let data = {url: 'Special', prop: 'special', type: req.params.type, page: req.params.page }
 
-    api.getSpecials(type, subType, page)
+    api.getSpecials(data)
         .then(specials =>{
             if (specials.length > 0) {
                 res.status(200).json({
@@ -255,11 +246,9 @@ router.get('/specials/:type/:page' , (req, res) =>{
 
 router.get('/tv/:type/:page' , (req, res) =>{
 
-    let type = {url: 'Tv', prop: 'tv'}
-    let subType = req.params.type;
-    let page = req.params.page;
+    let data = {url: 'Tv', prop: 'tv', type: req.params.type, page: req.params.page }
 
-    api.getSpecials(type, subType, page)
+    api.getSpecials(data)
         .then(tv =>{
             if (tv.length > 0) {
                 res.status(200).json({

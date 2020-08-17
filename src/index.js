@@ -1,8 +1,6 @@
 const app = require('./app');
 const port = process.env.PORT || 5000;
-const addr = isNaN(port) ?
-  '' :
-  (process.env.ADDR || '0.0.0.0');
+const addr = isNaN(port) ? '' : (process.env.ADDR || '0.0.0.0');
 
 server = app.listen(port, addr, () => {
   /* eslint-disable no-console */
@@ -11,7 +9,7 @@ server = app.listen(port, addr, () => {
 });
 
 function shutdown() {
-  server.close(); // socket file is automatically removed here
+  server.close();
   process.exit();
 }
 
