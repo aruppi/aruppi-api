@@ -1,4 +1,4 @@
-# **Aruppi API** (v2.7.1)
+# **Aruppi API** (v3.0.0)
 
 > This API has everything about Japan, from anime, music, radio, images, videos ... to japanese culture 
 >
@@ -68,6 +68,12 @@ But if you need to see the code or the operation of the old version you can do i
 
 - [Aruppi API GitHub (v1) [Deprecated]](https://github.com/aruppi/aruppi-api-v1)
 - [Aruppi API Custom Link(v1) [Deprecated]](https://aruppi.herokuapp.com/api/Aruppi/)
+
+## Countdown to deprecation of v2 API
+
+Aruppi has grown since it was launched and we need to continue improving the application along with the services to be able to give new features.
+
+At this time version 2.6.8 will remain functional until Aruppi App users fully migrate to version 1.5.0 of the app
 
 ## **:handshake: Contributing**
 

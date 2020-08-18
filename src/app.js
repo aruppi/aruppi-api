@@ -7,6 +7,8 @@ const version = require('./../package.json').version;
 const middlewares = require('./middlewares/index').middleware;
 const api = require('./api');
 
+const api_legacy = require('./v2/api');
+
 const app = express();
 
 app.use(helmet());
@@ -37,7 +39,8 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
-app.use('/api/v2', api);
+app.use('/api/v2', api_legacy);
+app.use('/api/v3', api);
 
 app.use(middlewares);
 

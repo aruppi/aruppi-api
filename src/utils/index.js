@@ -429,7 +429,6 @@ const getThemes = async (themes) => {
         name: doc.themeName,
         type: doc.themeType,
         video: doc.mirror.mirrorURL
-            `${BASE_ANIMEFLV}anime/${id}`
     }));
 
 };
