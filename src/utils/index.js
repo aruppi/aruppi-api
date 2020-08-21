@@ -134,24 +134,54 @@ const animeflvInfo = async (id) => {
     let $ = await homgot(`${BASE_ANIMEFLV}anime/${id}`, { scrapy: true });
     let scripts = $('script').toArray();
 
-    for (const pata in scripts) {
-        if (scripts[pata].children.length > 0) {
-            if (scripts[pata].children[0].data.includes('var episodes')){
+    const anime_info_ids = [];
+    const anime_eps_data = [];
 
-                let scriptInnerHTML = scripts[pata].children[0].data.trim()
-                const startIndex = scriptInnerHTML.indexOf('var episodes') + 'var episodes'.length
-                const endIndex = scriptInnerHTML.indexOf(';', startIndex)
-
-                const episodesJSON = JSON.parse(scriptInnerHTML.substring(startIndex, endIndex).split('=')[1].trim())
-                return episodesJSON.map(item => ({
-                    index: item[0],
-                    id: `${item[1]}/${id}-${item[0]}`,
-                }))
-
-            }
+    Array.from({length: scripts.length}, (v, k) => {
+        const $script = $(scripts[k]);
+        const contents = $script.html();
+        if ((contents || '').includes('var anime_info = [')) {
+            let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
+            let dat_anime_info = JSON.parse(anime_info);
+            anime_info_ids.push(dat_anime_info);
         }
+        if ((contents || '').includes('var episodes = [')) {
+            let episodes = contents.split('var episodes = ')[1].split(';')[0];
+            let eps_data = JSON.parse(episodes)
+            anime_eps_data.push(eps_data);
+        }
+    });
+    const animeId = id;
+    let nextEpisodeDate
 
+    if (anime_info_ids.length > 0) {
+        if (anime_info_ids[0].length === 4) {
+            nextEpisodeDate = anime_info_ids[0][3]
+        } else {
+            nextEpisodeDate = null
+        }
     }
+
+    const amimeTempList = [];
+    for (const [key, value] of Object.entries(anime_eps_data)) {
+        let episode = anime_eps_data[key].map(x => x[0]);
+        let episodeId = anime_eps_data[key].map(x => x[1]);
+        amimeTempList.push(episode, episodeId);
+    }
+    const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
+    Array.from({length: amimeTempList[1].length}, (v, k) => {
+        let data = amimeTempList.map(x => x[k]);
+        let episode = data[0];
+        let id = data[1];
+        let link = `${id}/${animeId}-${episode}`
+
+        animeListEps.push({
+            episode: episode,
+            id: link,
+        })
+    })
+
+    return animeListEps
 
 };
 
