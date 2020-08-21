@@ -449,7 +449,7 @@ const getThemesData = async (themes) => {
 
     }
 
-    return promises;
+    return promises.filter(x => x.title !== 'Remasterización');
 
 };
 
