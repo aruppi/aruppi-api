@@ -183,7 +183,8 @@ const laterSeasons = async () =>{
 
   return data.anime.map(doc =>({
       title: doc.title,
-      image: doc.image_url
+      image: doc.image_url,
+      malink: doc.url
   }));
 
 };
