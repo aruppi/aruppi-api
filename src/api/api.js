@@ -25,7 +25,7 @@ const ThemeParser = require('../utils/animetheme');
 const parserThemes = new ThemeParser()
 
 const {
-  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, GENRES_URL, BASE_THEMEMOE, BASE_ANIMEFLV
+  BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, GENRES_URL, BASE_THEMEMOE, BASE_ANIMEFLV, BASE_ARUPPI
 } = require('./urls');
 
 const schedule = async (day) =>{
@@ -379,45 +379,121 @@ const getArtist = async (id) => {
 
 };
 
-const getAnimeGenres = async(genre, order, page) => {
+const getAnimeGenres = async(genres) => {
 
   let $
   let promises = []
 
-  if (page !== undefined) {
-    $ = await homgot(`${GENRES_URL}genre%5B%5D=${genre}&order=${order}&page=${page}`,{ scrapy: true })
+  if (genres.genre === undefined && genres.page === undefined && genres.order === undefined)  {
+    return require('../assets/genres.json');
   } else {
-    $ = await homgot(`${GENRES_URL}genre%5B%5D=${genre}&order=${order}`,{ scrapy: true })
+
+    if (genres.page !== undefined) {
+      $ = await homgot(`${GENRES_URL}genre%5B%5D=${genres.genre}&order=${genres.order}&page=${genres.page}`,{ scrapy: true })
+    } else {
+      $ = await homgot(`${GENRES_URL}genre%5B%5D=${genres.genre}&order=${genres.order}`,{ scrapy: true })
+    }
+
+    $('div.Container ul.ListAnimes li article').each((index , element) =>{
+      const $element = $(element);
+      const id = $element.find('div.Description a.Button').attr('href').slice(1);
+      const title = $element.find('a h3').text();
+      const poster = $element.find('a div.Image figure img').attr('src');
+      const banner = poster.replace('covers' , 'banners').trim();
+      const type = $element.find('div.Description p span.Type').text();
+      const synopsis = $element.find('div.Description p').eq(1).text().trim();
+      const rating = $element.find('div.Description p span.Vts').text();
+
+      promises.push(animeflvGenres(id).then(async genres => ({
+        id: id || null,
+        title: title || null,
+        poster: await imageUrlToBase64(poster) || null,
+        banner: banner || null,
+        synopsis: synopsis || null,
+        type: type || null,
+        rating: rating || null,
+        genres: genres || null
+      })))
+
+    })
+
+    return Promise.all(promises);
+
   }
-
-  $('div.Container ul.ListAnimes li article').each((index , element) =>{
-    const $element = $(element);
-    const id = $element.find('div.Description a.Button').attr('href').slice(1);
-    const title = $element.find('a h3').text();
-    const poster = $element.find('a div.Image figure img').attr('src');
-    const banner = poster.replace('covers' , 'banners').trim();
-    const type = $element.find('div.Description p span.Type').text();
-    const synopsis = $element.find('div.Description p').eq(1).text().trim();
-    const rating = $element.find('div.Description p span.Vts').text();
-
-    promises.push(animeflvGenres(id).then(async genres => ({
-      id: id || null,
-      title: title || null,
-      poster: await imageUrlToBase64(poster) || null,
-      banner: banner || null,
-      synopsis: synopsis || null,
-      type: type || null,
-      rating: rating || null,
-      genres: genres || null
-    })))
-
-  })
-
-  return Promise.all(promises);
 
 };
 
 const getAllThemes = async () => await structureThemes(await parserThemes.all(), false);
+
+const getDestAnimePlatforms = async () => {
+
+  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/top.json`, { parse: true });
+
+  return data.map(doc =>({
+    id: doc.id,
+    name: doc.name,
+    logo: doc.logo
+  }));
+
+};
+
+const getPlatforms = async (id) => {
+
+  let data
+
+  if (id === undefined) {
+
+    data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/typeplatforms.json`, { parse: true });
+
+    return data.map(doc =>({
+      id: doc.id,
+      name: doc.name,
+      comming: doc.comming || false,
+      cover: doc.cover
+    }));
+
+  } else {
+
+    data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
+
+    return data.map(doc =>({
+      id: doc.id,
+      name: doc.name,
+      type: doc.type,
+      logo: doc.logo,
+      cover: doc.cover,
+      link: doc.link
+    }));
+  }
+
+};
+
+const getProfilePlatform = async (id) => {
+
+  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true })
+
+  let channelId = { id: data[0].youtubeId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
+  let videos = await getYoutubeVideos(channelId)
+
+  return data.map(doc =>({
+    id: doc.id,
+    name: doc.name,
+    logo: doc.logo,
+    cover: doc.cover,
+    category: doc.category,
+    description: doc.description,
+    facebook: doc.facebook,
+    twitter: doc.twitter,
+    instagram: doc.instagram,
+    webpage: doc.webpage,
+    simulcast: doc.simulcast,
+    paid: doc.paid,
+    shop: doc.shop,
+    faq: doc.faq,
+    videos: videos
+  }));
+
+};
 
 module.exports = {
   schedule,
@@ -442,5 +518,8 @@ module.exports = {
   getRandomTheme,
   getArtist,
   getAnimeGenres,
-  getAllThemes
+  getAllThemes,
+  getDestAnimePlatforms,
+  getPlatforms,
+  getProfilePlatform
 };

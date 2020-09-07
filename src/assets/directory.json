@@ -9372,7 +9372,7 @@
   {
     "id": "ghost-hound",
     "title": "Ghost Hound",
-    "mal_title": "Ghost Hound",
+    "mal_title": "Shinreigari",
     "poster": "https://aruppi.jeluchu.xyz/res/directory/537.jpg",
     "type": "Anime",
     "genres": [
@@ -21633,7 +21633,7 @@
   {
     "id": "jojos-bizarre-adventure-stardust-crusaders",
     "title": "JoJo's Bizarre Adventure: Stardust Crusaders",
-    "mal_title": "JoJo's Bizarre Adventure: Stardust Crusaders",
+    "mal_title": "JoJo no Kimyou na Bouken Part 3: Stardust Crusaders",
     "poster": "https://aruppi.jeluchu.xyz/res/directory/1257.jpg",
     "type": "Anime",
     "genres": [
@@ -30087,7 +30087,7 @@
   {
     "id": "jojos-bizarre-adventure-stardust-crusaders-2",
     "title": "Jojo's Bizarre Adventure: Stardust Crusaders 2nd Season",
-    "mal_title": "Jojo's Bizarre Adventure: Stardust Crusaders 2nd Season",
+    "mal_title": "JoJo no Kimyou na Bouken Part 3: Stardust Crusaders 2nd Season",
     "poster": "https://aruppi.jeluchu.xyz/res/directory/1752.jpg",
     "type": "Anime",
     "genres": [
@@ -55528,5 +55528,72 @@
     ],
     "state": "Finalizado",
     "description": "El año es 2027, y la ciudad de Kyoto ha experimentado un tremendo avance tecnológico. Dentro de la ciudad vive Naomi Katagaki, un niño socialmente torpe e introvertido que ama los libros, y Ruri Ichigyou, una niña con una personalidad fría que a menudo es contundente con la gente, pero comparte su amor por la lectura. A pesar de tener intereses similares, Naomi teme acercarse a Ruri debido a su naturaleza hostil."
+  },
+  {
+    "id": "devilman-lady",
+    "title": "Devilman Lady",
+    "mal_title": "Devilman Lady",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3278.jpg",
+    "type": "Anime",
+    "score": "3.8",
+    "jkanime": true,
+    "genres": [
+      "Acción",
+      "Drama",
+      "Terror",
+      "Psicológico"
+    ],
+    "state": "Finalizado",
+    "description": "La historia se centra en Jun Fudo, una maestra que es atacada por los demonios mientras acompañaba a un grupo de estudiantes en un viaje escolar. En medio del asalto, junio se transforma en Devil Lady y defiende a los sobrevivientes del ataque inicial, matando a los demonios con su recien adquirida fuerza. Jun, ahora la Devilman Lady, lucha por el bien de la humanidad para protegerlos de las bestias del diablo y sus creaciones."
+  },
+  {
+    "id": "ore-wo-suki-nano-wa-omae-dake-ka-yo-oretachi-no-game-set",
+    "title": "Ore wo Suki nano wa Omae dake ka yo: Oretachi no Game Set",
+    "mal_title": "Ore wo Suki nano wa Omae dake ka yo: Oretachi no Game Set",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3279.jpg",
+    "type": "OVA",
+    "score": "4.8",
+    "jkanime": false,
+    "genres": [
+      "Comedia",
+      "Escolares",
+      "Romance"
+    ],
+    "state": "Finalizado",
+    "description": "La historia se centra en Amatsuyu “Joro” Kisaragi, un chico ordinario de preparatoria que es invitado por dos hermosas chicas a hablar a solas: la primera es su senpai, Sakura “Cosmos” Akino, y la segunda es su amiga de la infancia Aoi “Himawari” Hinata. Esperando que ambas va a confesarle su amor, Joro triunfante asiste a verlas solo para que ellas le confiesen que están enamoradas de su mejor amigo, Taiyou “Sun-chan” Ouga. Joro a regañadientes acepta ayudarlas a atraer su atención, con la esperanza de aprovechar la situación cuando una de las dos pierda, no obstante, la chica ratón de biblioteca Sumireko “Pansy” Sanshokuin se le confiesa, y resulta que su mejor amigo Sun-chan en realidad solo está interesado en ella. ¡Vaya lío!"
+  },
+  {
+    "id": "jewelpet-twinkle",
+    "title": "Jewelpet Twinkle☆",
+    "mal_title": "Jewelpet Twinkle☆",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3280.jpg",
+    "type": "Anime",
+    "score": "4.8",
+    "jkanime": true,
+    "genres": [
+      "Shoujo",
+      "Colegial",
+      "Magia",
+      "Fantasia"
+    ],
+    "state": "En Emisión",
+    "description": "En Jewel Land, Jewelpets, criaturas que tienen la habilidad natural de usar la magia vivían en armonia con las Brujas, asistiendo a la Escuela de Magia y Hechicería para aprender a usar la magia con sus Jewel Eyes. Sin embargo, Ruby, una liebre japonesa blanca cuya magia a veces falla. Pero cuando usó la tarjeta que le dieron los magos, fue enviada al mundo Humano por accidente. En el mundo humano, una chica llamada Akari Sakura la encontró en la playa de camino a la escuela. Al principio, Akari no puede entenderla debido a su idioma de la tierra de las joyas hasta que Ruby tomo un caramelo especial para poder hablar y comprender el lenguaje humano."
+  },
+  {
+    "id": "human-lost-ningen-shikkaku",
+    "title": "Human Lost: Ningen Shikkaku",
+    "mal_title": "Human Lost: Ningen Shikkaku",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3281.jpg",
+    "type": "Película",
+    "score": "4.4",
+    "jkanime": true,
+    "genres": [
+      "Drama",
+      "Historico",
+      "Psicológico",
+      "Seinen"
+    ],
+    "state": "Finalizado",
+    "description": "Tokio, 2036 (año 111 de Showa): una revolucion en el tratamiento médico ha conquistado la muerte ...\nMediante nanomaquinas internas y el \"S.H.E.L.L.\" sistema cuya red los controla, los seres humanos no padecen enfermedades, no requieren tratamiento de lesiones y tienen garantizada una vida útil de 120 años, libre de enfermedades. Sin embargo, este consumado sistema social distorsiona a la nación japonesa de muchas maneras: disparidades económicas no resueltas, decadencia etica resultante de la inmortalidad, grave contaminacion ambiental y el fenomeno \"Human Lost\", en el que las personas mismas, desconectadas de S.H.E.L.L. red, se deforman. Japón se tambalea salvajemente entre dos futuros potenciales: la restauracion de la civilizacion o su destrucción."
   }
 ]

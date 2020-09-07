@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
         'Season': '/api/v3/season/:year/:type',
         'All Seasons': '/api/v3/allSeasons',
         'All Directory': '/api/v3/allDirectory',
-        'Genres': '/api/v3/getByGenres/:genre/:order/:page?',
+        'Genres': '/api/v3/getByGenres/:genre?/:order?/:page?',
         'Futures Seasons': '/api/v3/laterSeasons',
         'LastEpisodes': '/api/v3/lastEpisodes',
         'Movies': '/api/v3/movies/:type/:page',
@@ -38,7 +38,10 @@ router.get('/', (req, res) => {
         'Themes': '/api/v3/themes/:title',
         'Year Themes': '/api/v3/themesYear/:year?',
         'Random Theme': '/api/v3/randomTheme',
-        'Artists Theme': '/api/v3/artists/:id?'
+        'Artists Theme': '/api/v3/artists/:id?',
+        'Famous Platforms': '/api/v3/destAnimePlatforms',
+        'Legal Platforms': '/api/v3/platforms/:id?',
+        'Platforms Details': '/api/v3/profilePlatform:id'
       }
     ]
   });

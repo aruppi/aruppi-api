@@ -469,16 +469,66 @@ router.get('/artists/:id?', (req, res) =>{
 
 });
 
-router.get('/getByGenres/:genre/:order/:page?' , (req , res) =>{
-    let genre = req.params.genre;
-    let order = req.params.order;
-    let page = req.params.page;
-    api.getAnimeGenres(genre, order , page)
+router.get('/getByGenres/:genre?/:order?/:page?' , (req , res) =>{
+
+    let genres = { genre: req.params.genre, order: req.params.order, page: req.params.page  };
+
+    api.getAnimeGenres(genres)
         .then(animes =>{
             if (animes.length > 0) {
                 res.status(200).json({
                     animes
                 });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+});
+
+router.get('/destAnimePlatforms' , (req , res) =>{
+
+    api.getDestAnimePlatforms()
+        .then(destPlatforms =>{
+            if (destPlatforms.length > 0) {
+                res.status(200).json({
+                    destPlatforms
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+});
+
+router.get('/platforms/:id?' , (req , res) =>{
+
+    let id = req.params.id;
+
+    api.getPlatforms(id)
+        .then(platforms =>{
+            if (platforms.length > 0) {
+                res.status(200).json({
+                    platforms
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+});
+
+router.get('/profilePlatform/:id' , (req , res) =>{
+
+    let id = req.params.id;
+
+    api.getProfilePlatform(id)
+        .then(info =>{
+            if (info.length > 0) {
+                res.status(200).json(info[0]);
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
             )
