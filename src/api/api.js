@@ -49,6 +49,8 @@ const top = async (top) =>{
       title: doc.title,
       image: doc.image_url,
       type: doc.type,
+      score: doc.score,
+      link: doc.url,
       startDate: doc.start_date,
       endDate: doc.end_date
   }));
@@ -115,7 +117,7 @@ const getAnitakume = async () =>{
         title: doc.title,
         duration: doc.itunes_duration,
         created: date,
-        mp3: doc.enclosures.map(x => x.url)
+        mp3: doc.enclosures[0].url
       });
     });
 
