@@ -23,7 +23,7 @@ router.get('/schedule/:day' , (req, res) =>{
 
 });
 
-router.get('/top/:type/:subtype/:page' , (req, res) =>{
+router.get('/top/:type/:subtype?/:page' , (req, res) =>{
 
     let top = {type: req.params.type, subtype: req.params.subtype, page: req.params.page}
 

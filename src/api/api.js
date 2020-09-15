@@ -42,18 +42,15 @@ const schedule = async (day) =>{
 
 const top = async (top) =>{
 
-  const data = await homgot(`${BASE_JIKAN}top/${top.type}/${top.page}/${top.subtype}`, { parse: true });
+  let data
 
-  return data.top.map(doc => ({
-      rank: doc.rank,
-      title: doc.title,
-      image: doc.image_url,
-      type: doc.type,
-      score: doc.score,
-      link: doc.url,
-      startDate: doc.start_date,
-      endDate: doc.end_date
-  }));
+  if (top.subtype !== undefined) {
+    data = await homgot(`${BASE_JIKAN}top/${top.type}/${top.page}/${top.subtype}`, { parse: true });
+  } else {
+    data = await homgot(`${BASE_JIKAN}top/${top.type}/${top.page}`, { parse: true });
+  }
+
+  return data.top
 
 };
 
