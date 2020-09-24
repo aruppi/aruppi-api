@@ -339,6 +339,46 @@ const getYoutubeVideos = async (channelId) => {
 
 };
 
+const getSectionYoutubeVideos = async (type) => {
+
+  let data = []
+
+  if (type === 'learn') {
+    data = await homgot(`${BASE_YOUTUBE}UCCyQwSS6m2mVB0-H2FOFJtw&part=snippet,id&order=date&maxResults=50`, { parse: true });
+    return data.items.map(doc =>({
+      title: doc.snippet.title,
+      videoId: doc.id.videoId,
+      thumbDefault: doc.snippet.thumbnails.default.url,
+      thumbMedium: doc.snippet.thumbnails.medium.url,
+      thumbHigh: doc.snippet.thumbnails.high.url
+    }));
+  } else if (type === 'amv') {
+    let yt1 = await homgot(`${BASE_YOUTUBE}UCkTFkshjAsLMKwhAe1uPC1A&part=snippet,id&order=date&maxResults=25`, { parse: true });
+    let yt2 = await homgot(`${BASE_YOUTUBE}UC2cpvlLeowpqnR6bQofwNew&part=snippet,id&order=date&maxResults=25`, { parse: true });
+    data = yt1.items.concat(yt2.items)
+    return data.map(doc =>({
+      title: doc.snippet.title,
+      videoId: doc.id.videoId,
+      thumbDefault: doc.snippet.thumbnails.default.url,
+      thumbMedium: doc.snippet.thumbnails.medium.url,
+      thumbHigh: doc.snippet.thumbnails.high.url
+    }));
+  } else if (type === 'produccer'){
+    let yt1 = await homgot(`${BASE_YOUTUBE}UCkTFkshjAsLMKwhAe1uPC1A&part=snippet,id&order=date&maxResults=25`, { parse: true });
+    let yt2 = await homgot(`${BASE_YOUTUBE}UCwUeTOXP3DD9DIvHttowuSA&part=snippet,id&order=date&maxResults=25`, { parse: true });
+    let yt3 = await homgot(`${BASE_YOUTUBE}UCA8Vj7nN8bzT3rsukD2ypUg&part=snippet,id&order=date&maxResults=25`, { parse: true });
+    data = yt1.items.concat(yt2.items.concat(yt3.items))
+    return data.map(doc =>({
+      title: doc.snippet.title,
+      videoId: doc.id.videoId,
+      thumbDefault: doc.snippet.thumbnails.default.url,
+      thumbMedium: doc.snippet.thumbnails.medium.url,
+      thumbHigh: doc.snippet.thumbnails.high.url
+    }));
+  }
+
+};
+
 const getRadioStations = async () => require('../assets/radiostations.json');
 
 const getOpAndEd = async (title) => await structureThemes(await parserThemes.serie(title), true);
@@ -422,7 +462,7 @@ const getAnimeGenres = async(genres) => {
 
 };
 
-const getAllThemes = async () => await structureThemes(await parserThemes.all(), false);
+const getAllThemes = async () => require('../assets/themes.json');
 
 const getDestAnimePlatforms = async () => {
 
@@ -520,5 +560,6 @@ module.exports = {
   getAllThemes,
   getDestAnimePlatforms,
   getPlatforms,
+  getSectionYoutubeVideos,
   getProfilePlatform
 };

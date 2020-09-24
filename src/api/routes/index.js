@@ -358,6 +358,25 @@ router.get('/videos/:channelId' , (req, res) =>{
 
 });
 
+router.get('/sectionedVideos/:type' , (req, res) =>{
+
+    let type = req.params.type;
+
+    api.getSectionYoutubeVideos(type)
+        .then(videos =>{
+            if (videos.length > 0) {
+                res.status(200).json({
+                    videos
+                });
+            } else (
+                res.status(500).json({ message: 'Aruppi lost in the shell'})
+            )
+        }).catch((err) =>{
+        console.error(err);
+    });
+
+});
+
 router.get('/radio' , (req, res) =>{
 
     api.getRadioStations()

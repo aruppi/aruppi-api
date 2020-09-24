@@ -33,6 +33,7 @@ router.get('/', (req, res) => {
         'Search': '/api/v3/search/:title',
         'Images': '/api/v3/images/:query',
         'Videos': '/api/v3/videos/:channelId',
+        'Type Videos': '/api/v3/sectionedVideos/:type',
         'Radios': '/api/v3/radio',
         'All Themes': '/api/v3/allThemes',
         'Themes': '/api/v3/themes/:title',
