@@ -121,12 +121,10 @@ const jkanimeInfo = async (id) => {
 };
 
 const animeflvGenres = async (id) => {
-
     let $ = await homgot(`${BASE_ANIMEFLV}${id}`, { scrapy: true });
     $('main.Main section.WdgtCn nav.Nvgnrs a').each((index, element) => {
         return $(element).attr('href').split('=')[1] || null;
     });
-
 }
 
 const animeflvInfo = async (id) => {

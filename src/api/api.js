@@ -420,7 +420,7 @@ const getArtist = async (id) => {
 
 const getAnimeGenres = async(genres) => {
 
-  let $
+  let res
   let promises = []
 
   if (genres.genre === undefined && genres.page === undefined && genres.order === undefined)  {
@@ -428,36 +428,29 @@ const getAnimeGenres = async(genres) => {
   } else {
 
     if (genres.page !== undefined) {
-      $ = await homgot(`${GENRES_URL}genre%5B%5D=${genres.genre}&order=${genres.order}&page=${genres.page}`,{ scrapy: true })
+      res = await homgot(`${BASE_ANIMEFLV_JELU}Genres/${genres.genre}/${genres.order}/${genres.page}`,{ parse: true })
     } else {
-      $ = await homgot(`${GENRES_URL}genre%5B%5D=${genres.genre}&order=${genres.order}`,{ scrapy: true })
+      res = await homgot(`${BASE_ANIMEFLV_JELU}Genres/${genres.genre}/${genres.order}/1`,{ parse: true })
     }
 
-    $('div.Container ul.ListAnimes li article').each((index , element) =>{
-      const $element = $(element);
-      const id = $element.find('div.Description a.Button').attr('href').slice(1);
-      const title = $element.find('a h3').text();
-      const poster = $element.find('a div.Image figure img').attr('src');
-      const banner = poster.replace('covers' , 'banners').trim();
-      const type = $element.find('div.Description p span.Type').text();
-      const synopsis = $element.find('div.Description p').eq(1).text().trim();
-      const rating = $element.find('div.Description p span.Vts').text();
+    let data = res.animes
 
-      promises.push(animeflvGenres(id).then(async () => ({
-        id: id || null,
-        title: title || null,
-        genre: genres.genre,
+    for (let i = 0; i <= data.length - 1; i++) {
+      promises.push({
+        id: data[i].id || null,
+        title: data[i].title || null,
+        mention: genres.genre,
         page: genres.page,
-        poster: await imageUrlToBase64(poster) || null,
-        banner: banner || null,
-        synopsis: synopsis || null,
-        type: type || null,
-        rating: rating || null
-      })))
+        poster: data[i].poster || null,
+        banner: data[i].banner || null,
+        synopsis: data[i].synopsis || null,
+        type: data[i].type || null,
+        rating: data[i].rating || null,
+        genre: data[i].genres
+      })
+    }
 
-    })
-
-    return Promise.all(promises);
+    return promises;
 
   }
 
