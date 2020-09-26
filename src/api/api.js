@@ -443,15 +443,16 @@ const getAnimeGenres = async(genres) => {
       const synopsis = $element.find('div.Description p').eq(1).text().trim();
       const rating = $element.find('div.Description p span.Vts').text();
 
-      promises.push(animeflvGenres(id).then(async genres => ({
+      promises.push(animeflvGenres(id).then(async () => ({
         id: id || null,
         title: title || null,
+        genre: genres.genre,
+        page: genres.page,
         poster: await imageUrlToBase64(poster) || null,
         banner: banner || null,
         synopsis: synopsis || null,
         type: type || null,
-        rating: rating || null,
-        genres: genres || null
+        rating: rating || null
       })))
 
     })
