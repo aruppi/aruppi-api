@@ -50,7 +50,16 @@ const top = async (top) =>{
     data = await homgot(`${BASE_JIKAN}top/${top.type}/${top.page}`, { parse: true });
   }
 
-  return data.top
+  return data.top.map(doc =>({
+    rank: doc.rank,
+    title: doc.title,
+    url: doc.url,
+    image_url: doc.image_url,
+    type: top.type,
+    subtype: top.subtype,
+    page: top.page,
+    score: doc.score
+  }));
 
 };
 
@@ -438,7 +447,7 @@ const getAnimeGenres = async(genres) => {
     for (let i = 0; i <= data.length - 1; i++) {
       promises.push({
         id: data[i].id || null,
-        title: data[i].title || null,
+        title: data[i].title.trim() || null,
         mention: genres.genre,
         page: genres.page,
         poster: data[i].poster || null,
