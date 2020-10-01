@@ -17,25 +17,27 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
-  res.set('Cache-Control', 'no-store');
+  // we dont want to enforce the redirect storing, so just check
+  res.set('Cache-Control', 'no-cache,proxy-revalidate');
   res.redirect('/api/')
 });
 
 app.get('/api/', (req, res) => {
+  // dont cache answer 'cause we can check upstream version
   res.set('Cache-Control', 'no-store');
   res.json({
     title: 'Aruppi API',
     version: version,
     source: 'https://github.com/aruppi/aruppi-api',
     description: 'This API has everything about Japan, from anime, music, radio, images, videos... to japanese culture (Spanish Only)',
-    powers: 'https://play.google.com/store/apps/details?id=com.jeluchu.aruppi&hl=es_419'
+    powers: 'https://play.google.com/store/apps/details?id=com.jeluchu.aruppi'
   });
 });
 
 app.get('/api/v1', (req, res) => {
-  res.set('Cache-Control', 'no-store');
+  res.set('Cache-Control', 'no-cache,proxy-revalidate');
   res.json({
-    message: 'Sorry, version v1 is deprecated, if you want to see content go to v2'
+    message: 'Sorry, version v1 is not avaiable, if you want to see content go to v2'
   });
 });
 
