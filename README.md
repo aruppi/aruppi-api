@@ -114,6 +114,16 @@ Feel free to open issues or submit pull-requests to help me improving my work.
         <sub>Anime y Manga</sub>
       </a>
     </td>
+        <td align="center">
+      <a href="https://fmaldonado6.github.io/Akiyama/">
+        <img src="https://raw.githubusercontent.com/Fmaldonado6/Akiyama/master/images/logo/web-logo.png" width="75px;" alt="Jeluchu"/><br />
+          <sub>
+            <b>Akiyama</b>
+          </sub>
+      </a><br/>
+        <sub>Web and App</sub>
+      </a>
+    </td>
   </tr>
 </table>
 
