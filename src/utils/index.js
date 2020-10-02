@@ -21,32 +21,32 @@ global.btoa = btoa;
 
 async function videoServersJK(id) {
 
-    const $ =  await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
+    const $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
 
     const scripts = $('script');
     const episodes = $('div#reproductor-box li');
     const serverNames = [];
     let servers = [];
 
-    episodes.each((index , element) => serverNames.push($(element).find('a').text()))
+    episodes.each((index, element) => serverNames.push($(element).find('a').text()))
 
-    for(let i = 0; i < scripts.length; i++){
+    for (let i = 0; i < scripts.length; i++) {
         const contents = $(scripts[i]).html();
-        try{
+        try {
             if ((contents || '').includes('var video = [];')) {
-                Array.from({length: episodes.length} , (v , k) =>{
+                Array.from({ length: episodes.length }, (v, k) => {
                     let index = Number(k + 1);
                     let videoPageURL = contents.split(`video[${index}] = \'<iframe class="player_conte" src="`)[1].split('"')[0];
-                    servers.push({iframe: videoPageURL});
+                    servers.push({ iframe: videoPageURL });
                 });
             }
-        }catch(err) {
+        } catch (err) {
             return null;
         }
     }
 
     let serverList = [];
-    for(let server in servers) {
+    for (let server in servers) {
         serverList.push({
             id: serverNames[server].toLowerCase(),
             url: await getVideoURL(servers[server].iframe),
@@ -54,7 +54,7 @@ async function videoServersJK(id) {
         });
     }
 
-    serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka' );
+    serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
 
     return await Promise.all(serverList);
 }
@@ -64,11 +64,11 @@ async function getVideoURL(url) {
     const $ = await homgot(url, { scrapy: true });
 
     const video = $('video');
-    if(video.length){
+    if (video.length) {
         const src = $(video).find('source').attr('src');
         return src || null;
     }
-    else{
+    else {
 
         const scripts = $('script');
         const l = global;
@@ -97,14 +97,14 @@ const jkanimeInfo = async (id) => {
 
     const eps_temp_list = [];
     let episodes_aired = '';
-    $('div#container div.left-container div.navigation a').each(async(index , element) => {
+    $('div#container div.left-container div.navigation a').each(async (index, element) => {
         const $element = $(element);
         const total_eps = $element.text();
         eps_temp_list.push(total_eps);
     })
-    try{episodes_aired = eps_temp_list[0].split('-')[1].trim();}catch(err){}
+    try { episodes_aired = eps_temp_list[0].split('-')[1].trim(); } catch (err) { }
 
-    const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
+    const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
     for (let i = 1; i <= episodes_aired; i++) {
         let episode = i;
         let animeId = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src.split('/')[7].split('.jpg')[0];
@@ -135,7 +135,7 @@ const animeflvInfo = async (id) => {
     const anime_info_ids = [];
     const anime_eps_data = [];
 
-    Array.from({length: scripts.length}, (v, k) => {
+    Array.from({ length: scripts.length }, (v, k) => {
         const $script = $(scripts[k]);
         const contents = $script.html();
         if ((contents || '').includes('var anime_info = [')) {
@@ -166,8 +166,8 @@ const animeflvInfo = async (id) => {
         let episodeId = anime_eps_data[key].map(x => x[1]);
         amimeTempList.push(episode, episodeId);
     }
-    const animeListEps = [{nextEpisodeDate: nextEpisodeDate}];
-    Array.from({length: amimeTempList[1].length}, (v, k) => {
+    const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
+    Array.from({ length: amimeTempList[1].length }, (v, k) => {
         let data = amimeTempList.map(x => x[k]);
         let episode = data[0];
         let id = data[1];
@@ -203,7 +203,7 @@ const getAnimeCharacters = async (title) => {
         const charactersImages = body.map(doc => doc.image_url);
 
         let characters = [];
-        Array.from({length: charactersNames.length}, (v, k) => {
+        Array.from({ length: charactersNames.length }, (v, k) => {
             const id = charactersId[k];
             let name = charactersNames[k];
             let characterImg = charactersImages[k];
@@ -322,12 +322,12 @@ const imageUrlToBase64 = async (url) => {
     return img.rawBody.toString('base64');
 };
 
-const helper = async () => {}
+const helper = async () => { }
 
 const searchAnime = async (query) => {
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const res = data.filter(x => x.title.includes(query));
+    let queryLowerCase = query.toLowerCase()
+    const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
 
     return res.map(doc => ({
         id: doc.id || null,
@@ -345,7 +345,7 @@ const transformUrlServer = async (urlReal) => {
             let res = await homgot(data.code.replace("embed", "check"), { parse: true });
             data.code = res.file || null
             data.direct = true
-        } else if (data.server === 'gocdn' ) {
+        } else if (data.server === 'gocdn') {
             if (data.code.split('/player_gocdn.html#')[1] === undefined) {
                 data.code = `https://s1.streamium.xyz/gocdn.php?v=${data.code.split('/gocdn.html#')[1]}`
             } else {
@@ -355,7 +355,7 @@ const transformUrlServer = async (urlReal) => {
         }
     }
 
-    return urlReal.map(doc =>({
+    return urlReal.map(doc => ({
         id: doc.title.toLowerCase(),
         url: doc.code,
         direct: doc.direct || false
@@ -453,7 +453,7 @@ const getThemesData = async (themes) => {
 
 const getThemes = async (themes) => {
 
-    return themes.map(doc =>({
+    return themes.map(doc => ({
         name: doc.themeName,
         type: doc.themeType,
         video: doc.mirror.mirrorURL
