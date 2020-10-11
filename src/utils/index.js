@@ -345,13 +345,6 @@ const transformUrlServer = async (urlReal) => {
             let res = await homgot(data.code.replace("embed", "check"), { parse: true });
             data.code = res.file || null
             data.direct = true
-        } else if (data.server === 'gocdn') {
-            if (data.code.split('/player_gocdn.html#')[1] === undefined) {
-                data.code = `https://s1.streamium.xyz/gocdn.php?v=${data.code.split('/gocdn.html#')[1]}`
-            } else {
-                data.code = `https://s1.streamium.xyz/gocdn.php?v=${data.code.split('/player_gocdn.html#')[1]}`
-            }
-            data.direct = true
         }
     }
 

@@ -517,10 +517,8 @@ const transformUrlServer = async (urlReal) => {
 
             urlReal[index].code = res.file || null
             urlReal[index].direct = true
-        } else if (urlReal[index].server === 'gocdn' ) {
-            urlReal[index].code = `https://s1.streamium.xyz/gocdn.php?v=${urlReal[index].code.split('/player_gocdn.html#')[1]}`
-            urlReal[index].direct = true
         }
+
     }
 
     urlReal.map(doc => {
