@@ -373,7 +373,7 @@ const getSectionYoutubeVideos = async (type) => {
       thumbHigh: doc.snippet.thumbnails.high.url
     }));
   } else if (type === 'produccer'){
-    let yt1 = await homgot(`${BASE_YOUTUBE}UCkTFkshjAsLMKwhAe1uPC1A&part=snippet,id&order=date&maxResults=25`, { parse: true });
+    let yt1 = await homgot(`${BASE_YOUTUBE}UC-5MT-BUxTzkPTWMediyV0w&part=snippet,id&order=date&maxResults=25`, { parse: true });
     let yt2 = await homgot(`${BASE_YOUTUBE}UCwUeTOXP3DD9DIvHttowuSA&part=snippet,id&order=date&maxResults=25`, { parse: true });
     let yt3 = await homgot(`${BASE_YOUTUBE}UCA8Vj7nN8bzT3rsukD2ypUg&part=snippet,id&order=date&maxResults=25`, { parse: true });
     data = yt1.items.concat(yt2.items.concat(yt3.items))
