@@ -12,20 +12,16 @@
     "url": "http://radio.nyan.pw/station/stream"
   },
   {
+    "name": "Radio Japan Next",
+    "url": "http://perseus.shoutca.st:8803/stream"
+  },
+  {
     "name": "Listen Radio (J-Pop)",
     "url": "https://listen.moe/stream"
   },
   {
     "name": "Listen Radio (K-Pop)",
     "url": "https://listen.moe/kpop/stream"
-  },
-  {
-    "name": "Anison FM",
-    "url": "http://pool.anison.fm:9000/AniSonFM(128)"
-  },
-  {
-    "name": "Radio Nami",
-    "url": "https://radionami.com/play_radio.m3u"
   },
   {
     "name": "R/a/dio",
@@ -85,11 +81,11 @@
   },
   {
     "name": "Radio AOI",
-    "url": "http://radioaoi.pl/stream.m3u"
+    "url": "http://54.37.73.148:8000/stream"
   },
   {
     "name": "Radio Touhou",
-    "url": "http://www.touhouradio.com/touhouradio.m3u"
+    "url": "http://www.touhouradio.com/touhouradio"
   },
   {
     "name": "Radio MultiAnime",
@@ -97,27 +93,11 @@
   },
   {
     "name": "Radio Fan World Anime",
-    "url": "http://stream.miradio.in:2199/tunein/fanworld.pls"
-  },
-  {
-    "name": "Radio Japan-A",
-    "url": "http://www.japanaradio.com/free/48kaacp.pls"
-  },
-  {
-    "name": "Radio JPopsuki",
-    "url": "http://jpopsuki.fm:2199/tunein/jpopsuki-stream.pls"
+    "url": "http://184.154.45.106:8461/stream"
   },
   {
     "name": "Radio Hot Mix",
     "url": "http://hotmixradio-japan.ice.infomaniak.ch/hotmixradio-japan-128.mp3"
-  },
-  {
-    "name": "Dada more Radio",
-    "url": "http://dadamore2.ddo.jp:8000/listen.pls"
-  },
-  {
-    "name": "Initial D World",
-    "url": "http://69.163.186.124:9001/listen.aac"
   },
   {
     "name": "Radio Blast",
@@ -130,10 +110,6 @@
   {
     "name": "Power 945",
     "url": "http://38.96.148.28:8754/stream"
-  },
-  {
-    "name": "Japan Fans",
-    "url": "http://159.253.37.137:9984/listen.pls"
   },
   {
     "name": "Radio Aniterasu",
@@ -250,10 +226,6 @@
   {
     "name": "Radio Japanese Music",
     "url": "http://live.japanesemusicid.com:8000/japanesemusic"
-  },
-  {
-    "name": "Radio Japannext",
-    "url": "https://perseus.shoutca.st/tunein/japannex.pls"
   },
   {
     "name": "Radio Akari",

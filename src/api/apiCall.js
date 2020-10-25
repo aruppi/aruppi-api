@@ -1,30 +1,27 @@
-const hooman = require('hooman');
-const { CookieJar } = require('tough-cookie');
-const cookieJar = new CookieJar();
+const got = require('got');
 const cheerio = require('cheerio');
+const { CookieJar} = require('tough-cookie');
+const cookieJar = new CookieJar();
 
 let response
 let data
 
 const homgot = async (url, options) => {
 
-    response = await hooman.get(url, cookieJar);
-
     if (options !== undefined) {
         if (options.scrapy) {
+            response = await got(url, { cookieJar })
             data = await cheerio.load(response.body)
         }
         if (options.parse) {
-            data = JSON.parse(response.body)
+            data = await got(url, { cookieJar }).json()
         }
     } else {
-        data = response
+        data = await got.get(url, { cookieJar });
     }
 
     return data
 
 }
 
-module.exports = {
-    homgot
-}
+module.exports = {homgot}

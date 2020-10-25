@@ -42,7 +42,7 @@ router.get('/', (req, res) => {
         'Artists Theme': '/api/v3/artists/:id?',
         'Famous Platforms': '/api/v3/destAnimePlatforms',
         'Legal Platforms': '/api/v3/platforms/:id?',
-        'Platforms Details': '/api/v3/profilePlatform:id'
+        'Platforms Details': '/api/v3/profilePlatform/:id'
       }
     ]
   });

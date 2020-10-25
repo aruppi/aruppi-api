@@ -31,8 +31,8 @@ async function videoServersJK(id) {
     episodes.each((index, element) => serverNames.push($(element).find('a').text()))
 
     for (let i = 0; i < scripts.length; i++) {
-        const contents = $(scripts[i]).html();
         try {
+            const contents = $(scripts[i]).html();
             if ((contents || '').includes('var video = [];')) {
                 Array.from({ length: episodes.length }, (v, k) => {
                     let index = Number(k + 1);
@@ -41,6 +41,7 @@ async function videoServersJK(id) {
                 });
             }
         } catch (err) {
+            console.log(err)
             return null;
         }
     }
@@ -102,6 +103,7 @@ const jkanimeInfo = async (id) => {
         const total_eps = $element.text();
         eps_temp_list.push(total_eps);
     })
+
     try { episodes_aired = eps_temp_list[0].split('-')[1].trim(); } catch (err) { }
 
     const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
@@ -136,8 +138,7 @@ const animeflvInfo = async (id) => {
     const anime_eps_data = [];
 
     Array.from({ length: scripts.length }, (v, k) => {
-        const $script = $(scripts[k]);
-        const contents = $script.html();
+        const contents = $(scripts[k]).html();
         if ((contents || '').includes('var anime_info = [')) {
             let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
             let dat_anime_info = JSON.parse(anime_info);
@@ -161,7 +162,7 @@ const animeflvInfo = async (id) => {
     }
 
     const amimeTempList = [];
-    for (const [key, value] of Object.entries(anime_eps_data)) {
+    for (const [key] of Object.entries(anime_eps_data)) {
         let episode = anime_eps_data[key].map(x => x[0]);
         let episodeId = anime_eps_data[key].map(x => x[1]);
         amimeTempList.push(episode, episodeId);
@@ -183,136 +184,119 @@ const animeflvInfo = async (id) => {
 
 };
 
-const getAnimeCharacters = async (title) => {
+const getAnimeCharacters = async(title) =>{
+
+    const matchAnime = await getMALid(title)
 
     try {
-
-        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, { parse: true });
-        const matchAnime = res.results.filter(x => x.title === title);
-        const malId = matchAnime[0].mal_id;
-
-        if (typeof malId === 'undefined') return null;
-
-        const data = await homgot(`${BASE_JIKAN}anime/${malId}/characters_staff`, { parse: true });
-        let body = data.characters;
-
-        if (typeof body === 'undefined') return null;
-
-        const charactersId = body.map(doc => doc.mal_id)
-        const charactersNames = body.map(doc => doc.name);
-        const charactersImages = body.map(doc => doc.image_url);
-
-        let characters = [];
-        Array.from({ length: charactersNames.length }, (v, k) => {
-            const id = charactersId[k];
-            let name = charactersNames[k];
-            let characterImg = charactersImages[k];
-            characters.push({
-                id: id,
-                name: name,
-                image: characterImg
-            });
-        });
-
-        return Promise.all(characters);
-    } catch (e) {
-        console.log(e.message)
+        if(matchAnime !== null) {
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/characters_staff`, { parse: true });
+            return data.characters.map(doc => ({
+                id: doc.mal_id,
+                name: doc.name,
+                image: doc.image_url,
+                role: doc.role
+            }));
+        }
+    } catch (err) {
+        console.log(err)
     }
 
 };
 
-const getAnimeVideoPromo = async (title) => {
+const getAnimeVideoPromo = async(title) =>{
+
+    const matchAnime = await getMALid(title)
 
     try {
-
-        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, { parse: true });
-        const matchAnime = res.results.filter(x => x.title === title);
-        const malId = matchAnime[0].mal_id;
-
-        if (typeof malId === 'undefined') return null;
-
-        const data = await homgot(`${BASE_JIKAN}anime/${malId}/videos`, { parse: true });
-        const body = data.promo;
-        const promises = [];
-
-        body.map(doc => {
-            promises.push({
+        if(matchAnime !== null) {
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/videos`, {parse: true})
+            return data.promo.map(doc => ({
                 title: doc.title,
                 previewImage: doc.image_url,
                 videoURL: doc.video_url
-            });
-        });
-
-        return Promise.all(promises);
-    } catch (e) {
-        console.log(e.message)
+            }));
+        }
+    } catch (err) {
+        console.log(err)
     }
 
 };
 
 const animeExtraInfo = async (title) => {
 
+    const matchAnime = await getMALid(title)
+
     try {
 
-        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`, { parse: true });
-        const matchAnime = res.results.filter(x => x.title === title);
-        const malId = matchAnime[0].mal_id;
+        if(matchAnime !== null) {
 
-        if (typeof malId === 'undefined') return null;
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true})
+            const promises = [];
+            let broadcast = ''
 
-        const data = await homgot(`${BASE_JIKAN}anime/${malId}`, { parse: true });
-        const body = Array(data);
-        const promises = [];
+            Array(data).map(doc => {
 
-        body.map(doc => {
+                let airDay = {
+                    'mondays': 'Lunes',
+                    'monday': 'Lunes',
+                    'tuesdays': 'Martes',
+                    'tuesday': 'Martes',
+                    'wednesdays': 'Miércoles',
+                    'wednesday': 'Miércoles',
+                    'thursdays': 'Jueves',
+                    'thursday': 'Jueves',
+                    'fridays': 'Viernes',
+                    'friday': 'Viernes',
+                    'saturdays': 'Sábados',
+                    'saturday': 'Sábados',
+                    'sundays': 'Domingos',
+                    'sunday': 'Domingos',
+                    'default': 'Sin emisión'
+                };
 
-            let airDay = {
-                'mondays': 'Lunes',
-                'monday': 'Lunes',
-                'tuesdays': 'Martes',
-                'tuesday': 'Martes',
-                'wednesdays': 'Miércoles',
-                'wednesday': 'Miércoles',
-                'thursdays': 'Jueves',
-                'thursday': 'Jueves',
-                'fridays': 'Viernes',
-                'friday': 'Viernes',
-                'saturdays': 'Sábados',
-                'saturday': 'Sábados',
-                'sundays': 'Domingos',
-                'sunday': 'Domingos',
-                'default': 'Sin emisión'
-            };
+                if (doc.broadcast === null) {
+                    broadcast = null
+                } else {
+                    broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
+                }
 
-            let broadcast
-            if (doc.broadcast === null) {
-                broadcast = null
-            } else {
-                broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
-            }
-
-            promises.push({
-                titleJapanese: doc.title_japanese,
-                source: doc.source,
-                totalEpisodes: doc.episodes,
-                aired: {
-                    from: doc.aired.from,
-                    to: doc.aired.to
-                },
-                duration: doc.duration.split('per')[0],
-                rank: doc.rank,
-                broadcast: broadcast,
-                producers: doc.producers.map(x => x.name) || null,
-                licensors: doc.licensors.map(x => x.name) || null,
-                studios: doc.studios.map(x => x.name) || null,
-                openingThemes: doc.opening_themes || null,
-                endingThemes: doc.ending_themes || null
+                promises.push({
+                    titleJapanese: doc.title_japanese,
+                    source: doc.source,
+                    totalEpisodes: doc.episodes,
+                    aired: {
+                        from: doc.aired.from,
+                        to: doc.aired.to
+                    },
+                    duration: doc.duration.split('per')[0],
+                    rank: doc.rank,
+                    broadcast: broadcast,
+                    producers: doc.producers.map(x => x.name) || null,
+                    licensors: doc.licensors.map(x => x.name) || null,
+                    studios: doc.studios.map(x => x.name) || null,
+                    openingThemes: doc.opening_themes || null,
+                    endingThemes: doc.ending_themes || null
+                });
             });
-        });
-        return Promise.all(promises);
+            return Promise.all(promises);
+        }
 
-    } catch (e) {
-        console.log(e.message)
+    } catch (err) {
+        console.log(err)
+    }
+
+};
+
+const getMALid = async(title) =>{
+
+    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
+    const matchAnime = res.results.find(x => x.title === title);
+
+    if(typeof matchAnime === 'undefined') {
+        return null;
+    } else {
+        return matchAnime;
     }
 
 };
@@ -322,9 +306,8 @@ const imageUrlToBase64 = async (url) => {
     return img.rawBody.toString('base64');
 };
 
-const helper = async () => { }
-
 const searchAnime = async (query) => {
+
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     let queryLowerCase = query.toLowerCase()
     const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
@@ -394,33 +377,21 @@ const obtainPreviewNews = (encoded) => {
 const structureThemes = async (body, indv) => {
 
     const promises = []
-    let themes
-
     if (indv === true) {
-        themes = await getThemesData(body.themes)
-
         promises.push({
             title: body.title,
             year: body.year,
-            themes: themes,
+            themes: await getThemesData(body.themes),
         });
-
     } else {
-
         for (let i = 0; i <= body.length - 1; i++) {
-
-            themes = await getThemesData(body[i].themes)
-
             promises.push({
                 title: body[i].title,
                 year: body[i].year,
-                themes: themes,
+                themes: await getThemesData(body[i].themes),
             });
-
         }
-
     }
-
     return promises;
 
 };
@@ -461,12 +432,12 @@ module.exports = {
     getAnimeCharacters,
     getAnimeVideoPromo,
     animeExtraInfo,
+    getMALid,
     imageUrlToBase64,
     searchAnime,
     transformUrlServer,
     obtainPreviewNews,
     structureThemes,
     getThemes,
-    helper,
     videoServersJK
 }

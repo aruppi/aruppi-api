@@ -183,12 +183,10 @@ class ThemeParser {
                     this.$ = await redditocall(this.$('p a')[i].attribs.href.split('/r/AnimeThemes/wiki/')[1].split('#wiki')[0]);
 
                     for (let i = 0; i < this.$('h3').length; i++) {
-
                         if (this.$('h3')[i].children[0].children[0].data === query) {
                             let parsed = this.parseAnime(this.$('h3')[i]);
                             resolve(parsed);
                         }
-
                     }
 
                 }
@@ -269,9 +267,7 @@ class ThemeParser {
 }
 
 async function redditocall(href) {
-    let options = { parse: true }
-    let resp = await homgot(REDDIT_ANIMETHEMES + href + ".json", options)
-
+    let resp = await homgot(REDDIT_ANIMETHEMES + href + ".json", { parse: true })
     return cheerio.load(getHTML(resp.data.content_html));
 }
 

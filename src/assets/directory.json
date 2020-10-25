@@ -55749,7 +55749,7 @@
     "poster": "https://aruppi.jeluchu.xyz/res/directory/3291.jpg",
     "type": "Anime",
     "score": "4.3",
-    "jkanime": true,
+    "jkanime": false,
     "genres": [
       "Acción",
       "Ecchi",
@@ -55780,7 +55780,7 @@
     "poster": "https://aruppi.jeluchu.xyz/res/directory/3293.jpg",
     "type": "Anime",
     "score": "4.4",
-    "jkanime": true,
+    "jkanime": false,
     "genres": [
       "Acción",
       "Fantasía",
@@ -55996,5 +55996,297 @@
     ],
     "state": "En Emisión",
     "description": "A finales del siglo XIX, el Imperio Británico se convirtió en una potencia mundial. Debido a la estricta estratificación de clases, el ciudadano medio tiene pocas posibilidades de llegar a la cima, donde la despreciable nobleza gobierna sobre todos ellos.\n\nWilliam James Moriarty, el segundo hijo de la familia Moriarty, es un joven profesor de matemáticas que ha demostrado una gran astucia e intelecto desde que era niño. Junto con sus hermanos Albert y Louis, vive la vida sencilla de un noble. Fuera de la escuela, William es un conocido consultor privado dispuesto a resolver los problemas de cualquier persona que lo necesite. Sin embargo, su comportamiento amable contradice su posición como líder de un grupo dispuesto a causar estragos en la búsqueda de su deseo: un mundo nuevo construido a partir de las cenizas del viejo."
+  },
+  {
+    "id": "d4dj-first-mix",
+    "title": "D4DJ First Mix",
+    "mal_title": "D4DJ: First Mix",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3307.jpg",
+    "type": "Anime",
+    "score": "4.3",
+    "jkanime": false,
+    "genres": [
+      "Música"
+    ],
+    "state": "En Emisión",
+    "description": "Nunca olvidaremos ese momento. Rinku Aimoto tiene el hábito de pasarse el tiempo diciendo “Happy Around!” cada vez que se siente feliz. Después de regresar a Japón, se ha transferido a la Academia Yoba, en donde las actividades de DJ están bastante activas.\nQuedando impresionada antes las actividades de DJ, decide afiliarse con las chicas"
+  },
+  {
+    "id": "dogeza-de-tanondemita",
+    "title": "Dogeza de Tanondemita",
+    "mal_title": "Dogeza de Tanondemita",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3308.jpg",
+    "type": "Anime",
+    "score": "4.5",
+    "jkanime": false,
+    "genres": [
+      "Comedia",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "En el caso de las mujeres a las que les cuesta mucho decir que no, ¿aceptarán cualquier proposición, aunque sea indecente, si se les pide en dogeza? Suwaru Doge, es un hombre que suele pedir en posición a dogeza a las chicas que le muestren sus bragas, ¡y hasta la fecha nunca ha fallado! ¿Cuántas chicas más se expondrán ante él por verlo"
+  },
+  {
+    "id": "magatsu-wahrheit-zuerst",
+    "title": "Magatsu Wahrheit: Zuerst",
+    "mal_title": "Magatsu Wahrheit: Zuerst",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3309.jpg",
+    "type": "Anime",
+    "score": "4.4",
+    "jkanime": false,
+    "genres": [
+      "Acción",
+      "Fantasía",
+      "Magia"
+    ],
+    "state": "En Emisión",
+    "description": "La historia se centrará en dos jóvenes que viven y trabajan en el Imperio Wahrheit: Inumael, un joven empleado de una agencia de transportes, y Leocadio, un soldado inexperto que trabaja en el ejército imperial. Inumael está preocupado por cuidar de su hermana, mientras que Leocadio sueña con alcanzar el éxito en su profesión."
+  },
+  {
+    "id": "osomatsusan-3rd-season",
+    "title": "Osomatsu-san 3rd Season",
+    "mal_title": "Osomatsu-san 3rd Season",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3310.jpg",
+    "type": "Anime",
+    "score": "3.3",
+    "jkanime": false,
+    "genres": [
+      "Comedia",
+      "Parodia"
+    ],
+    "state": "En Emisión",
+    "description": "Tercera Temporada"
+  },
+  {
+    "id": "a3-season-autumn-winter",
+    "title": "A3! Season Autumn & Winter",
+    "mal_title": "A3! Season Autumn & Winter",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3311.jpg",
+    "type": "Anime",
+    "score": "3.9",
+    "jkanime": false,
+    "genres": [
+      "Drama",
+      "Recuentos de la vida"
+    ],
+    "state": "En Emisión",
+    "description": "La protagonista es una actriz retirada que, en un giro de eventos, se convierte en la directora de una compañía teatral en picada. Será su misión salvar la Compañía Mankai y devolverla a su antigua gloria consiguiendo actores que logren apantallar al público.\\nPero hay un problema, ¡solo cuenta con un año y una presentación en cada esta"
+  },
+  {
+    "id": "ochikobore-fruit-tart",
+    "title": "Ochikobore Fruit Tart",
+    "mal_title": "Ochikobore Fruit Tart",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3312.jpg",
+    "type": "Anime",
+    "score": "4.0",
+    "jkanime": false,
+    "genres": [
+      "Música",
+      "Recuentos de la vida"
+    ],
+    "state": "En Emisión",
+    "description": "Ino Sakura parte a Tokio persiguiendo su sueño de ser idol. Allí formará equipo con sus compañeras de la Residencia Nezumi (Ratón), donde se aloja: una antigua niña actriz poco popular llamada Roko, la música Hayu y la modelo Nina. Juntas serán Fruit Tart, un grupo de idols que intentarán entrar en la industria del entretenimiento a la vez"
+  },
+  {
+    "id": "maesetsu",
+    "title": "Maesetsu!",
+    "mal_title": "Maesetsu!",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3313.jpg",
+    "type": "Anime",
+    "score": "3.5",
+    "jkanime": false,
+    "genres": [
+      "Comedia",
+      "Recuentos de la vida"
+    ],
+    "state": "En Emisión",
+    "description": "La historia se centra en cuatro chicas en el mayor auge de su juventud, trabajando muy duro para lograr sus sueños mientras luchan valientemente. En la industria del entretenimiento japonés, “Maesetsu!” es una expresión introductoria de un intérprete hacia una audiencia antes de una emisión televisiva, usualmente realizada por los asistentes"
+  },
+  {
+    "id": "taisou-zamurai",
+    "title": "Taisou Zamurai",
+    "mal_title": "Taisou Zamurai",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3314.jpg",
+    "type": "Anime",
+    "score": "4.0",
+    "jkanime": false,
+    "genres": [
+      "Deportes"
+    ],
+    "state": "En Emisión",
+    "description": "La historia se desarrolla en el año 2002 y se centra en el alguna vez imbatible equipo de gimnasia masculino de Japón. Shoutarou Aragaki, el ex-miembro del equipo japonés que dedicó su vida a la gimnasia, ya no puede competir con sus expectativas. A pesar de que sigue entrenando sin descanso día a día"
+  },
+  {
+    "id": "kamisama-ni-natta-hi",
+    "title": "Kamisama ni Natta Hi",
+    "mal_title": "Kamisama ni Natta Hi",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3315.jpg",
+    "type": "Anime",
+    "score": "4.4",
+    "jkanime": false,
+    "genres": [
+      "Drama",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "Un día durante las últimas vacaciones de verano de Youta Narukami en preparatoria, una chica llamada Hina apareció ante él y se autoproclamó “la Diosa del Conocimiento”. Hina le anunció al confundido Youta que el mundo llegará a su final en solo 30 días.\\nYouta entonces es testigo de los poderes de Hina sobre prever el futuro"
+  },
+  {
+    "id": "gochuumon-wa-usagi-desu-ka-bloom",
+    "title": "Gochuumon wa Usagi Desu ka? Bloom",
+    "mal_title": "Gochuumon wa Usagi Desu ka? Bloom",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3316.jpg",
+    "type": "Anime",
+    "score": "4.6",
+    "jkanime": false,
+    "genres": [
+      "Comedia",
+      "Recuentos de la vida"
+    ],
+    "state": "En Emisión",
+    "description": "Cocoa Hoto ingresa al café Rabbit House asumiendo que dentro hay conejos con los que podrán convivir. Lo que Cocoa descubre es que es en realidad el dormitorio de su preparatoria, manejado por la hija del propietario, Chino Kafuu, una pequeña y tímida chica que lleva un conejo de angora en su cabeza.\\nCocoa rápidamente se hace amiga de Chino"
+  },
+  {
+    "id": "adachi-to-shimamura",
+    "title": "Adachi to Shimamura",
+    "mal_title": "Adachi to Shimamura",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3317.jpg",
+    "type": "Anime",
+    "score": "4.7",
+    "jkanime": false,
+    "genres": [
+      "Escolares",
+      "Yuri",
+      "Romance",
+      "Recuentos de la vida"
+    ],
+    "state": "En Emisión",
+    "description": "Adachi y Shimamura, dos chicas que asisten a la misma preparatoria y que son amigas inseparables. Ya sea jugando tenis, platicar sobre sus programas de televisión favoritos, o solo relajándose, siempre están juntas. Cuando Adachi se da cuenta de que siente una atracción física por Shimamura, toda su relación comenzará a cambiar"
+  },
+  {
+    "id": "guraburu",
+    "title": "Guraburu!",
+    "mal_title": "Guraburu!",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3318.jpg",
+    "type": "Anime",
+    "score": "4.1",
+    "jkanime": false,
+    "genres": [
+      "Aventura",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "Este es un mundo en los cielos, en donde muchas islas flotan en él. Un chico llamado Gran y un lagarto alado parlante llamado Vyns viven en Zinkenstill, una isla llena de misterios. Un día, se encuentran con una chica llamada Lyria. Ella ha escapado del Imperio Erste, un gobierno militar que intenta dominar al mundo con un poderoso ejército"
+  },
+  {
+    "id": "akudama-drive",
+    "title": "Akudama Drive",
+    "mal_title": "Akudama Drive",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3319.jpg",
+    "type": "Anime",
+    "score": "4.2",
+    "jkanime": false,
+    "genres": [
+      "Acción",
+      "Ciencia-Ficción"
+    ],
+    "state": "En Emisión",
+    "description": "En esta historia, hace mucho tiempo las regiones de Kanto y Kansai tuvieron una guerra que dividió el mundo. Pero al final de la guerra, Kansai perdió y juró lealtad a Kanto. No obstante, el gobierno y la fuerza policial de Kansai no aceptaron la derrota, por lo que el crimen dominó la región."
+  },
+  {
+    "id": "kimi-to-boku-no-saigo-no-senjou-aruiwa-sekai-ga-hajimaru-seisen",
+    "title": "Kimi to Boku no Saigo no Senjou, Aruiwa Sekai ga Hajimaru Seisen",
+    "mal_title": "Kimi to Boku no Saigo no Senjou, Aruiwa Sekai ga Hajimaru Seisen",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3320.jpg",
+    "type": "Anime",
+    "score": "4.0",
+    "jkanime": false,
+    "genres": [
+      "Acción",
+      "Militar",
+      "Romance",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "El Imperio, dotado de un nivel avanzado de conocimiento, y la Agencia de la Casa Imperial de Nebulis temida como el «País de las Brujas», mantienen una lucha que dura en el tiempo. En el campo de batalla un chico y una chica se conocen. El espadachín que se convirtió en la fuerza definitiva en el campo de batalla"
+  },
+  {
+    "id": "kuma-kuma-kuma-bear",
+    "title": "Kuma Kuma Kuma Bear",
+    "mal_title": "Kuma Kuma Kuma Bear",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3321.jpg",
+    "type": "Anime",
+    "score": "4.0",
+    "jkanime": false,
+    "genres": [
+      "Aventura",
+      "Comedia",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "Yuna, una chica de quince años, comienza a jugar su primer juego VRMMO. Ella ha conseguido miles de millones de yenes en acciones, y se confina en su casa para jugar sin ir a la escuela. Hoy, una actualización importante ha llegado al juego y ella obtiene un súper raro e intransferible traje de oso."
+  },
+  {
+    "id": "ikebukuro-west-gate-park",
+    "title": "Ikebukuro West Gate Park",
+    "mal_title": "Ikebukuro West Gate Park",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3322.jpg",
+    "type": "Anime",
+    "score": "3.8",
+    "jkanime": false,
+    "genres": [
+      "Drama",
+      "Misterio",
+      "Romance"
+    ],
+    "state": "En Emisión",
+    "description": "La historia sigue al sereno Makoto mientras navega por la vida de constante pandillas dado que su amigo, King, es el líder de los G-Boys. Makoto ve la oportunidad de convertirse en un solucionador de problemas para la pandilla, como una forma de mantener la calma y proteger a sus amigos."
+  },
+  {
+    "id": "maoujou-de-oyasumi",
+    "title": "Maoujou de Oyasumi",
+    "mal_title": "Maoujou de Oyasumi",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3323.jpg",
+    "type": "Anime",
+    "score": "4.5",
+    "jkanime": false,
+    "genres": [
+      "Sobrenatural",
+      "Shounen",
+      "Magia",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "Shhh! La princesa Syalis está intentando dormir bien por la noche. Hace mucho tiempo, cuando las personas y los demonios coexistían, no en total armonía claro, un rey demonio secuestró a una princesa humana y la encerró en su castillo. Despojados, los súbditos de la princesa pensaban sin cesar en una solución"
+  },
+  {
+    "id": "toji-no-miko-kizamishi-issen-no-tomoshibi-ova",
+    "title": "Toji no Miko: Kizamishi Issen no Tomoshibi OVA",
+    "mal_title": "Toji no Miko: Kizamishi Issen no Tomoshibi OVA",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3324.jpg",
+    "type": "Anime",
+    "score": "4.0",
+    "jkanime": true,
+    "genres": [
+      "Acción",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "Ovas de Katana Maiden"
+  },
+  {
+    "id": "noblesse",
+    "title": "Noblesse",
+    "mal_title": "Noblesse",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3325.jpg",
+    "type": "Anime",
+    "score": "3.9",
+    "jkanime": true,
+    "genres": [
+      "Acción",
+      "Fantasía"
+    ],
+    "state": "En Emisión",
+    "description": "Raizel despierta tras un letargo de 820 años. Ostenta el título de Noblesse, un Noble de pura sangre y protector del resto de Nobles. En un intento por proteger a Raizel, su sirviente Frankenstein se une a él en el Instituto Ye Ran, donde Raizel se acostumbra poco a poco a la rutina cotidiana del mundo humano junto a sus compañeros. Sin embargo, los humanos modificados de la Unión, una sociedad secreta que planea conquistar el mundo, entran poco a poco en la vida de Raizel y amenazan a sus seres queridos, obligándolo a usar su gran poder para protegerlos."
   }
 ]

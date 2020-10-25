@@ -5,7 +5,6 @@ const {
 } = require('./apiCall');
 
 const {
-  jkanimeInfo,
   animeflvGenres,
   animeflvInfo,
   imageUrlToBase64,
@@ -18,8 +17,6 @@ const {
   structureThemes,
   getAnimes,
   getDirectory,
-  helper,
-  videoServersJK,
   getThemes
 } = require('../utils');
 
@@ -201,24 +198,14 @@ const laterSeasons = async () =>{
 
 const getLastEpisodes = async () =>{
 
-  let options = { parse: true }
-  const data = await homgot(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`, options);
-  let body = data.episodes;
-  const promises = []
-
-  body.map(doc => {
-
-    promises.push(helper().then(async () => ({
-       id: doc.id,
-       title: doc.title,
-       image: doc.poster,
-       episode: doc.episode,
-       servers: await transformUrlServer(JSON.parse(JSON.stringify(doc.servers)))
-     })));
-
-  });
-
-  return Promise.all(promises);
+  const data = await homgot(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`, { parse: true });
+  return await Promise.all(data.episodes.map(async (item) => ({
+    id: item.id,
+    title: item.title,
+    image: item.poster,
+    episode: item.episode,
+    servers: await transformUrlServer(JSON.parse(JSON.stringify(item.servers)))
+  })));
 
 };
 
@@ -251,191 +238,55 @@ const getSpecials = async (type, subType, page) =>{
 
 const getMoreInfo = async (title) =>{
 
-  const promises = []
-  let animeTitle = ''
+  let promises = [];
   let animeId = ''
   let animeType = ''
   let animeIndex = ''
 
-  let seriesTitle
-  let position
-
-  const jkAnimeTitles = [
-    { title: 'The God of High School', id: 'the-god-of-high-school' },
-    { title: 'Kami no Tou', id: 'kami-no-tou' },
-    { title: 'BNA', id: 'bna' },
-    { title: 'Ansatsu Kyoushitsu (TV)', id: 'ansatsu-kyoushitsu-tv' },
-    { title: 'Ansatsu Kyoushitsu (TV) 2nd Season', id: 'ansatsu-kyoushitsu-tv-2nd-season' }
-  ];
-
-  const jkMyAnimetitles = [
-    { jkanime: 'Ansatsu Kyoushitsu (TV)', myanimelist: 'Ansatsu Kyoushitsu'},
-    { jkanime: 'Ansatsu Kyoushitsu (TV) 2nd Season', myanimelist: 'Ansatsu Kyoushitsu 2nd Season' }
-  ];
-
-  let jkanime = false
-  let jkanimeID
-  let jkanimeName
-  for (let name in jkAnimeTitles) {
-    if (title === jkAnimeTitles[name].title) {
-      jkanime = true
-      jkanimeID = jkAnimeTitles[name].id
-
-      for (let name in jkMyAnimetitles) {
-        if (title === jkMyAnimetitles[name].jkanime || title === jkMyAnimetitles[name].myanimelist) {
-          jkanimeName = jkMyAnimetitles[name].myanimelist
-          position = name
-        }
-      }
-
-      if (jkanimeName === undefined) {
-        jkanimeName = jkAnimeTitles[name].title
-      }
-
-    }
-  }
-
-  if (jkanime === false) {
-    const titles = [
-      { animeflv: 'Kaguya-sama wa Kokurasetai: Tensai-tachi no Renai Zunousen 2nd Season', myanimelist: 'Kaguya-sama wa Kokurasetai?: Tensai-tachi no Renai Zunousen', alternative: 'Kaguya-sama wa Kokurasetai'},
-      { animeflv: 'Naruto Shippuden', myanimelist: 'Naruto: Shippuuden' },
-      { animeflv: 'Rock Lee no Seishun Full-Power Ninden', myanimelist: 'Naruto SD: Rock Lee no Seishun Full-Power Ninden' },
-      { animeflv: 'BAKI: dai reitaisai-hen', myanimelist: 'Baki 2nd Season' },
-      { animeflv: 'Hitoribocchi no ○○ Seikatsu', myanimelist: 'Hitoribocchi no Marumaru Seikatsu' },
-      { animeflv: 'Nekopara (TV)', myanimelist: 'Nekopara' },
-      { animeflv: 'Black Clover (TV)', myanimelist: 'Black Clover' }
-    ];
-
-    for (let name in titles) {
-      if (title === titles[name].animeflv || title === titles[name].myanimelist || title === titles[name].alternative) {
-        seriesTitle = titles[name].animeflv
-        position = name
+  await getAllAnimes().then(animes => {
+    for (const i in animes) {
+      if (animes[i].title.split('\t')[0] === title.split('\t')[0]) {
+        animeId = animes[i].id
+        animeIndex = animes[i].index
+        animeType = animes[i].type.toLowerCase()
+        break;
       }
     }
+  });
 
-
-    if (seriesTitle === undefined) {
-      seriesTitle = title
-    }
-
-    await getAllAnimes().then(animes => {
-
-      for (const i in animes) {
-        if (animes[i].title.split('\t')[0] === seriesTitle.split('\t')[0] ||
-            animes[i].title === `${seriesTitle} (TV)` ||
-            animes[i].title.includes(seriesTitle.split('○')[0])
-        ) {
-          if (animes[i].title.includes('(TV)', 0)) { animeTitle = animes[i].title.split('\t')[0].replace(' (TV)', '') }
-          else { animeTitle = animes[i].title.split('\t')[0] }
-          animeId = animes[i].id
-          animeIndex = animes[i].index
-          animeType = animes[i].type.toLowerCase()
-
-          if (position !== undefined) {
-            seriesTitle = titles[position].myanimelist
-          }
-
-          break;
-
-        }
-      }
-    });
-
-    try{
-
-      if (animeType === 'tv') {
-        promises.push(await animeflvInfo(animeId, animeIndex).then(async extra => ({
-          title: animeTitle || null,
-          poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-          synopsis: extra.animeExtraInfo[0].synopsis || null,
-          status: extra.animeExtraInfo[0].debut || null,
-          type: extra.animeExtraInfo[0].type || null,
-          rating: extra.animeExtraInfo[0].rating || null,
-          genres: extra.genres || null,
-          episodes: extra.listByEps || null,
-          moreInfo: await animeExtraInfo(seriesTitle).then(info =>{
-            return info || null
-          }),
-          promo: await getAnimeVideoPromo(seriesTitle).then(promo =>{
-            return promo || null
-          }),
-          characters: await getAnimeCharacters(seriesTitle).then(characters =>{
-            return characters || null
-          })
-        })));
-      } else {
-        promises.push(await animeflvInfo(animeId).then(async extra => ({
-          title: animeTitle || null,
-          poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-          synopsis: extra.animeExtraInfo[0].synopsis || null,
-          status: extra.animeExtraInfo[0].debut || null,
-          type: extra.animeExtraInfo[0].type || null,
-          rating: extra.animeExtraInfo[0].rating || null,
-          genres: extra.genres || null,
-          episodes: extra.listByEps || null,
-        })));
-      }
-
-    }catch(err){
-      console.log(err)
-    }
-  } else {
-    promises.push(await jkanimeInfo(jkanimeID).then(async extra => ({
-      title: jkanimeName || null,
+  try{
+    promises.push(await animeflvInfo(`anime/${animeId}`, animeIndex).then(async extra => ({
+      title: title || null,
       poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
+      banner: extra.animeExtraInfo[0].banner || null,
       synopsis: extra.animeExtraInfo[0].synopsis || null,
-      status: extra.animeExtraInfo[0].debut || null,
+      debut: extra.animeExtraInfo[0].debut || null,
       type: extra.animeExtraInfo[0].type || null,
       rating: extra.animeExtraInfo[0].rating || null,
       genres: extra.genres || null,
       episodes: extra.listByEps || null,
-      moreInfo: await animeExtraInfo(jkanimeName).then(info =>{
+      moreInfo: await animeExtraInfo(title).then(info =>{
         return info || null
       }),
-      promo: await getAnimeVideoPromo(jkanimeName).then(promo =>{
+      promoList: await getAnimeVideoPromo(title).then(promo =>{
         return promo || null
       }),
-      characters: await getAnimeCharacters(jkanimeName).then(characters =>{
+      charactersList: await getAnimeCharacters(title).then(characters =>{
         return characters || null
       })
     })));
-  }
 
-  return promises;
+    return Promise.all(promises);
+
+  }catch(err){
+    console.log(err)
+  }
 
 };
 
 const getAnimeServers = async (id) => {
-
-  const jkAnimeIDs = [
-    { id: 'the-god-of-high-school' },
-    { id: 'kami-no-tou' },
-    { id: 'bna' },
-    { id: 'ansatsu-kyoushitsu-tv' },
-    { id: 'ansatsu-kyoushitsu-tv-2nd-season' }
-  ];
-
-  let jkanime = false
-  let jkanimeID
-  for (let name in jkAnimeIDs) {
-    if (id.includes(jkAnimeIDs[name].id)) {
-      jkanime = true
-      jkanimeID = id
-    }
-  }
-
-  if (jkanime === false) {
-
-    let options = { parse: true }
-    const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, options);
-    let body = data.servers;
-
-    return await transformUrlServer(body);
-
-  } else {
-    return await videoServersJK(jkanimeID)
-  }
-
+  const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
+  return await transformUrlServer(data.servers);
 };
 
 const search = async (title) =>{ return await searchAnime(title); };
@@ -574,10 +425,7 @@ const getAnimeGenres = async(genre, order, page) => {
 
 };
 
-const getAllThemes = async () => {
-  let data = await parserThemes.all()
-  return await structureThemes(data, false)
-};
+const getAllThemes = async () => require('../../assets/themes.json');
 
 module.exports = {
   schedule,
