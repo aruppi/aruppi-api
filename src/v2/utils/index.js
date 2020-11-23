@@ -1,10 +1,126 @@
 const {
-    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, BASE_ARUPPI, ANIMEFLV_SEARCH
+    BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, BASE_ARUPPI, ANIMEFLV_SEARCH, BASE_JKANIME
 } = require('../api/urls.js');
 
 const {
     homgot
 } = require('../api/apiCall.js');
+
+function btoa(str) {
+    let buffer;
+    if (str instanceof Buffer) {
+        buffer = str;
+    }
+    else {
+        buffer = Buffer.from(str.toString(), 'binary');
+    }
+    return buffer.toString('base64');
+}
+
+global.btoa = btoa;
+
+async function videoServersJK(id) {
+
+    const $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
+
+    const scripts = $('script');
+    const episodes = $('div#reproductor-box li');
+    const serverNames = [];
+    let servers = [];
+
+    episodes.each((index, element) => serverNames.push($(element).find('a').text()))
+
+    for (let i = 0; i < scripts.length; i++) {
+        try {
+            const contents = $(scripts[i]).html();
+            if ((contents || '').includes('var video = [];')) {
+                Array.from({ length: episodes.length }, (v, k) => {
+                    let index = Number(k + 1);
+                    let videoPageURL = contents.split(`video[${index}] = \'<iframe class="player_conte" src="`)[1].split('"')[0];
+                    servers.push({ iframe: videoPageURL });
+                });
+            }
+        } catch (err) {
+            console.log(err)
+            return null;
+        }
+    }
+
+    let serverList = [];
+    for (let server in servers) {
+        serverList.push({
+            id: serverNames[server].toLowerCase(),
+            url: servers[server].iframe,
+            direct: false
+        });
+    }
+
+    serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
+
+    return await Promise.all(serverList);
+}
+
+async function getVideoURL(url) {
+
+    const $ = await homgot(url, { scrapy: true });
+
+    const video = $('video');
+    if (video.length) {
+        const src = $(video).find('source').attr('src');
+        return src || null;
+    }
+    else {
+
+        const scripts = $('script');
+        const l = global;
+        const ll = String;
+        const $script2 = $(scripts[1]).html();
+        eval($script2);
+        return l.ss || null;
+    }
+}
+
+const jkanimeInfo = async (id) => {
+
+    let $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
+
+    let nextEpisodeDate
+    let rawNextEpisode = $('div[id="container"] div.left-container div[id="proxep"] p')[0]
+    if (rawNextEpisode === undefined) {
+        nextEpisodeDate = null
+    } else {
+        if (rawNextEpisode.children[1].data === '  ') {
+            nextEpisodeDate = null
+        } else {
+            nextEpisodeDate = rawNextEpisode.children[1].data.trim()
+        }
+    }
+
+    const eps_temp_list = [];
+    let episodes_aired = '';
+    $('div#container div.left-container div.navigation a').each(async (index, element) => {
+        const $element = $(element);
+        const total_eps = $element.text();
+        eps_temp_list.push(total_eps);
+    })
+
+    try { episodes_aired = eps_temp_list[0].split('-')[1].trim(); } catch (err) { }
+
+    const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
+    for (let i = 1; i <= episodes_aired; i++) {
+        let episode = i;
+        let animeId = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src.split('/')[7].split('.jpg')[0];
+        let link = `${animeId}/${episode}`
+
+        animeListEps.push({
+            episode: episode,
+            id: link
+        })
+    }
+
+    return animeListEps;
+
+};
 
 const animeflvGenres = async (id) => {
 
@@ -23,94 +139,58 @@ const animeflvGenres = async (id) => {
 
 }
 
-const animeflvInfo = async (id, index) => {
+const animeflvInfo = async (id) => {
 
-    try {
+    let $ = await homgot(`${BASE_ANIMEFLV}anime/${id}`, { scrapy: true });
+    let scripts = $('script').toArray();
 
-        let $ = await homgot(`${BASE_ANIMEFLV}/${id}`, { scrapy: true })
+    const anime_info_ids = [];
+    const anime_eps_data = [];
 
-        const scripts = $('script');
-        const anime_info_ids = [];
-        const anime_eps_data = [];
-        const animeExtraInfo = [];
-        const genres = [];
-        let listByEps;
+    Array.from({ length: scripts.length }, (v, k) => {
+        const contents = $(scripts[k]).html();
+        if ((contents || '').includes('var anime_info = [')) {
+            let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
+            let dat_anime_info = JSON.parse(anime_info);
+            anime_info_ids.push(dat_anime_info);
+        }
+        if ((contents || '').includes('var episodes = [')) {
+            let episodes = contents.split('var episodes = ')[1].split(';')[0];
+            let eps_data = JSON.parse(episodes)
+            anime_eps_data.push(eps_data);
+        }
+    });
+    const animeId = id;
+    let nextEpisodeDate
 
-        const animeTitle = $('body div.Wrapper div.Body div div.Ficha.fchlt div.Container h2.Title').text();
-        const poster = `${BASE_ANIMEFLV}` + $('body div div div div div aside div.AnimeCover div.Image figure img').attr('src')
-        const banner = poster.replace('covers', 'banners').trim();
-        const synopsis = $('body div div div div div main section div.Description p').text().trim();
-        const rating = $('body div div div.Ficha.fchlt div.Container div.vtshr div.Votes span#votes_prmd').text();
-        const debut = $('body div.Wrapper div.Body div div.Container div.BX.Row.BFluid.Sp20 aside.SidebarA.BFixed p.AnmStts').text();
-        const type = $('body div.Wrapper div.Body div div.Ficha.fchlt div.Container span.Type').text()
-
-        animeExtraInfo.push({
-            title: animeTitle,
-            poster: poster,
-            banner: banner,
-            synopsis: synopsis,
-            rating: rating,
-            debut: debut,
-            type: type,
-        })
-
-        $('main.Main section.WdgtCn nav.Nvgnrs a').each((index, element) =>
-            genres.push($(element).attr('href').split('=')[1] || null)
-        );
-
-        Array.from({length: scripts.length} , (v , k) =>{
-            const $script = $(scripts[k]);
-            const contents = $script.html();
-            if((contents || '').includes('var anime_info = [')) {
-                let anime_info = contents.split('var anime_info = ')[1].split(';')[0];
-                let dat_anime_info = JSON.parse(JSON.stringify(anime_info));//JSON.parse(anime_info);
-                anime_info_ids.push(dat_anime_info);
-            }
-            if((contents || '').includes('var episodes = [')) {
-                let episodes = contents.split('var episodes = ')[1].split(';')[0];
-                let eps_data = JSON.parse(episodes)
-                anime_eps_data.push(eps_data);
-            }
-        });
-
-        const AnimeThumbnailsId = index;
-        const animeId = id.split('anime/')[1];
-
-        let nextEpisodeDate
-        if (JSON.parse(JSON.stringify(anime_info_ids[0])).split('\"').length === 9) {
-            nextEpisodeDate = JSON.parse(JSON.stringify(anime_info_ids[0])).split("\"")[7]
+    if (anime_info_ids.length > 0) {
+        if (anime_info_ids[0].length === 4) {
+            nextEpisodeDate = anime_info_ids[0][3]
         } else {
             nextEpisodeDate = null
         }
-
-        const amimeTempList = [];
-        for (const [key] of Object.entries(anime_eps_data)) {
-            let episode = anime_eps_data[key].map(x => x[0]);
-            let episodeId = anime_eps_data[key].map(x => x[1]);
-            amimeTempList.push(episode, episodeId);
-        }
-        const listEps = [{nextEpisodeDate: nextEpisodeDate}];
-        Array.from({length: amimeTempList[1].length}, (v, k) => {
-            let data = amimeTempList.map(x => x[k]);
-            let episode = data[0];
-            let id = data[1];
-            let imagePreview = `${BASE_EPISODE_IMG_URL}${AnimeThumbnailsId}/${episode}/th_3.jpg`
-            let link = `${id}/${animeId}-${episode}`
-
-            listEps.push({
-                episode: episode,
-                id: link,
-                imagePreview: imagePreview
-            })
-        })
-
-        listByEps = listEps
-
-        return {listByEps , genres , animeExtraInfo};
-
-    } catch (e) {
-        console.log(e)
     }
+
+    const amimeTempList = [];
+    for (const [key] of Object.entries(anime_eps_data)) {
+        let episode = anime_eps_data[key].map(x => x[0]);
+        let episodeId = anime_eps_data[key].map(x => x[1]);
+        amimeTempList.push(episode, episodeId);
+    }
+    const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
+    Array.from({ length: amimeTempList[1].length }, (v, k) => {
+        let data = amimeTempList.map(x => x[k]);
+        let episode = data[0];
+        let id = data[1];
+        let link = `${id}/${animeId}-${episode}`
+
+        animeListEps.push({
+            episode: episode,
+            id: link,
+        })
+    })
+
+    return animeListEps
 
 };
 
@@ -426,6 +506,7 @@ const getDirectory = async () => {
 };
 
 module.exports = {
+    jkanimeInfo,
     animeflvGenres,
     animeflvInfo,
     getAnimeCharacters,
@@ -439,5 +520,6 @@ module.exports = {
     structureThemes,
     getThemes,
     getAnimes,
-    getDirectory
+    getDirectory,
+    videoServersJK
 }

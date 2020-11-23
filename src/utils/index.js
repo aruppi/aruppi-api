@@ -290,13 +290,23 @@ const animeExtraInfo = async (title) => {
 
 const getMALid = async(title) =>{
 
-    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
-    const matchAnime = res.results.find(x => x.title === title);
 
-    if(typeof matchAnime === 'undefined') {
-        return null;
+    if (title === undefined || title === null) {
+
+        return 1
+
     } else {
-        return matchAnime;
+
+            const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
+            const matchAnime = res.results.find(x => x.title === title);
+
+            if(typeof matchAnime === 'undefined') {
+                return null;
+            } else {
+                return matchAnime;
+            }
+
+
     }
 
 };

@@ -15,7 +15,8 @@ const {
   obtainPreviewNews,
   structureThemes,
   videoServersJK,
-  getThemes
+  getThemes,
+  getMALid
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');

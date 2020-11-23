@@ -5,6 +5,7 @@ const {
 } = require('./apiCall');
 
 const {
+  jkanimeInfo,
   animeflvGenres,
   animeflvInfo,
   imageUrlToBase64,
@@ -15,6 +16,7 @@ const {
   transformUrlServer,
   obtainPreviewNews,
   structureThemes,
+  videoServersJK,
   getAnimes,
   getDirectory,
   getThemes
@@ -238,55 +240,60 @@ const getSpecials = async (type, subType, page) =>{
 
 const getMoreInfo = async (title) =>{
 
-  let promises = [];
-  let animeId = ''
-  let animeType = ''
-  let animeIndex = ''
+  try {
 
-  await getAllAnimes().then(animes => {
-    for (const i in animes) {
-      if (animes[i].title.split('\t')[0] === title.split('\t')[0]) {
-        animeId = animes[i].id
-        animeIndex = animes[i].index
-        animeType = animes[i].type.toLowerCase()
-        break;
-      }
+    const promises = []
+
+    let data = JSON.parse(JSON.stringify(require('../../assets/directory.json')));
+    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+
+    if (!res.jkanime) {
+      promises.push({
+        title: res.title || null,
+        poster: res.poster || null,
+        synopsis: res.description || null,
+        status: res.state || null,
+        type: res.type || null,
+        rating: res.score || null,
+        genres: res.genres || null,
+        episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
+        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
+        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
+        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
+      });
+    } else {
+      promises.push({
+        title: res.title || null,
+        poster: res.poster || null,
+        synopsis: res.description || null,
+        status: res.state || null,
+        type: res.type || null,
+        rating: res.score || null,
+        genres: res.genres || null,
+        episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
+        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
+        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
+        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
+      });
     }
-  });
 
-  try{
-    promises.push(await animeflvInfo(`anime/${animeId}`, animeIndex).then(async extra => ({
-      title: title || null,
-      poster: await imageUrlToBase64(extra.animeExtraInfo[0].poster) || null,
-      banner: extra.animeExtraInfo[0].banner || null,
-      synopsis: extra.animeExtraInfo[0].synopsis || null,
-      debut: extra.animeExtraInfo[0].debut || null,
-      type: extra.animeExtraInfo[0].type || null,
-      rating: extra.animeExtraInfo[0].rating || null,
-      genres: extra.genres || null,
-      episodes: extra.listByEps || null,
-      moreInfo: await animeExtraInfo(title).then(info =>{
-        return info || null
-      }),
-      promoList: await getAnimeVideoPromo(title).then(promo =>{
-        return promo || null
-      }),
-      charactersList: await getAnimeCharacters(title).then(characters =>{
-        return characters || null
-      })
-    })));
+    return promises;
 
-    return Promise.all(promises);
-
-  }catch(err){
-    console.log(err)
+  } catch (e) {
+    console.log(e)
   }
 
 };
 
 const getAnimeServers = async (id) => {
-  const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
-  return await transformUrlServer(data.servers);
+
+  if (isNaN(id.split('/')[0])) {
+    return await videoServersJK(id)
+  } else {
+    const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
+    return await transformUrlServer(data.servers);
+  }
+
 };
 
 const search = async (title) =>{ return await searchAnime(title); };
