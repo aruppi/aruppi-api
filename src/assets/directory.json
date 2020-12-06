@@ -56290,7 +56290,7 @@
     "description": "Raizel despierta tras un letargo de 820 años. Ostenta el título de Noblesse, un Noble de pura sangre y protector del resto de Nobles. En un intento por proteger a Raizel, su sirviente Frankenstein se une a él en el Instituto Ye Ran, donde Raizel se acostumbra poco a poco a la rutina cotidiana del mundo humano junto a sus compañeros. Sin embargo, los humanos modificados de la Unión, una sociedad secreta que planea conquistar el mundo, entran poco a poco en la vida de Raizel y amenazan a sus seres queridos, obligándolo a usar su gran poder para protegerlos."
   },
   {
-    "id": "shingeki-no-kyojin:-the-final-season",
+    "id": "shingeki-no-kyojin-the-final-season",
     "title": "Shingeki no Kyojin: The Final Season",
     "genres": [
       "militar",
@@ -56302,9 +56302,10 @@
       "accion"
     ],
     "description": "Sinopsis: Con Eren y compañía ahora en la costa y la amenaza de Marley acechando, ¿que sigue para los Scouts y su búsqueda para desentrañar los misterios de los Titanes, la humanidad y mas?",
-    "status": "por estrenar",
+    "state": "En emisión",
     "score": "9.22",
-    "jkanime": true,
+    "type": "Anime",
+    "jkanime": false,
     "poster": "https://cdn.myanimelist.net/images/anime/1000/110531.jpg",
     "mal_title": "Shingeki no Kyojin: The Final Season"
   }
