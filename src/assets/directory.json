@@ -56301,12 +56301,66 @@
       "misterio",
       "accion"
     ],
-    "description": "Sinopsis: Con Eren y compañía ahora en la costa y la amenaza de Marley acechando, ¿que sigue para los Scouts y su búsqueda para desentrañar los misterios de los Titanes, la humanidad y mas?",
+    "description": "Con Eren y compañía ahora en la costa y la amenaza de Marley acechando, ¿que sigue para los Scouts y su búsqueda para desentrañar los misterios de los Titanes, la humanidad y mas?",
     "state": "En emisión",
     "score": "9.22",
     "type": "Anime",
     "jkanime": false,
-    "poster": "https://cdn.myanimelist.net/images/anime/1000/110531.jpg",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3326.jpg",
     "mal_title": "Shingeki no Kyojin: The Final Season"
+  },
+  {
+    "id": "kimetsu-no-yaiba-movie-mugen-ressha-hen",
+    "title": "Kimetsu no Yaiba Movie: Mugen Ressha-hen",
+    "genres": [
+      "accion",
+      "demonios",
+      "historico",
+      "shounen",
+      "sobrenatural"
+    ],
+    "description": "Tanjirou Kamado y sus amigos del Demon Slayer Corps acompañan a Kyoujurou Rengoku, el Flame Hashira, para investigar una misteriosa serie de desapariciones que ocurren dentro de un tren. Poco saben que Enmu, uno de los Doce Kizuki, también está a bordo y les ha preparado una trampa.",
+    "state": "Finalizado",
+    "score": "8.66",
+    "type": "Película",
+    "jkanime": true,
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3327.jpg",
+    "mal_title": "Kimetsu no Yaiba Movie: Mugen Ressha-hen"
+  },
+  {
+    "id": "dokyuu-hentai-hxeros-ova",
+    "title": "Dokyuu Hentai HxEros OVA",
+    "genres": [
+      "accion",
+      "comedia",
+      "ecchi",
+      "colegial",
+      "shounen",
+      "sobrenatural"
+    ],
+    "description": "El primer episodio de video original seguirá a tres de las heroínas principales en una historia original.\n\nIncluido con los volúmenes 11 y 12 del manga Dokyuu Hentai HxEros.",
+    "state": "Finalizado",
+    "type": "OVA",
+    "jkanime": true,
+    "score": "6.18",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3328.jpg",
+    "mal_title": "Dokyuu Hentai HxEros OVA"
+  },
+  {
+    "id": "bem-movie-become-human",
+    "title": "Bem Movie: Become Human",
+    "genres": [
+      "accion",
+      "demonios",
+      "terror",
+      "sobrenatural"
+    ],
+    "description": "Bem, Bela y Belo son aterradores monstruos humanoides (youkai) que luchan por la justicia. ... Los tres se encuentran excluidos tanto de los humanos como de otros youkai, pero continúan luchando con la esperanza de que algún día se conviertan en humanos.",
+    "state": "Finalizado",
+    "type": "Película",
+    "jkanime": true,
+    "score": "6.76",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3329.jpg",
+    "mal_title": "Bem Movie: Become Human"
   }
 ]
