@@ -75,10 +75,10 @@ const getAllAnimes = async () =>{
 
 };
 
-const getAllDirectory = async (notNSWF) =>{
+const getAllDirectory = async (genres) =>{
 
   let data
-  if (notNSWF) {
+  if (genres === "sfw") {
     data = JSON.parse(JSON.stringify(require('../assets/directory.json'))).filter(function (item) {
       return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
     })

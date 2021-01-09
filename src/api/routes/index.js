@@ -59,10 +59,10 @@ router.get('/allAnimes' , (req, res) =>{
 
 });
 
-router.get('/allDirectory/:notNSWF?' , (req, res) =>{
+router.get('/allDirectory/:genres?' , (req, res) =>{
 
-    let notNSWF = req.params.notNSWF;
-    api.getAllDirectory(notNSWF)
+    let genres = req.params.genres;
+    api.getAllDirectory(genres)
         .then(directory =>{
             if (directory.length > 0) {
                 res.status(200).json({

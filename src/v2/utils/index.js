@@ -487,10 +487,10 @@ const getThemes = async (themes) => {
 
 const getAnimes = async () => await homgot(`${BASE_ANIMEFLV}api/animes/list`, { parse: true });
 
-const getDirectory = async (notNSWF) => {
+const getDirectory = async (genres) => {
 
     let data
-    if (notNSWF) {
+    if (genres === "sfw") {
         data = JSON.parse(JSON.stringify(require('../../assets/directory.json'))).filter(function (item) {
             return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
         })
