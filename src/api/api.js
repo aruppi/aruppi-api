@@ -75,9 +75,16 @@ const getAllAnimes = async () =>{
 
 };
 
-const getAllDirectory = async () =>{
+const getAllDirectory = async (notNSWF) =>{
 
-  let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+  let data
+  if (notNSWF) {
+    data = JSON.parse(JSON.stringify(require('../assets/directory.json'))).filter(function (item) {
+      return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
+    })
+  } else {
+    data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+  }
 
   return data.map(doc => ({
     id: doc.id,

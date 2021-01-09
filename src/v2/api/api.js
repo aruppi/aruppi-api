@@ -70,7 +70,7 @@ const getAllAnimes = async () =>{
 
 };
 
-const getAllDirectory = async () =>{ return await getDirectory(); };
+const getAllDirectory = async (notNSWF) =>{ return await getDirectory(notNSWF); };
 
 const getAnitakume = async () =>{
 
