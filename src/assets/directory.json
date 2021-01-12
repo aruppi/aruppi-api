@@ -55135,7 +55135,7 @@
       "Fantasía",
       "Psicológico"
     ],
-    "state": "Finalizado",
+    "state": "En emisión",
     "score": "4.7",
     "jkanime": false,
     "description": "De un momento a otro, Subaru Natsuki ha sido llevado a otro mundo cuando salía de una tienda. Desconcertado, intenta comprender la situación pero ésta solo empeora cada vez más cuando es atacado por unos matones. Milagrosamente es salvado por una joven de cabello plateado, Subaru profundamente agradecido decide ayudarla para devolverle el favor. Lamentablemente fallan y son brutalmente asesinados. Entonces Subaru despierta en el lugar al que fue enviado inicialmente, descubriendo que tiene una habilidad única, “regresar de la muerte” ¿Subaru será capaz de sobrevivir y ayudar a su salvadora?"
@@ -56362,5 +56362,656 @@
     "score": "6.76",
     "poster": "https://aruppi.jeluchu.xyz/res/directory/3329.jpg",
     "mal_title": "Bem Movie: Become Human"
+  },
+  {
+    "id": "wave-surfing-yappe-tv",
+    "title": "Wave!! Surfing Yappe!! (TV)",
+    "genres": [
+      "deportes",
+      "recuentos-de-la-vida"
+    ],
+    "description": "La historia del proyecto se desarrolla en la ciudad de Ouarai, en la prefectura de Ibaraki, y se centra en Masaki Hinaoka, quien se hace amigo del estudiante de transferencia Shou Akitsuki antes de las vacaciones de verano, y termina enganchado al surf. A través de este deporte, Masaki conocerá nu...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "3.9",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3330.jpg",
+    "mal_title": "Wave!! Surfing Yappe!! (TV)"
+  },
+  {
+    "id": "shin-chuuka-ichiban-2nd-season",
+    "title": "Shin Chuuka Ichiban! 2nd Season",
+    "genres": [
+      "comedia",
+      "shounen"
+    ],
+    "description": "La serie está ambientada en un siglo 19 ficticio en China, donde los cocineros de toda china compiten en unas pruebas culinarias para medir sus habilidades, y siendo un cocinero maestro se le concede respeto y autoridad. La historia se centra en Liu Mao Xing, un joven cocinero de la provincia de Sz...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "2.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3331.jpg",
+    "mal_title": "Shin Chuuka Ichiban! 2nd Season"
+  },
+  {
+    "id": "idoly-pride",
+    "title": "Idoly Pride",
+    "genres": [
+      "musica"
+    ],
+    "description": "Para convertirme en una idol derramé sangre, sudor y lágrimas. Incluso así, sigo adelante porque quiero brillar. Quiero ganármelo, convertirme en la número uno. Quiero sonreír, hacer mis sueños realidad. Quiero mirar atrás a un mar de gente, quiero ser reconocida y quiero encontrarlo. Quiero...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.2",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3332.jpg",
+    "mal_title": "Idoly Pride"
+  },
+  {
+    "id": "mushoku-tensei-isekai-ittara-honki-dasu",
+    "title": "Mushoku Tensei: Isekai Ittara Honki Dasu",
+    "genres": [
+      "drama",
+      "fantasia",
+      "magia"
+    ],
+    "description": "Asesinado mientras salvaba unos estudiantes que serían atropellados por un camión, un NEET de 34 años reencarna en un nuevo mundo de magia bajo el nombre de Rudeus Greyrat, un recién nacido. Con conocimiento, experiencia y arrepentimientos de una vida pasada, Rudeus jura llevar una vida plena y ...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3333.jpg",
+    "mal_title": "Mushoku Tensei: Isekai Ittara Honki Dasu"
+  },
+  {
+    "id": "non-non-biyori-nonstop",
+    "title": "Non Non Biyori Nonstop",
+    "genres": [
+      "comedia",
+      "recuentos-de-la-vida",
+      "seinen"
+    ],
+    "description": "Tercera temporada",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3334.jpg",
+    "mal_title": "Non Non Biyori Nonstop"
+  },
+  {
+    "id": "exarm",
+    "title": "Ex-Arm",
+    "genres": [
+      "accion",
+      "ecchi",
+      "seinen",
+      "sobrenatural"
+    ],
+    "description": "2014: Akira Natsume parece tener una casi fobia a los dispositivos electrónicos a la vez que es muy bueno diagnosticándolos. Un día, decide cambiar para verse mejor y conseguir una novia tal como lo hizo su hermano mayor… Sin embargo, Akira muere repentinamente en un accidente.\n16 años desp...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "2.1",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3335.jpg",
+    "mal_title": "Ex-Arm"
+  },
+  {
+    "id": "kemono-jihen",
+    "title": "Kemono Jihen",
+    "genres": [
+      "accion",
+      "demonios",
+      "misterio",
+      "shounen",
+      "sobrenatural"
+    ],
+    "description": "Cuando una serie de cuerpos de animales que se pudren en una sola noche comienza a aparecer en un remoto pueblo de una montaña, Inugami, un detective de Tokio que se especializa en el ocultismo, comienza su investigación.\nMientras trabaja en el caso, se hace amigo de un chico que trabaja en el ...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.7",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3336.jpg",
+    "mal_title": "Kemono Jihen"
+  },
+  {
+    "id": "sk",
+    "title": "SK∞",
+    "genres": [
+      "deportes"
+    ],
+    "description": "El anime se centra en Reki, una estudiante de segundo año de secundaria a quien le encanta andar en patineta. Un día, el se ve atrapado en “S”, una peligrosa carrera de patinetas sin reglas que se realiza en mina abandonada.\nLanga, quien ha regresado a Japón tras vivir algún tiempo en Ca...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.6",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3337.jpg",
+    "mal_title": "SK∞"
+  },
+  {
+    "id": "horimiya",
+    "title": "Horimiya",
+    "genres": [
+      "comedia",
+      "escolares",
+      "recuentos-de-la-vida",
+      "romance",
+      "shounen"
+    ],
+    "description": "Aunque admirada en la escuela por su amabilidad y destreza académica, la estudiante de preparatoria Kyouko Hori ha estado escondiendo otro lado de ella. Con sus padres a menudo fuera de casa debido al trabajo, Hori tiene que cuidar de su hermano menor y hacer las tareas del hogar, sin tener tiempo ...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3338.jpg",
+    "mal_title": "Horimiya"
+  },
+  {
+    "id": "world-trigger-2nd-season",
+    "title": "World Trigger 2nd Season",
+    "genres": [
+      "accion",
+      "ciencia-ficcion",
+      "escolares",
+      "shounen",
+      "sobrenatural"
+    ],
+    "description": "Cuando la puerta a otro mundo de repente se abre en la Tierra, la ciudad de Mikado es invadida por extrañas criaturas conocidas como “Vecinos”, que son seres maliciosos con armamento tradicional. En respuesta a esta invasión, una organización conocida como la Agencia de Defensa Fronteriza ent...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3339.jpg",
+    "mal_title": "World Trigger 2nd Season"
+  },
+  {
+    "id": "kai-byoui-ramune",
+    "title": "Kai Byoui Ramune",
+    "genres": [
+      "psicologico",
+      "shounen",
+      "sobrenatural"
+    ],
+    "description": "Mayonesa sale de mis ojos… Tus dedos se convierten en chiles… Si tienes alguna de esas tan extrañas enfermedades, ¡entonces acude con el especialista en enfermedades, el doctor Ramune! Descubre los misterios que habitan en tu cuerpo y en tus deseos más profundos. ¡La apertura de una fantasí...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.5",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3340.jpg",
+    "mal_title": "Kai Byoui Ramune"
+  },
+  {
+    "id": "project-scard-praeter-no-kizu",
+    "title": "Project Scard: Praeter no Kizu",
+    "genres": [
+      "accion",
+      "superpoderes"
+    ],
+    "description": "La historia se desarrolla en el ficticio Barrio especial de Akatsuki en Tokio, un lugar donde no hay leyes. Para mantener el orden en dicho barrio, hay tres organizaciones: Helios, Artemis y la Oficina de Seguridad Pública, que emplean agentes conocidos como ‘Scard’. Estos agentes están marcad...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.1",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3341.jpg",
+    "mal_title": "Project Scard: Praeter no Kizu"
+  },
+  {
+    "id": "back-arrow",
+    "title": "Back Arrow",
+    "genres": [
+      "accion",
+      "fantasia",
+      "mecha"
+    ],
+    "description": "Lingalind es un lugar rodeado por un muro que protege y ayuda a dar prosperidad a esas tierras. El muro es la base sobre la que prospera Lingalind, casi como su dios.\nUn día aparece un misterioso hombre llamado Back Arrow en Edger, un pueblo en la zona más exterior de Lingalind. Arrow ha perdid...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3342.jpg",
+    "mal_title": "Back Arrow"
+  },
+  {
+    "id": "ore-dake-haireru-kakushi-dungeon",
+    "title": "Ore dake Haireru Kakushi Dungeon",
+    "genres": [
+      "accion",
+      "aventura",
+      "ecchi",
+      "fantasia",
+      "harem"
+    ],
+    "description": "Noir, el tercer hijo de una familia de nobles en decadencia, ha perdido su empleo y no sabe qué hacer, pero la fortuna le sonríe justo cuando decide convertirse en un aventurero.\nCalabozos a los que nadie sabe cómo entrar. Lugares legendarios llenos de extremadamente raras criaturas, herramien...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.7",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3343.jpg",
+    "mal_title": "Ore dake Haireru Kakushi Dungeon"
+  },
+  {
+    "id": "wixoss-divaalive",
+    "title": "WIXOSS Diva(A)Live",
+    "genres": [
+      "juegos",
+      "psicologico"
+    ],
+    "description": "La historia del anime mueve el tradicional juego de cartas de “Wixoss” a un espacio virtual conocido como “Wixossland”, mientras continúa engrandeciendo su popularidad. El juego permite a los jugadores convertirse en avatar de LRIG por sí mismos. El formato más popular son la “Diva Batt...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "3.5",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3344.jpg",
+    "mal_title": "WIXOSS Diva(A)Live"
+  },
+  {
+    "id": "idolls",
+    "title": "Idolls!",
+    "genres": [
+      "musica"
+    ],
+    "description": "YouTubers Virtuales",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "2.6",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3345.jpg",
+    "mal_title": "Idolls!"
+  },
+  {
+    "id": "jakuchara-tomozakikun",
+    "title": "Jaku-Chara Tomozaki-kun",
+    "genres": [
+      "drama",
+      "escolares",
+      "romance"
+    ],
+    "description": "Tomozaki es uno de los mejores jugadores de videojuegos del mundo, y para él, la realidad es el peor juego de todos: no hay un objetivo claro para ganar, el equilibrio es un asco y nada tiene sentido. Es entonces cuando conoce a una jugadora tan buena como él que se ofrece a enseñarle unos cuanto...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.6",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3346.jpg",
+    "mal_title": "Jaku-Chara Tomozaki-kun"
+  },
+  {
+    "id": "kumo-desu-ga-nani-ka",
+    "title": "Kumo Desu ga, Nani ka?",
+    "genres": [
+      "aventura",
+      "comedia",
+      "fantasia"
+    ],
+    "description": "El mundo donde el Héroe y el Rey Demonio continúan oponiéndose el uno al otro. La gran magia del Héroe y el Rey Demonio cruzan mundos y explotan en el aula de una cierta escuela secundaria.\nLos estudiantes que murieron en la explosión reencarnarán en un mundo diferente. La protagonista, que...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.7",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3347.jpg",
+    "mal_title": "Kumo Desu ga, Nani ka?"
+  },
+  {
+    "id": "243-seiin-koukou-danshi-volleybu",
+    "title": "2.43: Seiin Koukou Danshi Volley-bu",
+    "genres": [
+      "deportes",
+      "escolares"
+    ],
+    "description": "La historia se centra en Kimichika Haijima, quien se metió en serios problemas durante sus días en secundaria mientras participaba en el equipo de voleibol de su instituto, y como resultado fue transferido de la Prefectura de Tokio a la de Fukui, en donde se reencontró con su amigo de la infancia...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.5",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3348.jpg",
+    "mal_title": "2.43: Seiin Koukou Danshi Volley-bu"
+  },
+  {
+    "id": "hataraku-saibou-black-tv",
+    "title": "Hataraku Saibou Black (TV)",
+    "genres": [
+      "accion",
+      "seinen"
+    ],
+    "description": "La historia se centra en un glóbulo rojo novato, miembro de las otras células en el cuerpo. ¡Pero algo anda mal! Las hormonas del estrés le siguen gritando que aceleren cada vez más el ritmo. Los vasos sanguíneos están cubiertos de colesterol. Úlceras, hígado graso, problemas (ejem) abajo�...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3349.jpg",
+    "mal_title": "Hataraku Saibou Black (TV)"
+  },
+  {
+    "id": "hataraku-saibou",
+    "title": "Hataraku Saibou!!",
+    "genres": [
+      "comedia",
+      "shounen"
+    ],
+    "description": "Segunda temporada de Hataraku Saibou",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3350.jpg",
+    "mal_title": "Hataraku Saibou!!"
+  },
+  {
+    "id": "gotoubun-no-hanayome-2nd-season",
+    "title": "Gotoubun no Hanayome 2nd Season",
+    "genres": [
+      "comedia",
+      "escolares",
+      "harem",
+      "romance",
+      "shounen"
+    ],
+    "description": "Un día, el estudiante pobre de preparatoria Fuutarou Uesugi recibe un trabajo como tutor con una excelente paga. Una excelente oportunidad de hacer dinero, ¿no? ¡Pues resulta que su tutorada es su compañera de clases! ¡Y no sólo le enseñará a ella sino también a sus cuatro hermanas! ¡Sí! ...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3351.jpg",
+    "mal_title": "5-toubun no Hanayome ∬"
+  },
+  {
+    "id": "tenchi-souzou-designbu",
+    "title": "Tenchi Souzou Design-bu",
+    "genres": [
+      "comedia",
+      "fantasia",
+      "recuentos-de-la-vida",
+      "seinen"
+    ],
+    "description": "En el Departamento de Diseño Animal del Cielo, los diseñadores crean una variedad de animales todos los días para satisfacer las irracionales solicitudes de Dios. De forma divertida, interesante, y llena de información, la serie busca responder cuestiones como “¿Por qué los unicornios no pue...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.3",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3352.jpg",
+    "mal_title": "Tenchi Souzou Design-bu"
+  },
+  {
+    "id": "yuru-camp-season-2",
+    "title": "Yuru Camp△ Season 2",
+    "genres": [
+      "comedia",
+      "recuentos-de-la-vida"
+    ],
+    "description": "Si bien la escapada perfecta para la mayoría de las chicas de su edad pueden ser unas vacaciones extravagantes con sus seres queridos, la manera ideal de Rin Shima es acampar sola en la base del Monte Fuji. Desde armar su tienda de campaña hasta recoger leña, ella siempre ha hecho todo por sí mi...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.7",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3353.jpg",
+    "mal_title": "Yuru Camp△ Season 2"
+  },
+  {
+    "id": "show-by-rock-stars",
+    "title": "Show by Rock!! Stars!!",
+    "genres": [
+      "comedia",
+      "musica"
+    ],
+    "description": "Temporada \"All stars\" de Show by Rock!! mostrando a todas las bandas de las temporadas anteriores.",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3354.jpg",
+    "mal_title": "Show by Rock!! Stars!!"
+  },
+  {
+    "id": "soukou-musume-senki",
+    "title": "Soukou Musume Senki",
+    "genres": [
+      "accion",
+      "fantasia",
+      "militar"
+    ],
+    "description": "Es el año 2051, donde todos los jóvenes jugadores de LBX de todo el mundo cooperan para resolver la Crisis de Mizel. La explosión del Seto-50 dentro del Mizel Trouser está contenido dentro de la Gran Esfera, pero la energía liberada abrió una grieta dimensional, dividiendo así el mundo en dos.\nEsta es la historia de otro mundo paralelo de...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3355.jpg",
+    "mal_title": "Soukou Musume Senki"
+  },
+  {
+    "id": "hortensia-saga-tv",
+    "title": "Hortensia Saga (TV)",
+    "genres": [
+      "accion",
+      "aventura",
+      "fantasia",
+      "magia"
+    ],
+    "description": "Ambientada en el Reino de Hortensia, una potencia mundial gracias a sus principales territorios, Camellia y Olivier, que sirven como espada y escudo contra las invasiones. Comienza una revuelta por parte de Camellia, y con Hortensia encaminada hacia el caos absoluto y la llegada de monstruos que solo complica la situación, ¿podrán los caballeros...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3356.jpg",
+    "mal_title": "Hortensia Saga (TV)"
+  },
+  {
+    "id": "ichu-halfway-through-the-idol",
+    "title": "I★Chu: Halfway Through the Idol",
+    "genres": [
+      "comedia",
+      "escolares",
+      "musica",
+      "recuentos-de-la-vida"
+    ],
+    "description": "Ha comenzado el ciclo escolar en la Academia Étoile Vio, en donde los estudiantes aspirantes a convertirse en idols conocidos como “I-Chu” recibirán entrenamiento para convertirse en idols plenos y derechos. Sin embargo, las cosas han tenido un comienzo extraño cuando los nuevos estudiantes reciben un discurso del director, ¿un oso? Los I-C...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "2.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3357.jpg",
+    "mal_title": "I★Chu: Halfway Through the Idol"
+  },
+  {
+    "id": "yakusoku-no-neverland-2nd-season",
+    "title": "Yakusoku no Neverland 2nd Season",
+    "genres": [
+      "ciencia-ficcion",
+      "misterio",
+      "psicologico",
+      "shounen",
+      "suspenso"
+    ],
+    "description": "Segunda temporada de Yakusoku no Neverland",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.7",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3358.jpg",
+    "mal_title": "Yakusoku no Neverland 2nd Season"
+  },
+  {
+    "id": "gekidol",
+    "title": "Gekidol",
+    "genres": [
+      "musica"
+    ],
+    "description": "La historia se desarrolla cinco años después de que un misterioso desastre borrase del mapa las grandes ciudades del mundo. Las protagonistas son un grupo de chicas que quieren formar parte de las producciones teatrales holográficas en 3D \"Theater Material System\".",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3359.jpg",
+    "mal_title": "Gekidol"
+  },
+  {
+    "id": "urasekai-picnic",
+    "title": "Urasekai Picnic",
+    "genres": [
+      "aventura",
+      "ciencia-ficcion",
+      "fantasia",
+      "misterio",
+      "yuri"
+    ],
+    "description": "La novela original se desarrolla en el mundo moderno, pero existen puertas que pueden llevar a las personas al “otro lado”, donde las extrañas leyendas urbanas y los mitos de Internet resultan ser reales. La estudiante universitaria Kamikoshi Sorao descubre una de estas puertas y por poco muere estando del otro lado, hasta que es rescatada por...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3360.jpg",
+    "mal_title": "Urasekai Picnic"
+  },
+  {
+    "id": "uma-musume-pretty-derby-season-2",
+    "title": "Uma Musume: Pretty Derby Season 2",
+    "genres": [
+      "comedia",
+      "deportes",
+      "recuentos-de-la-vida"
+    ],
+    "description": "En un mundo muy parecido al nuestro, los grandes caballos de carreras del pasado recibieron la oportunidad de renacer como “uma musume”, chicas con las orejas y la cola de un caballo, pero que también cuentan con su velocidad y resistencia. Las mejores de estas chicas tienen el privilegio de estudiar en la Academia Tracen en Tokio, con la espe...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.4",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3361.jpg",
+    "mal_title": "Uma Musume: Pretty Derby (TV) Season 2"
+  },
+  {
+    "id": "tatoeba-last-dungeon-mae-no-mura-no-shounen-ga-joban-no-machi-de-kurasu-youna-monogatari",
+    "title": "Tatoeba Last Dungeon Mae no Mura no Shounen ga Joban no Machi de Kurasu Youna Monogatari",
+    "genres": [
+      "aventura",
+      "fantasia"
+    ],
+    "description": "Lloyd es un aventurero novato cuyo sueño es descubrir la \"verdadera fuerza\" en la capital que siempre ha admirado, aunque en realidad todos a su alrededor siempre le han considerado un debilucho. La historia comienza cuando parte de su pueblo natal, que casualmente, está junto a una de las mazmorras más peligrosas del mundo. Lloyd piensa que es ...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3362.jpg",
+    "mal_title": "Tatoeba Last Dungeon Mae no Mura no Shounen ga Joban no Machi de Kurasu Youna Monogatari"
+  },
+  {
+    "id": "skateleadingstars",
+    "title": "Skate-Leading☆Stars",
+    "genres": [
+      "deportes"
+    ],
+    "description": "\"Jamás podrás vencerme\".\nKensei Maeshima era un partinador artístico que abandonó su carrera cuando escuchó esas palabras de boca de Reo Shinozaki, su gran rival. Ahora, años después, Maeshima ya es estudiante de preparatoria y usa su talento físico para ayudar a otros clubes con sus actividades, aunque nunca se compromete con ninguno pa...",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "0.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3363.jpg",
+    "mal_title": "Skate-Leading☆Stars"
+  },
+  {
+    "id": "otona-no-bouguyasan-2nd-season",
+    "title": "Otona no Bouguya-san II",
+    "genres": [
+      "comedia",
+      "ecchi",
+      "fantasia"
+    ],
+    "description": "Segunda temporada de Otona no Bouguya-san.",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "3.5",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3364.jpg",
+    "mal_title": "Otona no Bouguya-san II"
+  },
+  {
+    "id": "yami-shibai-8",
+    "title": "Yami Shibai 8",
+    "genres": [
+      "Demencia",
+      "Terror",
+      "Sobrenatural"
+    ],
+    "description": "Octava temporada de Yami Shibai",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "3.2",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3365.jpg",
+    "mal_title": "Yami Shibai 8"
+  },
+  {
+    "id": "jimihen-jimiko-wo-kaechau-jun-isei-kouyuu",
+    "title": "Jimihen!!: Jimiko wo Kaechau Jun Isei Kouyuu!!",
+    "genres": [
+      "Ecchi",
+      "Romance"
+    ],
+    "description": "La historia sigue a Rena Yukuhasahi, una oficinista reservada y a Ryouhei Hachiya, un hombre de negocios y colega. Yukuhasahi parece ser la chica más reservada de la compañía, pero se convierte en una mujer súper hermosa cuando se viste de gala. Nerviosa ante la presencia de su yo transformado, Hachiya insiste en sacarla, solo para encontrarse frente a un hotel del amor.",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "3.6",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3366.jpg",
+    "mal_title": "Jimihen!!: Jimiko wo Kaechau Jun Isei Kouyuu!!"
+  },
+  {
+    "id": "beastars-2nd-season",
+    "title": "Beastars 2nd Season",
+    "genres": [
+      "Drama",
+      "Shounen",
+      "Cosas de la vida",
+      "Psicológico"
+    ],
+    "description": "Segunda temporada de Beastars",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "4.8",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3367.jpg",
+    "mal_title": "Beastars 2nd Season"
+  },
+  {
+    "id": "abciee-shuugyou-nikki",
+    "title": "Abciee Shuugyou Nikki",
+    "genres": [
+      "Comedia"
+    ],
+    "description": "ABCiee es un poco torpe y despistado, pero ánimo no le falta, ¡y además por fin tiene el trabajo con el que siempre soñó en una emisora de televisión! ¡Una comedia laboral repleta de humor! ¡No esperaba que trabajar en la TV fuera tan duro!. Pese a tener que enfrentarse a las desconocidas normas del mundo de la televisión, a sus extravagantes compañeros, y a invitados estelares con sus peculiaridades, ABCiee no se acobardará ante nada y conservará su optimismo. ¡Trabajo, amor, familia, con todo! No te pierdas cómo ABCiee va conquistando el mundo de la tele",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "3.9",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3368.jpg",
+    "mal_title": "Abciee Shuugyou Nikki"
+  },
+  {
+    "id": "date-a-bullet-nightmare-or-queen",
+    "title": "Date A Bullet: Nightmare or Queen",
+    "genres": [
+      "Sci-fi"
+    ],
+    "description": "Segunda parte de las películas de Date A Bullet",
+    "state": "En emision",
+    "type": "Película",
+    "jkanime": true,
+    "score": "4.4",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3369.jpg",
+    "mal_title": "Date A Bullet: Nightmare or Queen"
+  },
+  {
+    "id": "vlad-love",
+    "title": "Vlad Love",
+    "genres": [
+      "Comedia",
+      "Escolar",
+      "Vampiros",
+      "Sobrenatural"
+    ],
+    "description": "Mitsugu Banba es una chica de secundaria que encuentra sentido en la donación de sangre. Con frecuencia visita un banco de sangre para donar sangre, a pesar de que la enfermera la trata con dureza. Un día, se encuentra con una hermosa chica que parece ser del extranjero en el banco de sangre. La chica pálida parece que está a punto de desmayarse en cualquier momento, pero luego comienza a destruir el banco de sangre. La niña pierde el conocimiento y Mitsugu se la lleva a casa",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "4.2",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3370.jpg",
+    "mal_title": "Vlad Love"
   }
 ]

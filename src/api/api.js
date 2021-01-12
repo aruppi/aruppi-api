@@ -281,6 +281,33 @@ const getMoreInfo = async (title) =>{
 
 };
 
+const getEpisodes = async (title) =>{
+
+  try {
+
+    const promises = []
+
+    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+
+    if (!res.jkanime) {
+      promises.push({
+        episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
+      });
+    } else {
+      promises.push({
+        episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
+      });
+    }
+
+    return promises;
+
+  } catch (e) {
+    console.log(e)
+  }
+
+};
+
 const getAnimeServers = async (id) => {
 
   if (isNaN(id.split('/')[0])) {
@@ -520,6 +547,7 @@ module.exports = {
   getLastEpisodes,
   getSpecials,
   getMoreInfo,
+  getEpisodes,
   getAnimeServers,
   search,
   getImages,
