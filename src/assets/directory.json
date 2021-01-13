@@ -57055,7 +57055,7 @@
     "description": "Una historia de chicas con problemas, tejida por el guionista Shinji Nojima en el mundo del anime.\n\nDirigida por una voz misteriosa durante un paseo de medianoche, Ai Ooto, de 14 años, recoge un huevo. La voz la persuade: \"Si quieres cambiar el futuro, solo tienes que elegir ahora. Ahora, cree en ti misma y rompe el huevo\".",
     "state": "En emision",
     "type": "Anime",
-    "jkanime": true,
+    "jkanime": false,
     "score": "0.0",
     "poster": "https://aruppi.jeluchu.xyz/res/directory/3373.jpg",
     "mal_title": "Wonder Egg Priority"
@@ -57072,9 +57072,92 @@
     "description": "Tercera temporada de Yatogame-chan Kansatsu Nikki.",
     "state": "En emision",
     "type": "Anime",
-    "jkanime": true,
-    "score": "0.0",
+    "jkanime": false,
+    "score": "3.1",
     "poster": "https://aruppi.jeluchu.xyz/res/directory/3374.jpg",
     "mal_title": "Yatogame-chan Kansatsu Nikki Sansatsume"
+  },
+  {
+    "id": "nanatsu-no-taizai-fundo-no-shinpan",
+    "title": "Nanatsu no Taizai: Fundo no Shinpan",
+    "genres": [
+      "accion",
+      "aventura",
+      "fantasia",
+      "magia",
+      "shounen",
+      "sobrenatural"
+    ],
+    "description": "Cuarta temporada de Nanatsu no Taizai",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.7",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3375.jpg",
+    "mal_title": "Nanatsu no Taizai: Fundo no Shinpan"
+  },
+  {
+    "id": "world-witches-hasshin-shimasu",
+    "title": "World Witches Hasshin Shimasu!",
+    "genres": [
+      "comedia",
+      "militar"
+    ],
+    "description": "Tal como la entrega anterior, Strike Witches: 501 Butai Hasshin Shimasu!, esta serie seguirá las cómicas vidas diarias de la brujas mientras no se encuentran en batalla. Sin embargo, esta nueva serie no solo incluirá al Ala de Combate Conjunta 501 (Strike Witches) sino también al Ala de Combate Conjunta 502 (Brave Witches).",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": false,
+    "score": "4.0",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3376.jpg",
+    "mal_title": "World Witches Hasshin Shimasu!"
+  },
+  {
+    "id": "bungou-stray-dogs-wan",
+    "title": "Bungou Stray Dogs Wan!",
+    "genres": [
+      "comedia",
+      "Cosas de la vida",
+      "Sobrenatural"
+    ],
+    "description": "Los días tranquilos de la muy popular obra Bungou Stray Dogs están aquí. ¿Los personajes de la Agencia Armada de Detectives y la Mafia están en forma de miniatura? Gracias a Atsushi y compañía. volviéndose lindo, esta es una experiencia diferente a la obra original: ¡un manga de broma agradable!",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "4.3",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3377.jpg",
+    "mal_title": "Bungou Stray Dogs Wan!"
+  },
+  {
+    "id": "log-horizon-entaku-houkai",
+    "title": "Log Horizon: Entaku Houkai",
+    "genres": [
+      "Acción",
+      "Aventura",
+      "Fantasía",
+      "Juegos",
+      "Magia"
+    ],
+    "description": "Tercera temporada de Log Horizon",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "4.4",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3378.jpg",
+    "mal_title": "Log Horizon: Entaku Houkai"
+  },
+  {
+    "id": "kaifuku-jutsushi-no-yarinaoshi",
+    "title": "Kaifuku Jutsushi no Yarinaoshi",
+    "genres": [
+      "Ecchi",
+      "Fantasía"
+    ],
+    "description": "\"Los magos curadores no pueden luchar solos\".\n\nKeare, que estaba obligado por este conocimiento común, fue explotado una y otra vez por otros. Un día, se dio cuenta de lo que había más allá de la magia curativa y se convenció de que un mago curativo era la clase más fuerte. Sin embargo, cuando se dio cuenta de ese potencial, se vio privado de todo. Por lo tanto, usó magia curativa en el mundo mismo para retroceder cuatro años, decidiendo rehacer todo.\n\nEsta es una historia heroica de un mago curativo que se convirtió en el más fuerte al usar el conocimiento de su vida pasada y la magia curativa.",
+    "state": "En emision",
+    "type": "Anime",
+    "jkanime": true,
+    "score": "4.4",
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3379.jpg",
+    "mal_title": "Kaifuku Jutsushi no Yarinaoshi"
   }
 ]

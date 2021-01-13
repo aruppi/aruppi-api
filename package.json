@@ -1,6 +1,6 @@
 {
   "name": "aruppi",
-  "version": "3.3.5",
+  "version": "3.3.6",
   "description": "Aruppi is a custom API to obtain data from the Japanese culture for the mobile app",
   "main": "./src/api/api.js",
   "scripts": {
