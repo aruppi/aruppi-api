@@ -270,10 +270,8 @@ router.get('/moreInfo/:title' , (req, res) =>{
 
     api.getMoreInfo(title)
         .then(info =>{
-            if (info.length > 0) {
-                res.status(200).json({
-                    info
-                });
+            if (info !== undefined) {
+                res.status(200).json(info);
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
             )
@@ -290,7 +288,7 @@ router.get('/getEpisodes/:title' , (req, res) =>{
     api.getEpisodes(title)
         .then(episodes =>{
             if (episodes.length > 0) {
-                res.status(200).json(episodes);
+                res.status(200).json({episodes});
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
             )

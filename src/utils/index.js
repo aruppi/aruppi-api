@@ -168,8 +168,8 @@ const animeflvInfo = async (id) => {
         amimeTempList.push(episode, episodeId);
     }
     const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
-    Array.from({ length: amimeTempList[1].length }, (v, k) => {
-        let data = amimeTempList.map(x => x[k]);
+    for (let i = 0; i < amimeTempList[1].length; i++){
+        let data = amimeTempList.map(x => x[i]);
         let episode = data[0];
         let id = data[1];
         let link = `${id}/${animeId}-${episode}`
@@ -178,7 +178,7 @@ const animeflvInfo = async (id) => {
             episode: episode,
             id: link,
         })
-    })
+    }
 
     return animeListEps
 
@@ -260,7 +260,7 @@ const animeExtraInfo = async (title) => {
                 } else {
                     broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
                 }
-
+                
                 promises.push({
                     titleJapanese: doc.title_japanese,
                     source: doc.source,

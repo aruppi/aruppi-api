@@ -238,42 +238,21 @@ const getMoreInfo = async (title) =>{
 
   try {
 
-    const promises = []
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+    let result = data.filter(anime => anime.title === title)[0];
 
-    if (!res.jkanime) {
-      promises.push({
-        title: res.title || null,
-        poster: res.poster || null,
-        synopsis: res.description || null,
-        status: res.state || null,
-        type: res.type || null,
-        rating: res.score || null,
-        genres: res.genres || null,
-        episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
-        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
-        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
-        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
-      });
-    } else {
-      promises.push({
-        title: res.title || null,
-        poster: res.poster || null,
-        synopsis: res.description || null,
-        status: res.state || null,
-        type: res.type || null,
-        rating: res.score || null,
-        genres: res.genres || null,
-        episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
-        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
-        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
-        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
-      });
+    return {
+      title: result.title || null,
+      poster: result.poster || null,
+      synopsis: result.description || null,
+      status: result.state || null,
+      type: result.type || null,
+      rating: result.score || null,
+      genres: result.genres || null,
+      moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
+      promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
+      characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null)
     }
-
-    return promises;
 
   } catch (e) {
     console.log(e)
@@ -285,22 +264,14 @@ const getEpisodes = async (title) =>{
 
   try {
 
-    const promises = []
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     const res = data.filter(x => x.title === title || x.mal_title === title)[0];
 
     if (!res.jkanime) {
-      promises.push({
-        episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
-      });
+      return await animeflvInfo(res.id).then(episodes => episodes || null)
     } else {
-      promises.push({
-        episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
-      });
+      return await jkanimeInfo(res.id).then(episodes => episodes || null)
     }
-
-    return promises;
 
   } catch (e) {
     console.log(e)
