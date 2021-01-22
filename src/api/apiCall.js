@@ -1,27 +1,30 @@
-const got = require('got');
+const got = require('got'); // This is to make a HTTP request without doing AJAX
 const cheerio = require('cheerio');
 const { CookieJar} = require('tough-cookie');
 const cookieJar = new CookieJar();
 
-let response
-let data
+let response;
+let data;
 
 const homgot = async (url, options) => {
 
     if (options !== undefined) {
+
         if (options.scrapy) {
-            response = await got(url, { cookieJar })
-            data = await cheerio.load(response.body)
+            response = await got(url, { cookieJar });
+            data = await cheerio.load(response.body);
         }
+
         if (options.parse) {
-            data = await got(url, { cookieJar }).json()
+            data = await got(url, { cookieJar }).json();
         }
+        
     } else {
         data = await got.get(url, { cookieJar });
     }
 
-    return data
+    return data;
 
 }
 
-module.exports = {homgot}
+module.exports = { homgot };

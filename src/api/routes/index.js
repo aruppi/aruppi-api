@@ -269,12 +269,12 @@ router.get('/moreInfo/:title' , (req, res) =>{
     let title = req.params.title;
 
     api.getMoreInfo(title)
-        .then(info =>{
+        .then(info => {
             if (info !== undefined) {
                 res.status(200).json(info);
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
+            } else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }   
         }).catch((err) =>{
         console.error(err);
     });
@@ -286,13 +286,15 @@ router.get('/getEpisodes/:title' , (req, res) =>{
     let title = req.params.title;
 
     api.getEpisodes(title)
-        .then(episodes =>{
+        .then(episodes => {
+            
             if (episodes.length > 0) {
                 res.status(200).json({episodes});
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
+            } else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }
         }).catch((err) =>{
+        
         console.error(err);
     });
 
@@ -431,16 +433,17 @@ router.get('/allThemes', (req, res) =>{
 router.get('/themes/:title' , (req, res) =>{
 
     let title = req.params.title;
+    
 
     api.getOpAndEd(title)
-        .then(themes =>{
-            if (themes.length > 0) {
+        .then(themes => {
+            if (themes) {
                 res.status(200).json({
                     themes
                 });
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
+            } else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }
         }).catch((err) =>{
         console.error(err);
     });

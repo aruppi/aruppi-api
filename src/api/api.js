@@ -20,7 +20,7 @@ const {
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
-const parserThemes = new ThemeParser()
+const parserThemes = new ThemeParser();
 
 const {
   BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE, BASE_ANIMEFLV, BASE_ARUPPI
@@ -75,16 +75,18 @@ const getAllAnimes = async () =>{
 
 };
 
-const getAllDirectory = async (genres) =>{
+const getAllDirectory = async (genres) => {
 
-  let data
-  if (genres === "sfw") {
+  let data;
+
+  if (genres === 'sfw') {
     data = JSON.parse(JSON.stringify(require('../assets/directory.json'))).filter(function (item) {
       return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
-    })
+    });
   } else {
     data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
   }
+
 
   return data.map(doc => ({
     id: doc.id,
@@ -101,7 +103,7 @@ const getAllDirectory = async (genres) =>{
 
 };
 
-const getAnitakume = async () =>{
+const getAnitakume = async () => {
 
   const promises = []
 
@@ -363,7 +365,7 @@ const getOpAndEd = async (title) => await structureThemes(await parserThemes.ser
 
 const getThemesYear = async (year) => {
 
-  let data = []
+  let data = [];
   if (year === undefined) {
     return await parserThemes.allYears();
   } else {
