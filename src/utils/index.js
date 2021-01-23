@@ -22,37 +22,37 @@ global.btoa = btoa;
 async function videoServersJK(id) {
 
     const $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
-    
-    const scripts = $('script');
-    const episodes = $('div#reproductor-box li');
-    const serverNames = [];
-    let servers = [];
+    let servers = {};
+    let script;
+    const serverNames = $('div#reproductor-box li').map((index, element) => {
+        return $(element).find('a').text();
+    }).get();
 
-    episodes.each((index, element) => serverNames.push($(element).find('a').text()));
-
-    for (let i = 0; i < scripts.length; i++) {
-        try {
-            const contents = $(scripts[i]).html();
-            
-            if ((contents || '').includes('var video = [];')) {
-                Array.from({ length: episodes.length }, (v, k) => {
-                    let index = Number(k + 1);
-                    let videoPageURL = contents.split(`video[${index}] = \'<iframe class="player_conte" src="`)[1].split('"')[0];
-                    servers.push({ iframe: videoPageURL });
-                });
-            }
-        } catch (err) {
-            console.log(err)
-            return null;
+    $('script').each((index, element) => {
+        if ($(element).html().includes('var video = [];')) {
+            script = $(element).html();
         }
-    }
+    });
+    
+    
+    try {
+        let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
+        
+        for (let i = 0; i < serverNames.length; i++) {
+            servers[serverNames[i]] = videoUrls[i];
+        }
 
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+    
     let serverList = [];
 
     for (let server in servers) {
         serverList.push({
-            id: serverNames[server].toLowerCase(),
-            url: await getVideoURL(servers[server].iframe),
+            id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+            url: servers[server],
             direct: true
         });
     }
@@ -62,26 +62,6 @@ async function videoServersJK(id) {
     return await Promise.all(serverList);
 }
 
-
-async function getVideoURL(url) {
-
-    const $ = await homgot(url, { scrapy: true });
-
-    const video = $('video');
-    if (video.length) {
-        const src = $(video).find('source').attr('src');
-        return src || null;
-    }
-    else {
-
-        const scripts = $('script');
-        const l = global;
-        const ll = String;
-        const $script2 = $(scripts[1]).html();
-        eval($script2);
-        return l.ss || null;
-    }
-}
 
 const jkanimeInfo = async (id) => {
 
@@ -101,15 +81,17 @@ const jkanimeInfo = async (id) => {
 
     const eps_temp_list = [];
     let episodes_aired = '';
+
     $('div#container div.left-container div.navigation a').each(async (index, element) => {
         const $element = $(element);
         const total_eps = $element.text();
         eps_temp_list.push(total_eps);
-    })
+    });
 
     try { episodes_aired = eps_temp_list[0].split('-')[1].trim(); } catch (err) { }
 
     const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
+
     for (let i = 1; i <= episodes_aired; i++) {
         let episode = i;
         let animeId = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src.split('/')[7].split('.jpg')[0];
@@ -309,15 +291,15 @@ const getMALid = async(title) =>{
 
     } else {
 
-            const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
-            const matchAnime = res.results.find(x => x.title === title);
+        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true });
 
-            if(typeof matchAnime === 'undefined') {
-                return null;
-            } else {
-                return matchAnime;
-            }
+        const matchAnime = res.results.find(x => x.title === title);
 
+        if(typeof matchAnime === 'undefined') {
+            return null;
+        } else {
+            return matchAnime;
+        }
 
     }
 
