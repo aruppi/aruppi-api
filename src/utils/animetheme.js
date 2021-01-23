@@ -209,10 +209,11 @@ class ThemeParser {
         return new Promise(async resolve => {
 
             let years = this.$('h3 a');
-            this.$('h3 a')[0].children[0].data
+            
 
             for (let i = 0; i < years.length; i++) {
                 let yearElement = years[i];
+
                 await this.year(this.$(yearElement).attr('href').split('/')[4])
                     .then(async animes => {
                         this.animes = this.animes.concat(animes);

@@ -284,10 +284,15 @@ const getEpisodes = async (title) =>{
 const getAnimeServers = async (id) => {
 
   if (isNaN(id.split('/')[0])) {
-    return await videoServersJK(id)
+
+    return await videoServersJK(id);
+
   } else {
+
     const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
+    
     return await transformUrlServer(data.servers);
+
   }
 
 };
@@ -483,7 +488,7 @@ const getPlatforms = async (id) => {
 
 const getProfilePlatform = async (id) => {
 
-  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true })
+  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true });
   let channelId = { id: data[0].youtubeId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
   let videos = await getYoutubeVideos(channelId)
 
