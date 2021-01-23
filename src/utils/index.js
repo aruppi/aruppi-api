@@ -48,6 +48,7 @@ async function videoServersJK(id) {
     }
 
     let serverList = [];
+
     for (let server in servers) {
         serverList.push({
             id: serverNames[server].toLowerCase(),
@@ -60,6 +61,7 @@ async function videoServersJK(id) {
 
     return await Promise.all(serverList);
 }
+
 
 async function getVideoURL(url) {
 
@@ -192,18 +194,18 @@ const animeflvInfo = async (id) => {
 };
 
 
-const getAnimeCharacters = async (mal_id) =>{
+const getAnimeCharacters = async(title) =>{
 
-    const dataAnime = await homgot(`${BASE_JIKAN}/anime/${mal_id}/characters_staff`, { parse: true });
+    const matchAnime = await getMALid(title);
 
     try {
         if(matchAnime !== null) {
-            
-            return dataAnime.characters.map(item=> ({
-                id: item.mal_id,
-                name: item.name,
-                image: item.image_url,
-                role: item.role
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/characters_staff`, { parse: true });
+            return data.characters.map(doc => ({
+                id: doc.mal_id,
+                name: doc.name,
+                image: doc.image_url,
+                role: doc.role
             }));
         }
     } catch (err) {
@@ -212,41 +214,40 @@ const getAnimeCharacters = async (mal_id) =>{
 
 };
 
-const getAnimeVideoPromo = async(mal_id) =>{
+const getAnimeVideoPromo = async(title) =>{
 
-    const dataAnime = await homgot(`${BASE_JIKAN}/anime/${mal_id}`);
+    const matchAnime = await getMALid(title);
 
     try {
+        if(matchAnime !== null) {
 
-        if(dataAnime !== null) {
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/videos`, {parse: true});
 
-            return dataAnime.promo.map(doc => ({
+            return data.promo.map(doc => ({
                 title: doc.title,
                 previewImage: doc.image_url,
                 videoURL: doc.video_url
             }));
-
         }
-
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
+
 };
 
-const animeExtraInfo = async (mal_id) => {
+const animeExtraInfo = async (title) => {
 
-    //@TESTING
-    const dataAnime = await homgot(`${BASE_JIKAN}/anime/${mal_id}`, { parse: true });
-    console.log(dataAnime);
+    const matchAnime = await getMALid(title)
+
     try {
 
-        if(dataAnime !== null) {
+        if(matchAnime !== null) {
 
-
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true})
             const promises = [];
-            let broadcast = '';
+            let broadcast = ''
 
-            Array(dataAnime).map(doc => {
+            Array(data).map(doc => {
 
                 let airDay = {
                     'mondays': 'Lunes',
@@ -267,11 +268,11 @@ const animeExtraInfo = async (mal_id) => {
                 };
 
                 if (doc.broadcast === null) {
-                    broadcast = null;
+                    broadcast = null
                 } else {
-                    broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()];
+                    broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
                 }
-
+                
                 promises.push({
                     titleJapanese: doc.title_japanese,
                     source: doc.source,
@@ -290,11 +291,34 @@ const animeExtraInfo = async (mal_id) => {
                     endingThemes: doc.ending_themes || null
                 });
             });
-            return data;
+            return Promise.all(promises);
         }
 
     } catch (err) {
         console.log(err)
+    }
+
+};
+
+const getMALid = async(title) =>{
+
+
+    if (title === undefined || title === null) {
+
+        return 1
+
+    } else {
+
+            const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
+            const matchAnime = res.results.find(x => x.title === title);
+
+            if(typeof matchAnime === 'undefined') {
+                return null;
+            } else {
+                return matchAnime;
+            }
+
+
     }
 
 };
@@ -456,5 +480,6 @@ module.exports = {
     obtainPreviewNews,
     structureThemes,
     getThemes,
+    getMALid,
     videoServersJK
 }

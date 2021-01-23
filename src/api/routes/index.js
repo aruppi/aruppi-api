@@ -310,9 +310,9 @@ router.get('/getAnimeServers/:id([^/]+/[^/]+)' , (req, res) =>{
                 res.status(200).json({
                     servers
                 });
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
+            } else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }
         }).catch((err) =>{
         console.error(err);
     });

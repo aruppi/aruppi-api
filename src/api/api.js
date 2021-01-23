@@ -242,6 +242,7 @@ const getMoreInfo = async (title) =>{
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     let result = data.filter(anime => anime.title === title)[0];
+    console.log(result);
 
     return {
       title: result.title || null,
@@ -257,7 +258,7 @@ const getMoreInfo = async (title) =>{
     }
 
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
 };
@@ -267,16 +268,16 @@ const getEpisodes = async (title) =>{
   try {
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+    const result = data.filter(x => x.title === title || x.mal_title === title)[0];
 
-    if (!res.jkanime) {
-      return await animeflvInfo(res.id).then(episodes => episodes || null)
+    if (!result.jkanime) {
+      return await animeflvInfo(result.id).then(episodes => episodes || null);
     } else {
-      return await jkanimeInfo(res.id).then(episodes => episodes || null)
+      return await jkanimeInfo(result.id).then(episodes => episodes || null);
     }
 
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
 };
