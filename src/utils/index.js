@@ -34,7 +34,6 @@ async function videoServersJK(id) {
         }
     });
     
-    
     try {
         let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
         
@@ -50,16 +49,43 @@ async function videoServersJK(id) {
     let serverList = [];
 
     for (let server in servers) {
-        serverList.push({
-            id: serverNames[serverNames.indexOf(server)].toLowerCase(),
-            url: servers[server],
-            direct: true
-        });
+        if (serverNames[serverNames.indexOf(server)].toLowerCase() === 'desu') {
+            serverList.push({
+                id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+                url: await desuServerUrl(servers[server]),
+                direct: true
+            });
+        }else {
+            serverList.push({
+                id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+                url: servers[server],
+                direct: true
+            });
+        }
+        
     }
 
     serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
 
-    return await Promise.all(serverList);
+    return serverList;
+}
+
+async function desuServerUrl(url) {
+
+    const $ = await homgot(url, { scrapy: true});
+    let script;
+
+    $('script').each((index, element) => {
+        if ($(element).html().includes('var parts = {')) {
+            script = $(element).html();
+        }
+    });
+
+    let result = script.match(/swarmId: '(https:\/\/\S+)'/gi)
+        .toString()
+        .split('\'')[1];
+
+    return result;
 }
 
 
@@ -67,15 +93,16 @@ const jkanimeInfo = async (id) => {
 
     let $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
 
-    let nextEpisodeDate
-    let rawNextEpisode = $('div[id="container"] div.left-container div[id="proxep"] p')[0]
+    let nextEpisodeDate;
+    let rawNextEpisode = $('div[id="container"] div.left-container div[id="proxep"] p')[0];
+
     if (rawNextEpisode === undefined) {
-        nextEpisodeDate = null
+        nextEpisodeDate = null;
     } else {
         if (rawNextEpisode.children[1].data === '  ') {
-            nextEpisodeDate = null
+            nextEpisodeDate = null;
         } else {
-            nextEpisodeDate = rawNextEpisode.children[1].data.trim()
+            nextEpisodeDate = rawNextEpisode.children[1].data.trim();
         }
     }
 
@@ -219,15 +246,15 @@ const getAnimeVideoPromo = async(title) =>{
 
 const animeExtraInfo = async (title) => {
 
-    const matchAnime = await getMALid(title)
+    const matchAnime = await getMALid(title);
 
     try {
 
         if(matchAnime !== null) {
 
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true})
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true});
             const promises = [];
-            let broadcast = ''
+            let broadcast = '';
 
             Array(data).map(doc => {
 
@@ -277,18 +304,15 @@ const animeExtraInfo = async (title) => {
         }
 
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
 
 };
 
-const getMALid = async(title) =>{
-
+const getMALid = async (title) =>{
 
     if (title === undefined || title === null) {
-
-        return 1
-
+        return 1;
     } else {
 
         const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true });
@@ -300,9 +324,7 @@ const getMALid = async(title) =>{
         } else {
             return matchAnime;
         }
-
     }
-
 };
 
 
@@ -314,7 +336,7 @@ const imageUrlToBase64 = async (url) => {
 const searchAnime = async (query) => {
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    let queryLowerCase = query.toLowerCase()
+    let queryLowerCase = query.toLowerCase();
     const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
 
     return res.map(doc => ({
@@ -331,8 +353,8 @@ const transformUrlServer = async (urlReal) => {
     for (const data of urlReal) {
         if (data.server === 'amus' || data.server === 'natsuki') {
             let res = await homgot(data.code.replace("embed", "check"), { parse: true });
-            data.code = res.file || null
-            data.direct = true
+            data.code = res.file || null;
+            data.direct = true;
         }
     }
 

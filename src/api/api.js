@@ -242,7 +242,6 @@ const getMoreInfo = async (title) =>{
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     let result = data.filter(anime => anime.title === title)[0];
-    console.log(result);
 
     return {
       title: result.title || null,
