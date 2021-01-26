@@ -52,7 +52,7 @@ async function videoServersJK(id) {
         if (serverNames[serverNames.indexOf(server)].toLowerCase() === 'desu') {
             serverList.push({
                 id: serverNames[serverNames.indexOf(server)].toLowerCase(),
-                url: await desuServerUrl(servers[server]),
+                url: await desuServerUrl(servers[server]) !== null ? await desuServerUrl(servers[server]) : servers[server],
                 direct: true
             });
         }else {
@@ -77,7 +77,11 @@ async function desuServerUrl(url) {
 
     $('script').each((index, element) => {
         if ($(element).html().includes('var parts = {')) {
-            script = $(element).html();
+            if ($(element).html()) {
+                script = $(element).html();
+            }else {
+                return null;
+            }
         }
     });
 
@@ -132,6 +136,47 @@ const jkanimeInfo = async (id) => {
 
     return animeListEps;
 
+};
+
+function getPoster(id) {
+    
+    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+
+    for (let anime of data) {
+        if (anime.id === id) {
+            return anime.poster;
+        }
+    }
+};
+
+async function getRelatedAnimes(id) {
+  
+    const $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
+    let listRelated = {};
+    let relatedAnimes = [];
+  
+    if ($('ul.ListAnmRel').length) {
+      $('ul.ListAnmRel li a').each((index, element) => {
+        listRelated[$(element).text()] = $(element).attr('href');
+      });
+
+      for (related in listRelated) {
+        let posterUrl = getPoster(listRelated[related].split('/')[2]);
+
+        relatedAnimes.push(
+            {
+                id: listRelated[related].split('/')[2],
+                title: related,
+                poster: posterUrl
+            }
+        );
+      }
+
+      return relatedAnimes;
+
+    }else {
+      return [];
+    }
 };
 
 const animeflvGenres = async (id) => {
@@ -477,6 +522,7 @@ module.exports = {
     animeflvInfo,
     getAnimeCharacters,
     getAnimeVideoPromo,
+    getRelatedAnimes,
     animeExtraInfo,
     imageUrlToBase64,
     searchAnime,

@@ -16,7 +16,7 @@ const {
   structureThemes,
   videoServersJK,
   getThemes,
-  getMALid
+  getRelatedAnimes
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
@@ -253,7 +253,8 @@ const getMoreInfo = async (title) =>{
       genres: result.genres || null,
       moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
       promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
-      characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null)
+      characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null),
+      related: await getRelatedAnimes(result.id)
     }
 
   } catch (e) {
@@ -540,5 +541,6 @@ module.exports = {
   getDestAnimePlatforms,
   getPlatforms,
   getSectionYoutubeVideos,
-  getProfilePlatform
+  getProfilePlatform,
+  getRelatedAnimes
 };
