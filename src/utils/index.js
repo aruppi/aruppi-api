@@ -147,6 +147,8 @@ function getPoster(id) {
             return anime.poster;
         }
     }
+
+    return "";
 };
 
 async function getRelatedAnimes(id) {
