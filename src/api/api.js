@@ -16,11 +16,11 @@ const {
   structureThemes,
   videoServersJK,
   getThemes,
-  getMALid
+  getRelatedAnimes
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
-const parserThemes = new ThemeParser()
+const parserThemes = new ThemeParser();
 
 const {
   BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE, BASE_ANIMEFLV, BASE_ARUPPI
@@ -75,16 +75,18 @@ const getAllAnimes = async () =>{
 
 };
 
-const getAllDirectory = async (genres) =>{
+const getAllDirectory = async (genres) => {
 
-  let data
-  if (genres === "sfw") {
+  let data;
+
+  if (genres === 'sfw') {
     data = JSON.parse(JSON.stringify(require('../assets/directory.json'))).filter(function (item) {
       return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
-    })
+    });
   } else {
     data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
   }
+
 
   return data.map(doc => ({
     id: doc.id,
@@ -101,7 +103,7 @@ const getAllDirectory = async (genres) =>{
 
 };
 
-const getAnitakume = async () =>{
+const getAnitakume = async () => {
 
   const promises = []
 
@@ -238,45 +240,25 @@ const getMoreInfo = async (title) =>{
 
   try {
 
-    const promises = []
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+    let result = data.filter(anime => anime.title === title)[0];
 
-    if (!res.jkanime) {
-      promises.push({
-        title: res.title || null,
-        poster: res.poster || null,
-        synopsis: res.description || null,
-        status: res.state || null,
-        type: res.type || null,
-        rating: res.score || null,
-        genres: res.genres || null,
-        episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
-        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
-        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
-        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
-      });
-    } else {
-      promises.push({
-        title: res.title || null,
-        poster: res.poster || null,
-        synopsis: res.description || null,
-        status: res.state || null,
-        type: res.type || null,
-        rating: res.score || null,
-        genres: res.genres || null,
-        episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
-        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
-        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
-        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
-      });
+    return {
+      title: result.title || null,
+      poster: result.poster || null,
+      synopsis: result.description || null,
+      status: result.state || null,
+      type: result.type || null,
+      rating: result.score || null,
+      genres: result.genres || null,
+      moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
+      promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
+      characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null),
+      related: await getRelatedAnimes(result.id)
     }
 
-    return promises;
-
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
 };
@@ -285,25 +267,17 @@ const getEpisodes = async (title) =>{
 
   try {
 
-    const promises = []
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+    const result = data.filter(x => x.title === title || x.mal_title === title)[0];
 
-    if (!res.jkanime) {
-      promises.push({
-        episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
-      });
+    if (!result.jkanime) {
+      return await animeflvInfo(result.id).then(episodes => episodes || null);
     } else {
-      promises.push({
-        episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
-      });
+      return await jkanimeInfo(result.id).then(episodes => episodes || null);
     }
 
-    return promises;
-
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
 };
@@ -311,10 +285,15 @@ const getEpisodes = async (title) =>{
 const getAnimeServers = async (id) => {
 
   if (isNaN(id.split('/')[0])) {
-    return await videoServersJK(id)
+
+    return await videoServersJK(id);
+
   } else {
+
     const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
+    
     return await transformUrlServer(data.servers);
+
   }
 
 };
@@ -392,7 +371,7 @@ const getOpAndEd = async (title) => await structureThemes(await parserThemes.ser
 
 const getThemesYear = async (year) => {
 
-  let data = []
+  let data = [];
   if (year === undefined) {
     return await parserThemes.allYears();
   } else {
@@ -510,7 +489,7 @@ const getPlatforms = async (id) => {
 
 const getProfilePlatform = async (id) => {
 
-  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true })
+  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true });
   let channelId = { id: data[0].youtubeId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
   let videos = await getYoutubeVideos(channelId)
 
@@ -562,5 +541,6 @@ module.exports = {
   getDestAnimePlatforms,
   getPlatforms,
   getSectionYoutubeVideos,
-  getProfilePlatform
+  getProfilePlatform,
+  getRelatedAnimes
 };

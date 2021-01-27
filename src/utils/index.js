@@ -22,91 +22,107 @@ global.btoa = btoa;
 async function videoServersJK(id) {
 
     const $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
+    let servers = {};
+    let script;
+    const serverNames = $('div#reproductor-box li').map((index, element) => {
+        return $(element).find('a').text();
+    }).get();
 
-    const scripts = $('script');
-    const episodes = $('div#reproductor-box li');
-    const serverNames = [];
-    let servers = [];
-
-    episodes.each((index, element) => serverNames.push($(element).find('a').text()))
-
-    for (let i = 0; i < scripts.length; i++) {
-        try {
-            const contents = $(scripts[i]).html();
-            if ((contents || '').includes('var video = [];')) {
-                Array.from({ length: episodes.length }, (v, k) => {
-                    let index = Number(k + 1);
-                    let videoPageURL = contents.split(`video[${index}] = \'<iframe class="player_conte" src="`)[1].split('"')[0];
-                    servers.push({ iframe: videoPageURL });
-                });
-            }
-        } catch (err) {
-            console.log(err)
-            return null;
+    $('script').each((index, element) => {
+        if ($(element).html().includes('var video = [];')) {
+            script = $(element).html();
         }
-    }
+    });
+    
+    try {
+        let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
+        
+        for (let i = 0; i < serverNames.length; i++) {
+            servers[serverNames[i]] = videoUrls[i];
+        }
 
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+    
     let serverList = [];
+
     for (let server in servers) {
-        serverList.push({
-            id: serverNames[server].toLowerCase(),
-            url: await getVideoURL(servers[server].iframe),
-            direct: true
-        });
+        if (serverNames[serverNames.indexOf(server)].toLowerCase() === 'desu') {
+            serverList.push({
+                id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+                url: await desuServerUrl(servers[server]) !== null ? await desuServerUrl(servers[server]) : servers[server],
+                direct: true
+            });
+        }else {
+            serverList.push({
+                id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+                url: servers[server],
+                direct: true
+            });
+        }
+        
     }
 
     serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
 
-    return await Promise.all(serverList);
+    return serverList;
 }
 
-async function getVideoURL(url) {
+async function desuServerUrl(url) {
 
-    const $ = await homgot(url, { scrapy: true });
+    const $ = await homgot(url, { scrapy: true});
+    let script;
 
-    const video = $('video');
-    if (video.length) {
-        const src = $(video).find('source').attr('src');
-        return src || null;
-    }
-    else {
+    $('script').each((index, element) => {
+        if ($(element).html().includes('var parts = {')) {
+            if ($(element).html()) {
+                script = $(element).html();
+            }else {
+                return null;
+            }
+        }
+    });
 
-        const scripts = $('script');
-        const l = global;
-        const ll = String;
-        const $script2 = $(scripts[1]).html();
-        eval($script2);
-        return l.ss || null;
-    }
+    let result = script.match(/swarmId: '(https:\/\/\S+)'/gi)
+        .toString()
+        .split('\'')[1];
+
+    return result;
 }
+
 
 const jkanimeInfo = async (id) => {
 
     let $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
 
-    let nextEpisodeDate
-    let rawNextEpisode = $('div[id="container"] div.left-container div[id="proxep"] p')[0]
+    let nextEpisodeDate;
+    let rawNextEpisode = $('div[id="container"] div.left-container div[id="proxep"] p')[0];
+
     if (rawNextEpisode === undefined) {
-        nextEpisodeDate = null
+        nextEpisodeDate = null;
     } else {
         if (rawNextEpisode.children[1].data === '  ') {
-            nextEpisodeDate = null
+            nextEpisodeDate = null;
         } else {
-            nextEpisodeDate = rawNextEpisode.children[1].data.trim()
+            nextEpisodeDate = rawNextEpisode.children[1].data.trim();
         }
     }
 
     const eps_temp_list = [];
     let episodes_aired = '';
+
     $('div#container div.left-container div.navigation a').each(async (index, element) => {
         const $element = $(element);
         const total_eps = $element.text();
         eps_temp_list.push(total_eps);
-    })
+    });
 
     try { episodes_aired = eps_temp_list[0].split('-')[1].trim(); } catch (err) { }
 
     const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
+
     for (let i = 1; i <= episodes_aired; i++) {
         let episode = i;
         let animeId = $('div[id="container"] div.content-box div[id="episodes-content"]')[0].children[1].children[3].attribs.src.split('/')[7].split('.jpg')[0];
@@ -122,8 +138,52 @@ const jkanimeInfo = async (id) => {
 
 };
 
+function getPoster(id) {
+    
+    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+
+    for (let anime of data) {
+        if (anime.id === id) {
+            return anime.poster;
+        }
+    }
+
+    return "";
+};
+
+async function getRelatedAnimes(id) {
+  
+    const $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
+    let listRelated = {};
+    let relatedAnimes = [];
+  
+    if ($('ul.ListAnmRel').length) {
+      $('ul.ListAnmRel li a').each((index, element) => {
+        listRelated[$(element).text()] = $(element).attr('href');
+      });
+
+      for (related in listRelated) {
+        let posterUrl = getPoster(listRelated[related].split('/')[2]);
+
+        relatedAnimes.push(
+            {
+                id: listRelated[related].split('/')[2],
+                title: related,
+                poster: posterUrl
+            }
+        );
+      }
+
+      return relatedAnimes;
+
+    }else {
+      return [];
+    }
+};
+
 const animeflvGenres = async (id) => {
-    let $ = await homgot(`${BASE_ANIMEFLV}${id}`, { scrapy: true });
+    let $ = await homgot(`${BASE_ANIMEFLV}/${id}`, { scrapy: true });
+
     $('main.Main section.WdgtCn nav.Nvgnrs a').each((index, element) => {
         return $(element).attr('href').split('=')[1] || null;
     });
@@ -131,45 +191,51 @@ const animeflvGenres = async (id) => {
 
 const animeflvInfo = async (id) => {
 
-    let $ = await homgot(`${BASE_ANIMEFLV}anime/${id}`, { scrapy: true });
+    let $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
     let scripts = $('script').toArray();
 
     const anime_info_ids = [];
     const anime_eps_data = [];
 
-    Array.from({ length: scripts.length }, (v, k) => {
-        const contents = $(scripts[k]).html();
+    for (let script of scripts) {
+        const contents = $(script).html();
+        
         if ((contents || '').includes('var anime_info = [')) {
             let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
             let dat_anime_info = JSON.parse(anime_info);
             anime_info_ids.push(dat_anime_info);
         }
+
         if ((contents || '').includes('var episodes = [')) {
             let episodes = contents.split('var episodes = ')[1].split(';')[0];
-            let eps_data = JSON.parse(episodes)
+            let eps_data = JSON.parse(episodes);
             anime_eps_data.push(eps_data);
         }
-    });
+    }
+
     const animeId = id;
-    let nextEpisodeDate
+    let nextEpisodeDate;
 
     if (anime_info_ids.length > 0) {
         if (anime_info_ids[0].length === 4) {
-            nextEpisodeDate = anime_info_ids[0][3]
+            nextEpisodeDate = anime_info_ids[0][3];
         } else {
-            nextEpisodeDate = null
+            nextEpisodeDate = null;
         }
     }
 
     const amimeTempList = [];
+
     for (const [key] of Object.entries(anime_eps_data)) {
         let episode = anime_eps_data[key].map(x => x[0]);
         let episodeId = anime_eps_data[key].map(x => x[1]);
         amimeTempList.push(episode, episodeId);
     }
+
     const animeListEps = [{ nextEpisodeDate: nextEpisodeDate }];
-    Array.from({ length: amimeTempList[1].length }, (v, k) => {
-        let data = amimeTempList.map(x => x[k]);
+
+    for (let i = 0; i < amimeTempList[1].length; i++) {
+        let data = amimeTempList.map(x => x[i]);
         let episode = data[0];
         let id = data[1];
         let link = `${id}/${animeId}-${episode}`
@@ -177,16 +243,16 @@ const animeflvInfo = async (id) => {
         animeListEps.push({
             episode: episode,
             id: link,
-        })
-    })
+        });
+    }
 
-    return animeListEps
-
+    return animeListEps;
 };
+
 
 const getAnimeCharacters = async(title) =>{
 
-    const matchAnime = await getMALid(title)
+    const matchAnime = await getMALid(title);
 
     try {
         if(matchAnime !== null) {
@@ -199,18 +265,20 @@ const getAnimeCharacters = async(title) =>{
             }));
         }
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
 
 };
 
 const getAnimeVideoPromo = async(title) =>{
 
-    const matchAnime = await getMALid(title)
+    const matchAnime = await getMALid(title);
 
     try {
         if(matchAnime !== null) {
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/videos`, {parse: true})
+
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/videos`, {parse: true});
+
             return data.promo.map(doc => ({
                 title: doc.title,
                 previewImage: doc.image_url,
@@ -218,22 +286,22 @@ const getAnimeVideoPromo = async(title) =>{
             }));
         }
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
 
 };
 
 const animeExtraInfo = async (title) => {
 
-    const matchAnime = await getMALid(title)
+    const matchAnime = await getMALid(title);
 
     try {
 
         if(matchAnime !== null) {
 
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true})
+            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true});
             const promises = [];
-            let broadcast = ''
+            let broadcast = '';
 
             Array(data).map(doc => {
 
@@ -260,7 +328,7 @@ const animeExtraInfo = async (title) => {
                 } else {
                     broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
                 }
-
+                
                 promises.push({
                     titleJapanese: doc.title_japanese,
                     source: doc.source,
@@ -283,33 +351,29 @@ const animeExtraInfo = async (title) => {
         }
 
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
 
 };
 
-const getMALid = async(title) =>{
-
+const getMALid = async (title) =>{
 
     if (title === undefined || title === null) {
-
-        return 1
-
+        return 1;
     } else {
 
-            const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
-            const matchAnime = res.results.find(x => x.title === title);
+        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true });
 
-            if(typeof matchAnime === 'undefined') {
-                return null;
-            } else {
-                return matchAnime;
-            }
+        const matchAnime = res.results.find(x => x.title === title);
 
-
+        if(typeof matchAnime === 'undefined') {
+            return null;
+        } else {
+            return matchAnime;
+        }
     }
-
 };
+
 
 const imageUrlToBase64 = async (url) => {
     let img = await homgot(url)
@@ -319,7 +383,7 @@ const imageUrlToBase64 = async (url) => {
 const searchAnime = async (query) => {
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    let queryLowerCase = query.toLowerCase()
+    let queryLowerCase = query.toLowerCase();
     const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
 
     return res.map(doc => ({
@@ -336,8 +400,8 @@ const transformUrlServer = async (urlReal) => {
     for (const data of urlReal) {
         if (data.server === 'amus' || data.server === 'natsuki') {
             let res = await homgot(data.code.replace("embed", "check"), { parse: true });
-            data.code = res.file || null
-            data.direct = true
+            data.code = res.file || null;
+            data.direct = true;
         }
     }
 
@@ -384,44 +448,63 @@ const obtainPreviewNews = (encoded) => {
     return image;
 }
 
-const structureThemes = async (body, indv) => {
 
-    const promises = []
+
+/*   -  StructureThemes  
+    This function only parses the theme/themes
+    if indv is true, then only return a object, if it's false
+    then returns a array with the themes selected.
+*/
+const structureThemes = async (body, indv) => {
+    
     if (indv === true) {
-        promises.push({
+
+        return {
             title: body.title,
             year: body.year,
-            themes: await getThemesData(body.themes),
-        });
+            themes: await getThemesData(body.themes)
+        };
+
     } else {
         for (let i = 0; i <= body.length - 1; i++) {
-            promises.push({
+
+            const themes = [];
+
+            themes.push({
                 title: body[i].title,
                 year: body[i].year,
                 themes: await getThemesData(body[i].themes),
             });
         }
+
+        return themes;
     }
-    return promises;
+    
 
 };
+/*   -  GetThemesData
+    Get the themes from the object and
+    format to a new array of items where
+    these items are formatted better.
+*/
 
 const getThemesData = async (themes) => {
 
-    let promises = []
+    let items = [];
 
     for (let i = 0; i <= themes.length - 1; i++) {
 
-        promises.push({
+        items.push({
             title: themes[i].name.split('"')[1] || 'Remasterización',
-            type: themes[i].name.split('"')[0] || 'OP/ED',
-            episodes: themes[i].episodes || null,
+            type: themes[i].type,
+            episodes: themes[i].episodes !== "" ? themes[i].episodes : null,
+            notes: themes[i].notes !== "" ? themes[i].notes : null,
             video: themes[i].link
         });
 
     }
-
-    return promises.filter(x => x.title !== 'Remasterización');
+    
+    return items.filter(x => x.title !== 'Remasterización');
 
 };
 
@@ -441,13 +524,14 @@ module.exports = {
     animeflvInfo,
     getAnimeCharacters,
     getAnimeVideoPromo,
+    getRelatedAnimes,
     animeExtraInfo,
-    getMALid,
     imageUrlToBase64,
     searchAnime,
     transformUrlServer,
     obtainPreviewNews,
     structureThemes,
     getThemes,
+    getMALid,
     videoServersJK
 }
