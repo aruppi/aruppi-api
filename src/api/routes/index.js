@@ -193,10 +193,10 @@ router.get('/movies/:type/:page' , (req, res) =>{
     let data = {url: 'Movies', prop: 'movies', type: req.params.type, page: req.params.page }
 
     api.getSpecials(data)
-        .then(movies =>{
-            if (movies.length > 0) {
+        .then(animes =>{
+            if (animes.length > 0) {
                 res.status(200).json({
-                    movies
+                    animes
                 });
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
@@ -207,15 +207,15 @@ router.get('/movies/:type/:page' , (req, res) =>{
 
 });
 
-router.get('/ovas/:type/:page' , (req, res) =>{
+router.get('/ova/:type/:page' , (req, res) =>{
 
     let data = {url: 'Ova', prop: 'ova', type: req.params.type, page: req.params.page }
 
     api.getSpecials(data)
-        .then(ovas =>{
-            if (ovas.length > 0) {
+        .then(animes =>{
+            if (animes.length > 0) {
                 res.status(200).json({
-                    ovas
+                    animes
                 });
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
@@ -226,15 +226,15 @@ router.get('/ovas/:type/:page' , (req, res) =>{
 
 });
 
-router.get('/specials/:type/:page' , (req, res) =>{
+router.get('/special/:type/:page' , (req, res) =>{
 
     let data = {url: 'Special', prop: 'special', type: req.params.type, page: req.params.page }
 
     api.getSpecials(data)
-        .then(specials =>{
-            if (specials.length > 0) {
+        .then(animes =>{
+            if (animes.length > 0) {
                 res.status(200).json({
-                    specials
+                    animes
                 });
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
@@ -250,10 +250,10 @@ router.get('/tv/:type/:page' , (req, res) =>{
     let data = {url: 'Tv', prop: 'tv', type: req.params.type, page: req.params.page }
 
     api.getSpecials(data)
-        .then(tv =>{
-            if (tv.length > 0) {
+        .then(animes =>{
+            if (animes.length > 0) {
                 res.status(200).json({
-                    tv
+                    animes
                 });
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
@@ -548,25 +548,7 @@ router.get('/platforms/:id?' , (req , res) =>{
     api.getPlatforms(id)
         .then(platforms =>{
             if (platforms.length > 0) {
-                res.status(200).json({
-                    platforms
-                });
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
-        }).catch((err) =>{
-        console.error(err);
-    });
-});
-
-router.get('/profilePlatform/:id' , (req , res) =>{
-
-    let id = req.params.id;
-
-    api.getProfilePlatform(id)
-        .then(info =>{
-            if (info.length > 0) {
-                res.status(200).json(info[0]);
+                res.status(200).json({platforms});
             } else (
                 res.status(500).json({ message: 'Aruppi lost in the shell'})
             )

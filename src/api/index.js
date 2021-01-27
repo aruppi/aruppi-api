@@ -25,8 +25,8 @@ router.get('/', (req, res) => {
         'Futures Seasons': '/api/v3/laterSeasons',
         'LastEpisodes': '/api/v3/lastEpisodes',
         'Movies': '/api/v3/movies/:type/:page',
-        'Ovas': '/api/v3/ovas/:type/:page',
-        'Specials': '/api/v3/specials/:type/:page',
+        'Ovas': '/api/v3/ova/:type/:page',
+        'Specials': '/api/v3/special/:type/:page',
         'Tv': '/api/v3/tv/:type/:page',
         'MoreInfo': '/api/v3/moreInfo/:title',
         'GetEpisodes': '/api/v3/getEpisodes/:title',
@@ -42,8 +42,7 @@ router.get('/', (req, res) => {
         'Random Theme': '/api/v3/randomTheme',
         'Artists Theme': '/api/v3/artists/:id?',
         'Famous Platforms': '/api/v3/destAnimePlatforms',
-        'Legal Platforms': '/api/v3/platforms/:id?',
-        'Platforms Details': '/api/v3/profilePlatform/:id'
+        'Legal Platforms': '/api/v3/platforms/:id?'
       }
     ]
   });

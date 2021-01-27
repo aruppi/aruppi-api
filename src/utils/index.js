@@ -33,10 +33,10 @@ async function videoServersJK(id) {
             script = $(element).html();
         }
     });
-    
+
     try {
         let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
-        
+
         for (let i = 0; i < serverNames.length; i++) {
             servers[serverNames[i]] = videoUrls[i];
         }
@@ -45,7 +45,7 @@ async function videoServersJK(id) {
         console.log(err);
         return null;
     }
-    
+
     let serverList = [];
 
     for (let server in servers) {
@@ -62,7 +62,7 @@ async function videoServersJK(id) {
                 direct: true
             });
         }
-        
+
     }
 
     serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
@@ -139,12 +139,13 @@ const jkanimeInfo = async (id) => {
 };
 
 function getPoster(id) {
-    
+
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
 
+    //@CHECK
     for (let anime of data) {
         if (anime.id === id) {
-            return anime.poster;
+            return [anime.poster, anime.type];
         }
     }
 
@@ -152,11 +153,11 @@ function getPoster(id) {
 };
 
 async function getRelatedAnimes(id) {
-  
+
     const $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
     let listRelated = {};
     let relatedAnimes = [];
-  
+
     if ($('ul.ListAnmRel').length) {
       $('ul.ListAnmRel li a').each((index, element) => {
         listRelated[$(element).text()] = $(element).attr('href');
@@ -165,11 +166,13 @@ async function getRelatedAnimes(id) {
       for (related in listRelated) {
         let posterUrl = getPoster(listRelated[related].split('/')[2]);
 
+        //@CHECK
         relatedAnimes.push(
             {
                 id: listRelated[related].split('/')[2],
                 title: related,
-                poster: posterUrl
+                type: posterUrl[1],
+                poster: posterUrl[0]
             }
         );
       }
@@ -199,7 +202,7 @@ const animeflvInfo = async (id) => {
 
     for (let script of scripts) {
         const contents = $(script).html();
-        
+
         if ((contents || '').includes('var anime_info = [')) {
             let anime_info = contents.split('var anime_info = ')[1].split(';\n')[0];
             let dat_anime_info = JSON.parse(anime_info);
@@ -328,7 +331,7 @@ const animeExtraInfo = async (title) => {
                 } else {
                     broadcast = airDay[doc.broadcast.split('at')[0].replace(" ", "").toLowerCase()]
                 }
-                
+
                 promises.push({
                     titleJapanese: doc.title_japanese,
                     source: doc.source,
@@ -450,13 +453,13 @@ const obtainPreviewNews = (encoded) => {
 
 
 
-/*   -  StructureThemes  
+/*   -  StructureThemes
     This function only parses the theme/themes
     if indv is true, then only return a object, if it's false
     then returns a array with the themes selected.
 */
 const structureThemes = async (body, indv) => {
-    
+
     if (indv === true) {
 
         return {
@@ -479,7 +482,7 @@ const structureThemes = async (body, indv) => {
 
         return themes;
     }
-    
+
 
 };
 /*   -  GetThemesData
@@ -503,7 +506,7 @@ const getThemesData = async (themes) => {
         });
 
     }
-    
+
     return items.filter(x => x.title !== 'Remasterización');
 
 };

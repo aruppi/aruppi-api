@@ -224,7 +224,8 @@ const getSpecials = async (data) =>{
   return res[data.prop].map(doc =>({
       id: doc.id,
       title: doc.title,
-      type: doc.type,
+      type: data.url.toLowerCase(),
+      page: data.page,
       banner: doc.banner,
       image: doc.poster,
       synopsis: doc.synopsis,
@@ -471,6 +472,25 @@ const getPlatforms = async (id) => {
       cover: doc.cover
     }));
 
+  } if (id === "producers" || id === "apps" || id === "publishers") {
+
+        data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
+
+        return data.map(doc =>({
+            id: doc.id,
+            name: doc.name,
+            logo: doc.logo,
+            cover: doc.cover,
+            description: doc.description,
+            type: doc.type,
+            moreInfo: doc.moreInfo,
+            facebook: doc.facebook,
+            twitter: doc.twitter,
+            instagram: doc.instagram,
+            webInfo: doc.webInfo,
+            webpage: doc.webpage
+        }));
+
   } else {
 
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
@@ -481,7 +501,8 @@ const getPlatforms = async (id) => {
       type: doc.type,
       logo: doc.logo,
       cover: doc.cover,
-      link: doc.link
+      webpage: doc.webpage,
+
     }));
   }
 
