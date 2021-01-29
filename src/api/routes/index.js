@@ -320,7 +320,6 @@ router.get('/getAnimeServers/:id([^/]+/[^/]+)' , (req, res) =>{
 });
 
 router.get('/search/:title' , (req, res) =>{
-
     let title = req.params.title;
 
     api.search(title)
@@ -339,7 +338,6 @@ router.get('/search/:title' , (req, res) =>{
 });
 
 router.get('/images/:query' , (req, res) =>{
-
     let query = { title: req.params.query, count: '51', type: 'images', safesearch: '1', country: 'es_ES', uiv: '4'  };
 
     api.getImages(query)
@@ -358,7 +356,6 @@ router.get('/images/:query' , (req, res) =>{
 });
 
 router.get('/videos/:channelId' , (req, res) =>{
-
     let channelId = { id: req.params.channelId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
 
     api.getYoutubeVideos(channelId)
@@ -377,7 +374,6 @@ router.get('/videos/:channelId' , (req, res) =>{
 });
 
 router.get('/sectionedVideos/:type' , (req, res) =>{
-
     let type = req.params.type;
 
     api.getSectionYoutubeVideos(type)
@@ -396,7 +392,6 @@ router.get('/sectionedVideos/:type' , (req, res) =>{
 });
 
 router.get('/radio' , (req, res) =>{
-
     api.getRadioStations()
         .then(stations =>{
             if (stations.length > 0) {
@@ -431,9 +426,7 @@ router.get('/allThemes', (req, res) =>{
 
 
 router.get('/themes/:title' , (req, res) =>{
-
     let title = req.params.title;
-    
 
     api.getOpAndEd(title)
         .then(themes => {
@@ -451,19 +444,17 @@ router.get('/themes/:title' , (req, res) =>{
 });
 
 router.get('/themesYear/:year?', (req, res) =>{
-
     let year = req.params.year;
-    let season = req.params.season
 
-    api.getThemesYear(year, season)
+    api.getThemesYear(year)
         .then(themes =>{
             if (themes.length > 0) {
                 res.status(200).json({
                     themes
                 });
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
+            } else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }
         }).catch((err) =>{
         console.error(err);
     });
@@ -512,17 +503,27 @@ router.get('/getByGenres/:genre?/:order?/:page?' , (req , res) =>{
     let genres = { genre: req.params.genre, order: req.params.order, page: req.params.page  };
 
     api.getAnimeGenres(genres)
-        .then(animes =>{
+        .then(animes => {
             if (animes.length > 0) {
                 res.status(200).json({
                     animes
                 });
-            } else (
-                res.status(500).json({ message: 'Aruppi lost in the shell'})
-            )
+            } else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }
         }).catch((err) =>{
         console.error(err);
     });
+});
+
+router.get('/randomAnime', (req, res) => {
+    let randomAnime = api.getRandomAnime();
+
+    if (randomAnime) {
+        res.status(200).json({randomAnime});
+    }else {
+        res.status(500).json({ message: 'Aruppi lost in the shell'});
+    }
 });
 
 router.get('/destAnimePlatforms' , (req , res) =>{

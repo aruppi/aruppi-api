@@ -242,7 +242,7 @@ const getMoreInfo = async (title) =>{
   try {
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    let result = data.filter(anime => anime.title === title)[0];
+    let result = data.filter(anime => anime.title === title || anime.mal_title === title)[0];
 
     return {
       title: result.title || null,
@@ -265,9 +265,7 @@ const getMoreInfo = async (title) =>{
 };
 
 const getEpisodes = async (title) =>{
-
   try {
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     const result = data.filter(x => x.title === title || x.mal_title === title)[0];
 
@@ -371,13 +369,13 @@ const getRadioStations = async () => require('../assets/radiostations.json');
 const getOpAndEd = async (title) => await structureThemes(await parserThemes.serie(title), true);
 
 const getThemesYear = async (year) => {
-
   let data = [];
+
   if (year === undefined) {
     return await parserThemes.allYears();
   } else {
-    data = await parserThemes.year(year)
-    return await structureThemes(data, false)
+    data = await parserThemes.year(year);
+    return await structureThemes(data, false);
   }
 
 };
@@ -534,6 +532,13 @@ const getProfilePlatform = async (id) => {
 
 };
 
+function getRandomAnime() {
+  let directory = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+  const randomNumber = Math.floor(Math.random() * directory.length);
+
+  return directory[randomNumber];
+}
+
 module.exports = {
   schedule,
   top,
@@ -563,5 +568,6 @@ module.exports = {
   getPlatforms,
   getSectionYoutubeVideos,
   getProfilePlatform,
-  getRelatedAnimes
+  getRelatedAnimes,
+  getRandomAnime
 };

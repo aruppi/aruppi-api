@@ -82,11 +82,11 @@ class ThemeParser {
         let animes = [];
 
         this.$ = await redditocall(date);
-        this.$('h3').each((i, el) => {
-            let parsed = this.parseAnime(el);
+        this.$('h3').each((index, element) => {
+            let parsed = this.parseAnime(this.$(element));
             parsed.year = date;
             animes.push(parsed);
-        })
+        });
         return animes;
     }
 
@@ -106,25 +106,25 @@ class ThemeParser {
         });
     }
 
+    /*  -ParseYears
+        Get the data from the year
+        get the name and the id to do the respective
+        scrapping.
+    */
     parseYears() {
         return new Promise(async resolve => {
+            let years = [];
 
-            let promises = [];
-            let data = this.$('h3 a');
+            this.$('h3 a').each((index, element) => {
+                years.push(
+                    {
+                        id: this.$(element).attr('href').split('/')[4],
+                        name: this.$(element).text()
+                    }
+                );
+            });
 
-            for (let i = 0; i < data.length; i++) {
-
-                promises.push({
-                    id: data[i].children[0].parent.attribs.href.split('/')[4],
-                    name: data[i].children[0].data
-                })
-
-                if (i === data.length - 1) {
-                    resolve(promises);
-                }
-
-            }
-
+            resolve(years);
         });
     }
 
@@ -226,10 +226,16 @@ class ThemeParser {
         })
     }
 
+    /* - ParseAnime
+        Parse the h3 tag and get the table
+        for the next function to parse the table
+        and get the information about the ending and
+        openings.
+    */
     parseAnime(element) {
-        let el = this.$(element).children('a');
-        let title = el.text();
-        let mal_id = el.attr('href').split('/')[4];
+        let el = this.$(element).find('a');
+        let title = this.$(el).text();
+        let mal_id = this.$(el).attr('href').split('/')[4];
         let next = this.$(element).next();
 
         let theme = {
@@ -237,17 +243,11 @@ class ThemeParser {
             title
         };
 
-
-        if (next.prop("tagName") === "TABLE") {
-
-            theme.themes = this.parseTable(next);
-
-        }else if (next.prop("tagName") === "P") {
-            
-            theme.themes = this.parseTable(next.next());
-
+        if (this.$(next).prop("tagName") === "TABLE") {
+            theme.themes = this.parseTable(this.$(next));
+        }else if (this.$(next).prop("tagName") === "P") {
+            theme.themes = this.parseTable(this.$(next).next());
         } 
-
 
         return theme;
     }
@@ -257,25 +257,22 @@ class ThemeParser {
         and returns a object with all the
         information.
     */
-
     parseTable(element) {
 
-        if (element.prop('tagName') !== "TABLE") {
-            return this.parseTable(element.next());
+        if (this.$(element).prop('tagName') !== "TABLE") {
+            return this.parseTable(this.$(element).next());
         }
 
         let themes = [];
 
         
-        element.find('tbody').find('tr').each((i, elem) => {
-
-            let name = replaceAll(elem.children[1].children[0].data, "&quot;", "\"");
-            let link = elem.children[3].children[0].attribs.href;
-            let linkDesc = elem.children[3].children[0].children[0].data;
-            let episodes = elem.children[5].children.length > 0 ? elem.children[5].children[0].data : "";
-            let notes = elem.children[7].children.length > 0 ? elem.children[7].children[0].data : "";
+        this.$(element).find('tbody').find('tr').each((i, elem) => {
             
-            
+            let name = replaceAll(this.$(elem).find('td').eq(0).text(), '&quot;', '"');
+            let link = this.$(elem).find('td').eq(1).find('a').attr('href');
+            let linkDesc = this.$(elem).find('td').eq(1).find('a').text();
+            let episodes = this.$(elem).find('td').eq(2).text().length > 0 ? this.$(elem).find('td').eq(2).text() : "";
+            let notes = this.$(elem).find('td').eq(3).text().length > 0 ? this.$(elem).find('td').eq(3).text() : "";
 
             themes.push({
                 name,
@@ -286,8 +283,8 @@ class ThemeParser {
                 notes
             });
         });
-        return themes;
 
+        return themes;
     }
 }
 

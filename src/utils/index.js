@@ -138,14 +138,16 @@ const jkanimeInfo = async (id) => {
 
 };
 
-function getPoster(id) {
-
+function getPosterAndType(id) {
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
 
-    //@CHECK
+
     for (let anime of data) {
         if (anime.id === id) {
-            return [anime.poster, anime.type];
+            return [
+                anime.poster, 
+                anime.type
+            ];
         }
     }
 
@@ -153,7 +155,6 @@ function getPoster(id) {
 };
 
 async function getRelatedAnimes(id) {
-
     const $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
     let listRelated = {};
     let relatedAnimes = [];
@@ -164,9 +165,8 @@ async function getRelatedAnimes(id) {
       });
 
       for (related in listRelated) {
-        let posterUrl = getPoster(listRelated[related].split('/')[2]);
+        let posterUrl = getPosterAndType(listRelated[related].split('/')[2]);
 
-        //@CHECK
         relatedAnimes.push(
             {
                 id: listRelated[related].split('/')[2],
@@ -193,7 +193,6 @@ const animeflvGenres = async (id) => {
 }
 
 const animeflvInfo = async (id) => {
-
     let $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
     let scripts = $('script').toArray();
 
@@ -459,6 +458,7 @@ const obtainPreviewNews = (encoded) => {
     then returns a array with the themes selected.
 */
 const structureThemes = async (body, indv) => {
+    let themes = [];
 
     if (indv === true) {
 
@@ -470,8 +470,6 @@ const structureThemes = async (body, indv) => {
 
     } else {
         for (let i = 0; i <= body.length - 1; i++) {
-
-            const themes = [];
 
             themes.push({
                 title: body[i].title,
