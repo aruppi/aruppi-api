@@ -224,7 +224,8 @@ const getSpecials = async (data) =>{
   return res[data.prop].map(doc =>({
       id: doc.id,
       title: doc.title,
-      type: doc.type,
+      type: data.url.toLowerCase(),
+      page: data.page,
       banner: doc.banner,
       image: doc.poster,
       synopsis: doc.synopsis,
@@ -241,7 +242,7 @@ const getMoreInfo = async (title) =>{
   try {
 
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    let result = data.filter(anime => anime.title === title)[0];
+    let result = data.filter(anime => anime.title === title || anime.mal_title === title)[0];
 
     return {
       title: result.title || null,
@@ -264,9 +265,7 @@ const getMoreInfo = async (title) =>{
 };
 
 const getEpisodes = async (title) =>{
-
   try {
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     const result = data.filter(x => x.title === title || x.mal_title === title)[0];
 
@@ -370,13 +369,13 @@ const getRadioStations = async () => require('../assets/radiostations.json');
 const getOpAndEd = async (title) => await structureThemes(await parserThemes.serie(title), true);
 
 const getThemesYear = async (year) => {
-
   let data = [];
+
   if (year === undefined) {
     return await parserThemes.allYears();
   } else {
-    data = await parserThemes.year(year)
-    return await structureThemes(data, false)
+    data = await parserThemes.year(year);
+    return await structureThemes(data, false);
   }
 
 };
@@ -471,6 +470,25 @@ const getPlatforms = async (id) => {
       cover: doc.cover
     }));
 
+  } if (id === "producers" || id === "apps" || id === "publishers") {
+
+        data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
+
+        return data.map(doc =>({
+            id: doc.id,
+            name: doc.name,
+            logo: doc.logo,
+            cover: doc.cover,
+            description: doc.description,
+            type: doc.type,
+            moreInfo: doc.moreInfo,
+            facebook: doc.facebook,
+            twitter: doc.twitter,
+            instagram: doc.instagram,
+            webInfo: doc.webInfo,
+            webpage: doc.webpage
+        }));
+
   } else {
 
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
@@ -481,7 +499,8 @@ const getPlatforms = async (id) => {
       type: doc.type,
       logo: doc.logo,
       cover: doc.cover,
-      link: doc.link
+      webpage: doc.webpage,
+
     }));
   }
 
@@ -513,6 +532,27 @@ const getProfilePlatform = async (id) => {
 
 };
 
+async function getRandomAnime() {
+  let directory = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+
+  const randomNumber = Math.floor(Math.random() * directory.length);
+  let result = directory[randomNumber];
+
+  return {
+    title: result.title || null,
+    poster: result.poster || null,
+    synopsis: result.description || null,
+    status: result.state || null,
+    type: result.type || null,
+    rating: result.score || null,
+    genres: result.genres || null,
+    moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
+    promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
+    characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null),
+    related: await getRelatedAnimes(result.id)
+  };
+}
+
 module.exports = {
   schedule,
   top,
@@ -542,5 +582,6 @@ module.exports = {
   getPlatforms,
   getSectionYoutubeVideos,
   getProfilePlatform,
-  getRelatedAnimes
+  getRelatedAnimes,
+  getRandomAnime
 };
