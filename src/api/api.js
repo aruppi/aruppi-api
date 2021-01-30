@@ -534,9 +534,23 @@ const getProfilePlatform = async (id) => {
 
 async function getRandomAnime() {
   let directory = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-  const randomNumber = Math.floor(Math.random() * directory.length);
 
-  return await getMoreInfo(directory[randomNumber].title);
+  const randomNumber = Math.floor(Math.random() * directory.length);
+  let result = directory[randomNumber];
+
+  return {
+    title: result.title || null,
+    poster: result.poster || null,
+    synopsis: result.description || null,
+    status: result.state || null,
+    type: result.type || null,
+    rating: result.score || null,
+    genres: result.genres || null,
+    moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
+    promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
+    characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null),
+    related: await getRelatedAnimes(result.id)
+  };
 }
 
 module.exports = {
