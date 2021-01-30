@@ -17,7 +17,8 @@ const {
   structureThemes,
   videoServersJK,
   getThemes,
-  getRelatedAnimes
+  getRelatedAnimesFLV,
+  getRelatedAnimesMAL
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
@@ -224,18 +225,34 @@ const getMoreInfo = async (title) =>{
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     let result = data.filter(anime => fuzzball.ratio(anime.title, title) > 90)[0];
 
-    return {
-      title: result.title || null,
-      poster: result.poster || null,
-      synopsis: result.description || null,
-      status: result.state || null,
-      type: result.type || null,
-      rating: result.score || null,
-      genres: result.genres || null,
-      moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
-      promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
-      characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
-      related: await getRelatedAnimes(result.id)
+    if (!result.jkanime) {
+      return {
+        title: result.title || null,
+        poster: result.poster || null,
+        synopsis: result.description || null,
+        status: result.state || null,
+        type: result.type || null,
+        rating: result.score || null,
+        genres: result.genres || null,
+        moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+        promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+        characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+        related: await getRelatedAnimesFLV(result.id)
+      };
+    }else {
+      return {
+        title: result.title || null,
+        poster: result.poster || null,
+        synopsis: result.description || null,
+        status: result.state || null,
+        type: result.type || null,
+        rating: result.score || null,
+        genres: result.genres || null,
+        moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+        promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+        characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+        related: await getRelatedAnimesMAL(result.mal_id)
+      };
     }
   } catch (e) {
     console.log(e);
@@ -245,7 +262,7 @@ const getMoreInfo = async (title) =>{
 const getEpisodes = async (title) =>{
   try {
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const result = data.filter(x => x.title === title || x.mal_title === title)[0];
+    const result = data.filter(x => x.title === title)[0];
 
     if (!result.jkanime) {
       return await animeflvInfo(result.id).then(episodes => episodes || null);
@@ -536,6 +553,5 @@ module.exports = {
   getPlatforms,
   getSectionYoutubeVideos,
   getProfilePlatform,
-  getRelatedAnimes,
   getRandomAnime
 };
