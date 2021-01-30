@@ -499,7 +499,6 @@ router.get('/artists/:id?', (req, res) =>{
 });
 
 router.get('/getByGenres/:genre?/:order?/:page?' , (req , res) =>{
-
     let genres = { genre: req.params.genre, order: req.params.order, page: req.params.page  };
 
     api.getAnimeGenres(genres)
