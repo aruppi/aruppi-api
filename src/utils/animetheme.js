@@ -158,13 +158,12 @@ class ThemeParser {
 
             for (let i = 0; i < data.length; i++) {
 
-                let parsed = await this.parseAnime(data[i])
+                let parsed = await this.parseAnime(data[i]);
                 promises.push(parsed)
 
                 if (i === data.length - 1) {
-                    resolve(promises)
+                    resolve(promises);
                 }
-
             }
 
         })

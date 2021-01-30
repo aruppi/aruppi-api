@@ -510,13 +510,11 @@ const getThemesData = async (themes) => {
 };
 
 const getThemes = async (themes) => {
-
     return themes.map(doc => ({
         name: doc.themeName,
         type: doc.themeType,
         video: doc.mirror.mirrorURL
     }));
-
 };
 
 module.exports = {

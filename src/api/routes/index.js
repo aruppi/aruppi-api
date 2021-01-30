@@ -517,13 +517,17 @@ router.get('/getByGenres/:genre?/:order?/:page?' , (req , res) =>{
 });
 
 router.get('/randomAnime', (req, res) => {
-    let randomAnime = api.getRandomAnime();
-
-    if (randomAnime) {
-        res.status(200).json({randomAnime});
-    }else {
-        res.status(500).json({ message: 'Aruppi lost in the shell'});
-    }
+    api.getRandomAnime()
+        .then(anime => {
+            if (anime) {
+                res.status(200).json(anime);
+            }else {
+                res.status(500).json({ message: 'Aruppi lost in the shell'});
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        });
 });
 
 router.get('/destAnimePlatforms' , (req , res) =>{

@@ -532,11 +532,11 @@ const getProfilePlatform = async (id) => {
 
 };
 
-function getRandomAnime() {
+async function getRandomAnime() {
   let directory = JSON.parse(JSON.stringify(require('../assets/directory.json')));
   const randomNumber = Math.floor(Math.random() * directory.length);
 
-  return directory[randomNumber];
+  return await getMoreInfo(directory[randomNumber].title);
 }
 
 module.exports = {

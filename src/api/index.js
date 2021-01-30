@@ -16,6 +16,7 @@ router.get('/', (req, res) => {
         'Schedule': '/api/v3/schedule/:day',
         'Top': '/api/v3/top/:type/:subtype/:page',
         'AllAnimes': '/api/v3/allAnimes',
+        'RandomAnime': '/api/v3/randomAnime',
         'Anitakume': '/api/v3/anitakume',
         'News': '/api/v3/news',
         'Season': '/api/v3/season/:year/:type',
