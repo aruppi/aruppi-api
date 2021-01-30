@@ -20,10 +20,10 @@ function btoa(str) {
 global.btoa = btoa;
 
 async function videoServersJK(id) {
-
     const $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
     let servers = {};
     let script;
+    
     const serverNames = $('div#reproductor-box li').map((index, element) => {
         return $(element).find('a').text();
     }).get();
@@ -71,7 +71,6 @@ async function videoServersJK(id) {
 }
 
 async function desuServerUrl(url) {
-
     const $ = await homgot(url, { scrapy: true});
     let script;
 
@@ -94,7 +93,6 @@ async function desuServerUrl(url) {
 
 
 const jkanimeInfo = async (id) => {
-
     let $ = await homgot(`${BASE_JKANIME}${id}`, { scrapy: true });
 
     let nextEpisodeDate;
@@ -141,7 +139,6 @@ const jkanimeInfo = async (id) => {
 function getPosterAndType(id) {
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
 
-
     for (let anime of data) {
         if (anime.id === id) {
             return [
@@ -178,7 +175,6 @@ async function getRelatedAnimes(id) {
       }
 
       return relatedAnimes;
-
     }else {
       return [];
     }
@@ -252,57 +248,50 @@ const animeflvInfo = async (id) => {
 };
 
 
-const getAnimeCharacters = async(title) =>{
-
-    const matchAnime = await getMALid(title);
+const getAnimeCharacters = async(mal_id) =>{
+    let data;
 
     try {
-        if(matchAnime !== null) {
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/characters_staff`, { parse: true });
-            return data.characters.map(doc => ({
-                id: doc.mal_id,
-                name: doc.name,
-                image: doc.image_url,
-                role: doc.role
-            }));
-        }
-    } catch (err) {
-        console.log(err);
+        data = await homgot(`${BASE_JIKAN}anime/${mal_id}/characters_staff`, { parse: true });
+    }catch(error) {
+        console.log(error);
     }
-
+    
+    if(data !== null) {
+        return data.characters.map(doc => ({
+            id: doc.mal_id,
+            name: doc.name,
+            image: doc.image_url,
+            role: doc.role
+        }));
+    }
 };
 
-const getAnimeVideoPromo = async(title) =>{
-
-    const matchAnime = await getMALid(title);
+const getAnimeVideoPromo = async(mal_id) =>{
+    let data;
 
     try {
-        if(matchAnime !== null) {
-
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/videos`, {parse: true});
-
-            return data.promo.map(doc => ({
-                title: doc.title,
-                previewImage: doc.image_url,
-                videoURL: doc.video_url
-            }));
-        }
-    } catch (err) {
-        console.log(err);
+        data = await homgot(`${BASE_JIKAN}anime/${mal_id}/videos`, {parse: true});
+    }catch(error) {
+        console.log(error);
     }
 
+    if(data !== null) {
+        return data.promo.map(doc => ({
+            title: doc.title,
+            previewImage: doc.image_url,
+            videoURL: doc.video_url
+        }));
+    }
 };
 
-const animeExtraInfo = async (title) => {
-
-    const matchAnime = await getMALid(title);
+const animeExtraInfo = async (mal_id) => {
+    const data = await homgot(`${BASE_JIKAN}anime/${mal_id}`, {parse: true});
 
     try {
 
-        if(matchAnime !== null) {
-
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true});
-            const promises = [];
+        if(data !== null) {
+            let promises = [];
             let broadcast = '';
 
             Array(data).map(doc => {
@@ -358,32 +347,12 @@ const animeExtraInfo = async (title) => {
 
 };
 
-const getMALid = async (title) =>{
-
-    if (title === undefined || title === null) {
-        return 1;
-    } else {
-
-        const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true });
-
-        const matchAnime = res.results.find(x => x.title === title);
-
-        if(typeof matchAnime === 'undefined') {
-            return null;
-        } else {
-            return matchAnime;
-        }
-    }
-};
-
-
 const imageUrlToBase64 = async (url) => {
     let img = await homgot(url)
     return img.rawBody.toString('base64');
 };
 
 const searchAnime = async (query) => {
-
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
     let queryLowerCase = query.toLowerCase();
     const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
@@ -394,7 +363,6 @@ const searchAnime = async (query) => {
         type: doc.type || null,
         image: doc.poster || null
     }));
-
 };
 
 const transformUrlServer = async (urlReal) => {
@@ -531,6 +499,5 @@ module.exports = {
     obtainPreviewNews,
     structureThemes,
     getThemes,
-    getMALid,
     videoServersJK
 }
