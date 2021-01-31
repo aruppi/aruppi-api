@@ -136,22 +136,36 @@ const jkanimeInfo = async (id) => {
 
 };
 
-function getPosterAndType(id) {
+function getPosterAndType(id, mal_id) {
     let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
 
-    for (let anime of data) {
-        if (anime.id === id) {
-            return [
-                anime.poster, 
-                anime.type
-            ];
+    if (id) {
+        for (let anime of data) {
+            if (anime.id === id) {
+                return [
+                    anime.poster, 
+                    anime.type
+                ];
+            }
+        }
+    }
+
+    if (mal_id) {
+        for (let anime of data) {
+            if (anime.mal_id === parseInt(mal_id)) {
+                return [
+                    anime.poster, 
+                    anime.type,
+                    anime.id
+                ];
+            }
         }
     }
 
     return "";
-};
+}
 
-async function getRelatedAnimes(id) {
+async function getRelatedAnimesFLV(id) {
     const $ = await homgot(`${BASE_ANIMEFLV}/anime/${id}`, { scrapy: true });
     let listRelated = {};
     let relatedAnimes = [];
@@ -162,7 +176,7 @@ async function getRelatedAnimes(id) {
       });
 
       for (related in listRelated) {
-        let posterUrl = getPosterAndType(listRelated[related].split('/')[2]);
+        let posterUrl = getPosterAndType(listRelated[related].split('/')[2], false);
 
         relatedAnimes.push(
             {
@@ -178,7 +192,41 @@ async function getRelatedAnimes(id) {
     }else {
       return [];
     }
-};
+}
+
+async function getRelatedAnimesMAL(mal_id) {
+    const $ = await homgot(`https://myanimelist.net/anime/${mal_id}`, { scrapy: true });
+
+    let listRelated = {};
+    let relatedAnimes = [];
+
+    if ($('table.anime_detail_related_anime').length > 0) {
+        $('table.anime_detail_related_anime').find('tbody tr').each((index, element) => {
+            if ($(element).find('td').eq(0) !== 'Adaptation:') {
+                listRelated[$(element).find('td').eq(1).text()] = $(element).find('td').children('a').attr('href');
+            }
+        });
+    
+        for (related in listRelated) {
+            let posterUrl = getPosterAndType(false, listRelated[related].split('/')[2]);
+    
+            if (posterUrl !== "") {
+                relatedAnimes.push(
+                    {
+                        id: posterUrl[2],
+                        title: related,
+                        type: posterUrl[1],
+                        poster: posterUrl[0]
+                    }
+                );
+            }
+        }
+    
+        return relatedAnimes;
+    }else {
+        return [];
+    }
+}
 
 const animeflvGenres = async (id) => {
     let $ = await homgot(`${BASE_ANIMEFLV}/${id}`, { scrapy: true });
@@ -256,7 +304,7 @@ const getAnimeCharacters = async(mal_id) =>{
     }catch(error) {
         console.log(error);
     }
-    
+
     if(data !== null) {
         return data.characters.map(doc => ({
             id: doc.mal_id,
@@ -286,7 +334,7 @@ const getAnimeVideoPromo = async(mal_id) =>{
 };
 
 const animeExtraInfo = async (mal_id) => {
-    const data = await homgot(`${BASE_JIKAN}anime/${mal_id}`, {parse: true});
+    const data = await homgot(`${BASE_JIKAN}anime/${mal_id}`, { parse: true });
 
     try {
 
@@ -491,7 +539,8 @@ module.exports = {
     animeflvInfo,
     getAnimeCharacters,
     getAnimeVideoPromo,
-    getRelatedAnimes,
+    getRelatedAnimesFLV,
+    getRelatedAnimesMAL,
     animeExtraInfo,
     imageUrlToBase64,
     searchAnime,
