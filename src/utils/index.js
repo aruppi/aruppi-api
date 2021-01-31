@@ -155,8 +155,7 @@ function getPosterAndType(id, mal_id) {
             if (anime.mal_id === parseInt(mal_id)) {
                 return [
                     anime.poster, 
-                    anime.type,
-                    anime.id
+                    anime.type
                 ];
             }
         }
@@ -180,7 +179,6 @@ async function getRelatedAnimesFLV(id) {
 
         relatedAnimes.push(
             {
-                id: listRelated[related].split('/')[2],
                 title: related,
                 type: posterUrl[1],
                 poster: posterUrl[0]
@@ -213,7 +211,6 @@ async function getRelatedAnimesMAL(mal_id) {
             if (posterUrl !== "") {
                 relatedAnimes.push(
                     {
-                        id: posterUrl[2],
                         title: related,
                         type: posterUrl[1],
                         poster: posterUrl[0]
