@@ -281,7 +281,7 @@ const getAnimeServers = async (id) => {
     return await videoServersJK(id);
   } else {
     const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
-    
+
     return await transformUrlServer(data.servers);
   }
 };
@@ -426,7 +426,8 @@ const getDestAnimePlatforms = async () => {
   return data.map(doc =>({
     id: doc.id,
     name: doc.name,
-    logo: doc.logo
+    logo: doc.logo,
+    link: doc.link
   }));
 };
 
@@ -444,7 +445,7 @@ const getPlatforms = async (id) => {
       cover: doc.cover
     }));
 
-  } if (id === "producers" || id === "apps" || id === "publishers") {
+  } if (id === "producers" || id === "apps" || id === "publishers" || "events") {
 
         data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
 
@@ -460,7 +461,9 @@ const getPlatforms = async (id) => {
             twitter: doc.twitter,
             instagram: doc.instagram,
             webInfo: doc.webInfo,
-            webpage: doc.webpage
+            webpage: doc.webpage,
+            latitude: doc.latitude || null,
+            longitude: doc.longitude || null
         }));
 
   } else {
