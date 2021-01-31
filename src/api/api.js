@@ -509,19 +509,35 @@ async function getRandomAnime() {
   const randomNumber = Math.floor(Math.random() * directory.length);
   let result = directory[randomNumber];
 
-  return {
-    title: result.title || null,
-    poster: result.poster || null,
-    synopsis: result.description || null,
-    status: result.state || null,
-    type: result.type || null,
-    rating: result.score || null,
-    genres: result.genres || null,
-    moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
-    promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
-    characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null),
-    related: await getRelatedAnimes(result.id)
-  };
+  if (!result.jkanime) {
+    return {
+      title: result.title || null,
+      poster: result.poster || null,
+      synopsis: result.description || null,
+      status: result.state || null,
+      type: result.type || null,
+      rating: result.score || null,
+      genres: result.genres || null,
+      moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+      promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+      characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+      related: await getRelatedAnimesFLV(result.id)
+    };
+  }else {
+    return {
+      title: result.title || null,
+      poster: result.poster || null,
+      synopsis: result.description || null,
+      status: result.state || null,
+      type: result.type || null,
+      rating: result.score || null,
+      genres: result.genres || null,
+      moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+      promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+      characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+      related: await getRelatedAnimesMAL(result.mal_id)
+    };
+  }
 }
 
 module.exports = {
