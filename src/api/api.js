@@ -1,10 +1,8 @@
 const rss = require('rss-to-json');
 const fuzzball = require('fuzzball');
-
 const {
   homgot
 } = require('../api/apiCall');
-
 const {
   jkanimeInfo,
   animeflvInfo,
@@ -18,7 +16,11 @@ const {
   videoServersJK,
   getThemes,
   getRelatedAnimesFLV,
-  getRelatedAnimesMAL
+  getRelatedAnimesMAL,
+  directoryAnimes,
+  radioStations,
+  animeGenres,
+  animeThemes
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
@@ -75,7 +77,7 @@ const getAllDirectory = async (genres) => {
   let data;
 
   if (genres === 'sfw') {
-    data = JSON.parse(JSON.stringify(require('../assets/directory.json'))).filter(function (item) {
+    data = directoryAnimes.filter(function (item) {
       return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
     });
   } else {
@@ -137,7 +139,6 @@ const getNews = async (pageRss) =>{
   let promises = [];
 
   for(let i = 0; i <= pageRss.length -1; i++) {
-
     await rss.load(pageRss[i].url).then(rss => {
 
       const body = JSON.parse(JSON.stringify(rss, null, 3)).items
@@ -150,11 +151,8 @@ const getNews = async (pageRss) =>{
           thumbnail: obtainPreviewNews(doc[pageRss[i].content]),
           content: doc[pageRss[i].content]
         });
-
       });
-
     });
-
   }
 
   return promises;
@@ -222,7 +220,7 @@ const getSpecials = async (data) =>{
 
 const getMoreInfo = async (title) =>{
   try {
-    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+    let data = directoryAnimes;
     let result = data.filter(anime => fuzzball.ratio(anime.title, title) > 90)[0];
 
     if (!result.jkanime) {
@@ -261,7 +259,7 @@ const getMoreInfo = async (title) =>{
 
 const getEpisodes = async (title) =>{
   try {
-    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+    let data = directoryAnimes;
     const result = data.filter(x => x.title === title)[0];
 
     if (!result.jkanime) {
@@ -349,7 +347,7 @@ const getSectionYoutubeVideos = async (type) => {
 
 };
 
-const getRadioStations = async () => require('../assets/radiostations.json');
+const getRadioStations = async () => radioStations;
 
 const getOpAndEd = async (title) => await structureThemes(await parserThemes.serie(title), true);
 
@@ -388,7 +386,7 @@ const getAnimeGenres = async(genres) => {
   let promises = [];
 
   if (genres.genre === undefined && genres.page === undefined && genres.order === undefined)  {
-    return require('../assets/genres.json');
+    return animeGenres;
   } else {
 
     if (genres.page !== undefined) {
@@ -418,7 +416,7 @@ const getAnimeGenres = async(genres) => {
   }
 };
 
-const getAllThemes = async () => require('../assets/themes.json');
+const getAllThemes = async () => animeThemes;
 
 const getDestAnimePlatforms = async () => {
   let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/top.json`, { parse: true });
@@ -507,10 +505,10 @@ const getProfilePlatform = async (id) => {
 };
 
 async function getRandomAnime() {
-  let directory = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+  let data = directoryAnimes;
 
-  const randomNumber = Math.floor(Math.random() * directory.length);
-  let result = directory[randomNumber];
+  const randomNumber = Math.floor(Math.random() * data.length);
+  let result = data[randomNumber];
 
   if (!result.jkanime) {
     return {
