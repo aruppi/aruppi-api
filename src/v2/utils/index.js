@@ -1,10 +1,13 @@
 const {
     BASE_ANIMEFLV, BASE_JIKAN, BASE_EPISODE_IMG_URL, BASE_ARUPPI, ANIMEFLV_SEARCH, BASE_JKANIME
 } = require('../api/urls.js');
-
 const {
     homgot
 } = require('../api/apiCall.js');
+const directoryAnimes = JSON.parse(JSON.stringify(require('../../assets/directory.json')));
+const radioStations = require('../../assets/radiostations.json');
+const animeGenres = require('../../assets/genres.json');
+const animeThemes = require('../../assets/themes.json');
 
 function btoa(str) {
     let buffer;
@@ -194,54 +197,48 @@ const animeflvInfo = async (id) => {
 
 };
 
-const getAnimeCharacters = async(title) =>{
-
-    const matchAnime = await getMALid(title)
+const getAnimeCharacters = async(mal_id) =>{
+    let data;
 
     try {
-        if(matchAnime !== null) {
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/characters_staff`, { parse: true });
-            return data.characters.map(doc => ({
-                id: doc.mal_id,
-                name: doc.name,
-                image: doc.image_url,
-                role: doc.role
-            }));
-        }
-    } catch (err) {
-        console.log(err)
+        data = await homgot(`${BASE_JIKAN}anime/${mal_id}/characters_staff`, { parse: true });
+    }catch(error) {
+        console.log(error);
     }
 
+    if(data !== null) {
+        return data.characters.map(doc => ({
+            id: doc.mal_id,
+            name: doc.name,
+            image: doc.image_url,
+            role: doc.role
+        }));
+    }
 };
 
-const getAnimeVideoPromo = async(title) =>{
-
-    const matchAnime = await getMALid(title)
+const getAnimeVideoPromo = async(mal_id) =>{
+    let data;
 
     try {
-        if(matchAnime !== null) {
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}/videos`, {parse: true})
-            return data.promo.map(doc => ({
-                title: doc.title,
-                previewImage: doc.image_url,
-                videoURL: doc.video_url
-            }));
-        }
-    } catch (err) {
-        console.log(err)
+        data = await homgot(`${BASE_JIKAN}anime/${mal_id}/videos`, {parse: true});
+    }catch(error) {
+        console.log(error);
     }
 
+    if(data !== null) {
+        return data.promo.map(doc => ({
+            title: doc.title,
+            previewImage: doc.image_url,
+            videoURL: doc.video_url
+        }));
+    }
 };
 
-const animeExtraInfo = async (title) => {
-
-    const matchAnime = await getMALid(title)
+const animeExtraInfo = async (mal_id) => {
+    const data = await homgot(`${BASE_JIKAN}anime/${mal_id}`, {parse: true});
 
     try {
-
-        if(matchAnime !== null) {
-
-            const data = await homgot(`${BASE_JIKAN}anime/${matchAnime.mal_id}`, {parse: true})
+        if(data !== null) {
             const promises = [];
             let broadcast = ''
 
@@ -294,19 +291,6 @@ const animeExtraInfo = async (title) => {
 
     } catch (err) {
         console.log(err)
-    }
-
-};
-
-const getMALid = async(title) =>{
-
-    const res = await homgot(`${BASE_JIKAN}search/anime?q=${title}`,{ parse: true })
-    const matchAnime = res.results.find(x => x.title === title);
-
-    if(typeof matchAnime === 'undefined') {
-        return null;
-    } else {
-        return matchAnime;
     }
 
 };
@@ -491,11 +475,11 @@ const getDirectory = async (genres) => {
 
     let data
     if (genres === "sfw") {
-        data = JSON.parse(JSON.stringify(require('../../assets/directory.json'))).filter(function (item) {
+        data = directoryAnimes.filter(function (item) {
             return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
         })
     } else {
-        data = JSON.parse(JSON.stringify(require('../../assets/directory.json')));
+        data = directoryAnimes;
     }
 
     return data.map(doc => ({
@@ -520,7 +504,6 @@ module.exports = {
     getAnimeCharacters,
     getAnimeVideoPromo,
     animeExtraInfo,
-    getMALid,
     imageUrlToBase64,
     searchAnime,
     transformUrlServer,
@@ -529,5 +512,9 @@ module.exports = {
     getThemes,
     getAnimes,
     getDirectory,
-    videoServersJK
+    videoServersJK,
+    directoryAnimes,
+    radioStations,
+    animeGenres,
+    animeThemes
 }

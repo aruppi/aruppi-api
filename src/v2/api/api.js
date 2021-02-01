@@ -19,11 +19,15 @@ const {
   videoServersJK,
   getAnimes,
   getDirectory,
-  getThemes
+  getThemes,
+  directoryAnimes,
+  radioStations,
+  animeGenres,
+  animeThemes
 } = require('../utils');
 
 const ThemeParser = require('../utils/animetheme');
-const parserThemes = new ThemeParser()
+const parserThemes = new ThemeParser();
 
 const {
   BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, GENRES_URL, BASE_THEMEMOE
@@ -111,7 +115,7 @@ const getAnitakume = async () =>{
 
 const getNews = async (pageRss) =>{
 
-  const promises = []
+  const promises = [];
 
   for(let i = 0; i <= pageRss.length -1; i++) {
 
@@ -242,10 +246,10 @@ const getMoreInfo = async (title) =>{
 
   try {
 
-    const promises = []
+    const promises = [];
 
-    let data = JSON.parse(JSON.stringify(require('../../assets/directory.json')));
-    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
+    let data = directoryAnimes;
+    const res = data.filter(x => x.title === title)[0];
 
     if (!res.jkanime) {
       promises.push({
@@ -257,9 +261,9 @@ const getMoreInfo = async (title) =>{
         rating: res.score || null,
         genres: res.genres || null,
         episodes: await animeflvInfo(res.id).then(episodes => episodes || null),
-        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
-        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
-        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
+        moreInfo: await animeExtraInfo(res.mal_id).then(info => info || null),
+        promo: await getAnimeVideoPromo(res.mal_id).then(promo => promo || null),
+        characters: await getAnimeCharacters(res.mal_id).then(characters => characters || null)
       });
     } else {
       promises.push({
@@ -271,9 +275,9 @@ const getMoreInfo = async (title) =>{
         rating: res.score || null,
         genres: res.genres || null,
         episodes: await jkanimeInfo(res.id).then(episodes => episodes || null),
-        moreInfo: await animeExtraInfo(res.mal_title).then(info => info || null),
-        promo: await getAnimeVideoPromo(res.mal_title).then(promo => promo || null),
-        characters: await getAnimeCharacters(res.mal_title).then(characters => characters || null)
+        moreInfo: await animeExtraInfo(res.mal_id).then(info => info || null),
+        promo: await getAnimeVideoPromo(res.mal_id).then(promo => promo || null),
+        characters: await getAnimeCharacters(res.mal_id).then(characters => characters || null)
       });
     }
 
@@ -343,7 +347,7 @@ const getYoutubeVideos = async (channelId) => {
 };
 
 const getRadioStations = async () => {
-  return require('../assets/radiostations.json');
+  return radioStations;
 }
 
 const getOpAndEd = async (title) => {
@@ -432,7 +436,7 @@ const getAnimeGenres = async(genre, order, page) => {
 
 };
 
-const getAllThemes = async () => require('../../assets/themes.json');
+const getAllThemes = async () => animeThemes;
 
 module.exports = {
   schedule,

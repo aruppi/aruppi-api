@@ -81,7 +81,7 @@ const getAllDirectory = async (genres) => {
       return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
     });
   } else {
-    data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+    data = directoryAnimes;
   }
 
   return data.map(doc => ({
