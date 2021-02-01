@@ -1,9 +1,8 @@
 const rss = require('rss-to-json');
-
+const fuzzball = require('fuzzball');
 const {
   homgot
 } = require('../api/apiCall');
-
 const {
   jkanimeInfo,
   animeflvInfo,
@@ -16,18 +15,22 @@ const {
   structureThemes,
   videoServersJK,
   getThemes,
-  getMALid
+  getRelatedAnimesFLV,
+  getRelatedAnimesMAL,
+  directoryAnimes,
+  radioStations,
+  animeGenres,
+  animeThemes
 } = require('../utils/index');
 
 const ThemeParser = require('../utils/animetheme');
-const parserThemes = new ThemeParser()
+const parserThemes = new ThemeParser();
 
 const {
   BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE, BASE_ANIMEFLV, BASE_ARUPPI
 } = require('./urls');
 
 const schedule = async (day) =>{
-
   const data = await homgot(`${BASE_JIKAN}schedule/${day.current}`, { parse: true });
 
   return data[day.current].map(doc =>({
@@ -35,12 +38,10 @@ const schedule = async (day) =>{
       malid: doc.mal_id,
       image: doc.image_url
   }));
-
 };
 
 const top = async (top) =>{
-
-  let data
+  let data;
 
   if (top.subtype !== undefined) {
     data = await homgot(`${BASE_JIKAN}top/${top.type}/${top.page}/${top.subtype}`, { parse: true });
@@ -58,11 +59,9 @@ const top = async (top) =>{
     page: top.page,
     score: doc.score
   }));
-
 };
 
 const getAllAnimes = async () =>{
-
   let data = await homgot(`${BASE_ANIMEFLV}api/animes/list`, { parse: true })
 
   return data.map(item => ({
@@ -72,16 +71,15 @@ const getAllAnimes = async () =>{
     id: item[2],
     type: item[4]
   }));
-
 };
 
-const getAllDirectory = async (genres) =>{
+const getAllDirectory = async (genres) => {
+  let data;
 
-  let data
-  if (genres === "sfw") {
-    data = JSON.parse(JSON.stringify(require('../assets/directory.json'))).filter(function (item) {
+  if (genres === 'sfw') {
+    data = directoryAnimes.filter(function (item) {
       return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
-    })
+    });
   } else {
     data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
   }
@@ -98,12 +96,11 @@ const getAllDirectory = async (genres) =>{
     jkanime: false,
     description: doc.description
   }));
-
 };
 
-const getAnitakume = async () =>{
+const getAnitakume = async () => {
 
-  const promises = []
+  const promises = [];
 
   await rss.load(BASE_IVOOX).then(rss => {
 
@@ -139,11 +136,9 @@ const getAnitakume = async () =>{
 };
 
 const getNews = async (pageRss) =>{
-
-  let promises = []
+  let promises = [];
 
   for(let i = 0; i <= pageRss.length -1; i++) {
-
     await rss.load(pageRss[i].url).then(rss => {
 
       const body = JSON.parse(JSON.stringify(rss, null, 3)).items
@@ -156,19 +151,14 @@ const getNews = async (pageRss) =>{
           thumbnail: obtainPreviewNews(doc[pageRss[i].content]),
           content: doc[pageRss[i].content]
         });
-
       });
-
     });
-
   }
 
   return promises;
-
 };
 
 const season = async (season) =>{
-
   const data = await homgot(`${BASE_JIKAN}season/${season.year}/${season.type}`, { parse: true });
 
   return data.anime.map(doc =>({
@@ -176,22 +166,18 @@ const season = async (season) =>{
     image: doc.image_url,
     genres: doc.genres.map(x => x.name)
   }));
-
 };
 
 const allSeasons = async () =>{
-
   const data = await homgot(`${BASE_JIKAN}season/archive`, { parse: true });
 
   return data.archive.map(doc =>({
       year: doc.year,
       seasons: doc.seasons,
   }));
-
 };
 
 const laterSeasons = async () =>{
-
   const data = await homgot(`${BASE_JIKAN}season/later`, { parse: true });
 
   return data.anime.map(doc =>({
@@ -199,12 +185,11 @@ const laterSeasons = async () =>{
       image: doc.image_url,
       malink: doc.url
   }));
-
 };
 
 const getLastEpisodes = async () =>{
-
   const data = await homgot(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`, { parse: true });
+
   return await Promise.all(data.episodes.map(async (item) => ({
     id: item.id,
     title: item.title,
@@ -212,17 +197,16 @@ const getLastEpisodes = async () =>{
     episode: item.episode,
     servers: await transformUrlServer(JSON.parse(JSON.stringify(item.servers)))
   })));
-
 };
 
 const getSpecials = async (data) =>{
-
   const res = await homgot(`${BASE_ANIMEFLV_JELU}${data.url}/${data.type}/${data.page}`, { parse: true });
 
   return res[data.prop].map(doc =>({
       id: doc.id,
       title: doc.title,
-      type: doc.type,
+      type: data.url.toLowerCase(),
+      page: data.page,
       banner: doc.banner,
       image: doc.poster,
       synopsis: doc.synopsis,
@@ -235,65 +219,74 @@ const getSpecials = async (data) =>{
 };
 
 const getMoreInfo = async (title) =>{
-
   try {
+    let data = directoryAnimes;
+    let result = data.filter(anime => fuzzball.ratio(anime.title, title) > 90)[0];
 
-    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    let result = data.filter(anime => anime.title === title)[0];
-
-    return {
-      title: result.title || null,
-      poster: result.poster || null,
-      synopsis: result.description || null,
-      status: result.state || null,
-      type: result.type || null,
-      rating: result.score || null,
-      genres: result.genres || null,
-      moreInfo: await animeExtraInfo(result.mal_title).then(info => info || null),
-      promo: await getAnimeVideoPromo(result.mal_title).then(promo => promo || null),
-      characters: await getAnimeCharacters(result.mal_title).then(characters => characters || null)
+    if (!result.jkanime) {
+      return {
+        title: result.title || null,
+        poster: result.poster || null,
+        synopsis: result.description || null,
+        status: result.state || null,
+        type: result.type || null,
+        rating: result.score || null,
+        genres: result.genres || null,
+        moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+        promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+        characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+        related: await getRelatedAnimesFLV(result.id)
+      };
+    }else {
+      return {
+        title: result.title || null,
+        poster: result.poster || null,
+        synopsis: result.description || null,
+        status: result.state || null,
+        type: result.type || null,
+        rating: result.score || null,
+        genres: result.genres || null,
+        moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+        promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+        characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+        related: await getRelatedAnimesMAL(result.mal_id)
+      };
     }
-
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
-
 };
 
 const getEpisodes = async (title) =>{
-
   try {
+    let data = directoryAnimes;
+    const result = data.filter(x => x.title === title)[0];
 
-    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
-    const res = data.filter(x => x.title === title || x.mal_title === title)[0];
-
-    if (!res.jkanime) {
-      return await animeflvInfo(res.id).then(episodes => episodes || null)
+    if (!result.jkanime) {
+      return await animeflvInfo(result.id).then(episodes => episodes || null);
     } else {
-      return await jkanimeInfo(res.id).then(episodes => episodes || null)
+      return await jkanimeInfo(result.id).then(episodes => episodes || null);
     }
 
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 
 };
 
 const getAnimeServers = async (id) => {
-
   if (isNaN(id.split('/')[0])) {
-    return await videoServersJK(id)
+    return await videoServersJK(id);
   } else {
     const data = await homgot(`${BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`, { parse: true });
+
     return await transformUrlServer(data.servers);
   }
-
 };
 
 const search = async (title) =>{ return await searchAnime(title); };
 
 const getImages = async (query) => {
-
   try {
     const data = await homgot(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`, { parse: true });
     return data.data.result.items.map(doc =>({
@@ -304,11 +297,9 @@ const getImages = async (query) => {
   } catch (e) {
     console.log(e)
   }
-
 };
 
 const getYoutubeVideos = async (channelId) => {
-
   const data = await homgot(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`, { parse: true });
 
   return data[channelId.prop].map(doc =>({
@@ -318,7 +309,6 @@ const getYoutubeVideos = async (channelId) => {
      thumbMedium: doc.snippet.thumbnails.medium.url,
      thumbHigh: doc.snippet.thumbnails.high.url
   }));
-
 };
 
 const getSectionYoutubeVideos = async (type) => {
@@ -357,24 +347,22 @@ const getSectionYoutubeVideos = async (type) => {
 
 };
 
-const getRadioStations = async () => require('../assets/radiostations.json');
+const getRadioStations = async () => radioStations;
 
 const getOpAndEd = async (title) => await structureThemes(await parserThemes.serie(title), true);
 
 const getThemesYear = async (year) => {
+  let data = [];
 
-  let data = []
   if (year === undefined) {
     return await parserThemes.allYears();
   } else {
-    data = await parserThemes.year(year)
-    return await structureThemes(data, false)
+    data = await parserThemes.year(year);
+    return await structureThemes(data, false);
   }
-
 };
 
 const getRandomTheme = async () => {
-
   let data = await homgot(`${BASE_THEMEMOE}roulette`, { parse: true });
   let themes = await getThemes(data.themes)
 
@@ -383,26 +371,22 @@ const getRandomTheme = async () => {
     title: doc.name,
     link: doc.video
   }));
-
 };
 
 const getArtist = async (id) => {
-
   if (id === undefined) {
     return await parserThemes.artists();
   } else {
     return await structureThemes(await parserThemes.artist(id), false)
   }
-
 };
 
 const getAnimeGenres = async(genres) => {
-
-  let res
-  let promises = []
+  let res;
+  let promises = [];
 
   if (genres.genre === undefined && genres.page === undefined && genres.order === undefined)  {
-    return require('../assets/genres.json');
+    return animeGenres;
   } else {
 
     if (genres.page !== undefined) {
@@ -429,28 +413,24 @@ const getAnimeGenres = async(genres) => {
     }
 
     return promises;
-
   }
-
 };
 
-const getAllThemes = async () => require('../assets/themes.json');
+const getAllThemes = async () => animeThemes;
 
 const getDestAnimePlatforms = async () => {
-
   let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/top.json`, { parse: true });
 
   return data.map(doc =>({
     id: doc.id,
     name: doc.name,
-    logo: doc.logo
+    logo: doc.logo,
+    link: doc.link
   }));
-
 };
 
 const getPlatforms = async (id) => {
-
-  let data
+  let data;
 
   if (id === undefined) {
 
@@ -463,6 +443,27 @@ const getPlatforms = async (id) => {
       cover: doc.cover
     }));
 
+  } if (id === "producers" || id === "apps" || id === "publishers" || "events") {
+
+        data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
+
+        return data.map(doc =>({
+            id: doc.id,
+            name: doc.name,
+            logo: doc.logo,
+            cover: doc.cover,
+            description: doc.description,
+            type: doc.type,
+            moreInfo: doc.moreInfo,
+            facebook: doc.facebook,
+            twitter: doc.twitter,
+            instagram: doc.instagram,
+            webInfo: doc.webInfo,
+            webpage: doc.webpage,
+            latitude: doc.latitude || null,
+            longitude: doc.longitude || null
+        }));
+
   } else {
 
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
@@ -473,15 +474,14 @@ const getPlatforms = async (id) => {
       type: doc.type,
       logo: doc.logo,
       cover: doc.cover,
-      link: doc.link
+      webpage: doc.webpage,
+
     }));
   }
-
 };
 
 const getProfilePlatform = async (id) => {
-
-  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true })
+  let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true });
   let channelId = { id: data[0].youtubeId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
   let videos = await getYoutubeVideos(channelId)
 
@@ -502,8 +502,44 @@ const getProfilePlatform = async (id) => {
     faq: doc.faq,
     videos: videos
   }));
-
 };
+
+async function getRandomAnime() {
+  let data = directoryAnimes;
+
+  const randomNumber = Math.floor(Math.random() * data.length);
+  let result = data[randomNumber];
+
+  if (!result.jkanime) {
+    return {
+      title: result.title || null,
+      poster: result.poster || null,
+      synopsis: result.description || null,
+      status: result.state || null,
+      type: result.type || null,
+      rating: result.score || null,
+      genres: result.genres || null,
+      moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+      promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+      characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+      related: await getRelatedAnimesFLV(result.id)
+    };
+  }else {
+    return {
+      title: result.title || null,
+      poster: result.poster || null,
+      synopsis: result.description || null,
+      status: result.state || null,
+      type: result.type || null,
+      rating: result.score || null,
+      genres: result.genres || null,
+      moreInfo: await animeExtraInfo(result.mal_id).then(info => info || null),
+      promo: await getAnimeVideoPromo(result.mal_id).then(promo => promo || null),
+      characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
+      related: await getRelatedAnimesMAL(result.mal_id)
+    };
+  }
+}
 
 module.exports = {
   schedule,
@@ -533,5 +569,6 @@ module.exports = {
   getDestAnimePlatforms,
   getPlatforms,
   getSectionYoutubeVideos,
-  getProfilePlatform
+  getProfilePlatform,
+  getRandomAnime
 };
