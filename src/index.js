@@ -13,8 +13,6 @@ function shutdown() {
   process.exit();
 }
 
-// @TESTING
-
 process.on('SIGINT', shutdown);
 process.on('SIGQUIT', shutdown);
 process.on('SIGTERM', shutdown);

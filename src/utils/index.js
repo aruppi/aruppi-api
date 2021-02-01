@@ -1,10 +1,13 @@
 const {
     BASE_ANIMEFLV, BASE_JIKAN, BASE_ARUPPI, BASE_JKANIME
 } = require('../api/urls');
-
 const {
     homgot
 } = require('../api/apiCall');
+const directoryAnimes = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+const radioStations = require('../assets/radiostations.json');
+const animeGenres = require('../assets/genres.json');
+const animeThemes = require('../assets/themes.json');
 
 function btoa(str) {
     let buffer;
@@ -137,7 +140,7 @@ const jkanimeInfo = async (id) => {
 };
 
 function getPosterAndType(id, mal_id) {
-    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+    let data = directoryAnimes;
 
     if (id) {
         for (let anime of data) {
@@ -398,7 +401,7 @@ const imageUrlToBase64 = async (url) => {
 };
 
 const searchAnime = async (query) => {
-    let data = JSON.parse(JSON.stringify(require('../assets/directory.json')));
+    let data = directoryAnimes;
     let queryLowerCase = query.toLowerCase();
     const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
 
@@ -545,5 +548,9 @@ module.exports = {
     obtainPreviewNews,
     structureThemes,
     getThemes,
-    videoServersJK
+    videoServersJK,
+    directoryAnimes,
+    radioStations,
+    animeGenres,
+    animeThemes
 }
