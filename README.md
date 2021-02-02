@@ -73,7 +73,7 @@ But if you need to see the code or the operation of the old version you can do i
 
 Aruppi has grown since it was launched and we need to continue improving the application along with the services to be able to give new features.
 
-At this time version 2.6.8 will remain functional until Aruppi App users fully migrate to version 1.5.0 of the app
+At this time version 2.6.9 will remain functional until Aruppi App users fully migrate to version 1.5.0 of the app
 
 ## **:handshake: Contributing**
 
