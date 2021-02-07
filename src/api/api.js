@@ -221,8 +221,14 @@ const getSpecials = async (data) =>{
 const getMoreInfo = async (title) =>{
   try {
     let data = directoryAnimes;
-    let result = data.filter(anime => fuzzball.ratio(anime.title, title) > 90)[0];
-
+    const result = data.filter(x => {
+      if (x.title === title) {
+        return x;
+      }else {
+        return x.title === `${title} (TV)` ? x : undefined; 
+      }
+    })[0];
+    
     if (!result.jkanime) {
       return {
         title: result.title || null,
@@ -260,7 +266,13 @@ const getMoreInfo = async (title) =>{
 const getEpisodes = async (title) =>{
   try {
     let data = directoryAnimes;
-    const result = data.filter(x => x.title === title)[0];
+    const result = data.filter(x => {
+      if (x.title === title) {
+        return x;
+      }else {
+        return x.title === `${title} (TV)` ? x : undefined; 
+      }
+    })[0];
 
     if (!result.jkanime) {
       return await animeflvInfo(result.id).then(episodes => episodes || null);
