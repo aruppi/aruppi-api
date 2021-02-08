@@ -1,5 +1,5 @@
 const rss = require('rss-to-json');
-const fuzzball = require('fuzzball');
+
 const {
   homgot
 } = require('../api/apiCall');
@@ -463,7 +463,7 @@ const getPlatforms = async (id) => {
     }));
 
   } if (id === "producers" || id === "apps" || id === "publishers" || "events") {
-    
+
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
 
     return data.map(doc => ({
