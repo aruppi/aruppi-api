@@ -274,7 +274,7 @@ router.get('/moreInfo/:title' , (req, res) =>{
                 res.status(200).json(info);
             } else {
                 res.status(500).json({ message: 'Aruppi lost in the shell'});
-            }   
+            }
         }).catch((err) =>{
         console.error(err);
     });
@@ -287,14 +287,14 @@ router.get('/getEpisodes/:title' , (req, res) =>{
 
     api.getEpisodes(title)
         .then(episodes => {
-            
+
             if (episodes.length > 0) {
                 res.status(200).json({episodes});
             } else {
                 res.status(500).json({ message: 'Aruppi lost in the shell'});
             }
         }).catch((err) =>{
-        
+
         console.error(err);
     });
 
@@ -519,6 +519,7 @@ router.get('/randomAnime', (req, res) => {
     api.getRandomAnime()
         .then(anime => {
             if (anime) {
+                res.set('Cache-Control', 'no-store');
                 res.status(200).json(anime);
             }else {
                 res.status(500).json({ message: 'Aruppi lost in the shell'});

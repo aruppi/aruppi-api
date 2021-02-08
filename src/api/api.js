@@ -443,7 +443,8 @@ const getDestAnimePlatforms = async () => {
   return data.map(doc => ({
     id: doc.id,
     name: doc.name,
-    logo: doc.logo
+    logo: doc.logo,
+    link: doc.link
   }));
 };
 
@@ -461,8 +462,8 @@ const getPlatforms = async (id) => {
       cover: doc.cover
     }));
 
-  } if (id === "producers" || id === "apps" || id === "publishers") {
-
+  } if (id === "producers" || id === "apps" || id === "publishers" || "events") {
+    
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
 
     return data.map(doc => ({
@@ -479,7 +480,6 @@ const getPlatforms = async (id) => {
       webInfo: doc.webInfo,
       webpage: doc.webpage
     }));
-
   } else {
 
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });

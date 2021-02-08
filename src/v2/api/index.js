@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
   res.json({
     message: 'Aruppi API - 🎏',
     author: 'Jéluchu',
-    version: '2.6.8',
+    version: '2.6.9',
     credits: 'The bitch loves APIs that offers data to Aruppi App',
     deprecated: 'This version will be available until users migrate to Aruppi App v1.5.0',
     entries: [
