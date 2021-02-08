@@ -140,10 +140,8 @@ const jkanimeInfo = async (id) => {
 };
 
 function getPosterAndType(id, mal_id) {
-    let data = directoryAnimes;
-
     if (id) {
-        for (let anime of data) {
+        for (let anime of directoryAnimes) {
             if (anime.id === id) {
                 return [
                     anime.poster, 
@@ -154,7 +152,7 @@ function getPosterAndType(id, mal_id) {
     }
 
     if (mal_id) {
-        for (let anime of data) {
+        for (let anime of directoryAnimes) {
             if (anime.mal_id === parseInt(mal_id)) {
                 return [
                     anime.poster, 
@@ -401,9 +399,8 @@ const imageUrlToBase64 = async (url) => {
 };
 
 const searchAnime = async (query) => {
-    let data = directoryAnimes;
     let queryLowerCase = query.toLowerCase();
-    const res = data.filter(x => x.title.toLowerCase().includes(queryLowerCase));
+    const res = directoryAnimes.filter(x => x.title.toLowerCase().includes(queryLowerCase));
 
     return res.map(doc => ({
         id: doc.id || null,

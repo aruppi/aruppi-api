@@ -74,20 +74,29 @@ const getAllAnimes = async () =>{
 };
 
 const getAllDirectory = async (genres) => {
-  let data;
-
   if (genres === 'sfw') {
-    data = directoryAnimes.filter(function (item) {
-      return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
+    return directoryAnimes.filter(function (doc) {
+      if (doc.genres.indexOf('Ecchi') === -1 && doc.genres.indexOf('ecchi') === -1) {
+        return {
+          id: doc.id,
+          title: doc.title,
+          mal_id: doc.mal_id,
+          poster: doc.poster,
+          type: doc.type,
+          genres: doc.genres,
+          state: doc.state,
+          score: doc.score,
+          jkanime: false,
+          description: doc.description
+        };
+      }
     });
-  } else {
-    data = directoryAnimes;
   }
 
-  return data.map(doc => ({
+  return directoryAnimes.map(doc => ({
     id: doc.id,
     title: doc.title,
-    mal_title: doc.mal_title,
+    mal_id: doc.mal_id,
     poster: doc.poster,
     type: doc.type,
     genres: doc.genres,
@@ -107,7 +116,7 @@ const getAnitakume = async () => {
     const body = JSON.parse(JSON.stringify(rss, null, 3)).items
     body.map(doc =>{
 
-      let time = new Date(doc.created)
+      let time = new Date(doc.created);
       const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
       let day = time.getDate()
@@ -220,8 +229,7 @@ const getSpecials = async (data) =>{
 
 const getMoreInfo = async (title) =>{
   try {
-    let data = directoryAnimes;
-    const result = data.filter(x => {
+    const result = directoryAnimes.filter(x => {
       if (x.title === title) {
         return x;
       }else {
@@ -265,8 +273,7 @@ const getMoreInfo = async (title) =>{
 
 const getEpisodes = async (title) =>{
   try {
-    let data = directoryAnimes;
-    const result = data.filter(x => {
+    const result = directoryAnimes.filter(x => {
       if (x.title === title) {
         return x;
       }else {
@@ -376,7 +383,7 @@ const getThemesYear = async (year) => {
 
 const getRandomTheme = async () => {
   let data = await homgot(`${BASE_THEMEMOE}roulette`, { parse: true });
-  let themes = await getThemes(data.themes)
+  let themes = await getThemes(data.themes);
 
   return themes.map(doc =>({
     name: data.name,
@@ -514,10 +521,8 @@ const getProfilePlatform = async (id) => {
 };
 
 async function getRandomAnime() {
-  let data = directoryAnimes;
-
-  const randomNumber = Math.floor(Math.random() * data.length);
-  let result = data[randomNumber];
+  const randomNumber = Math.floor(Math.random() * directoryAnimes.length);
+  let result = directoryAnimes[randomNumber];
 
   if (!result.jkanime) {
     return {
