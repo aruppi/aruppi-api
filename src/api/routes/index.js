@@ -60,8 +60,8 @@ router.get('/allAnimes' , (req, res) =>{
 });
 
 router.get('/allDirectory/:genres?' , (req, res) =>{
-
     let genres = req.params.genres;
+    
     api.getAllDirectory(genres)
         .then(directory =>{
             if (directory.length > 0) {
