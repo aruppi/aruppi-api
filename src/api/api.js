@@ -1,5 +1,5 @@
 const rss = require('rss-to-json');
-const fuzzball = require('fuzzball');
+
 const {
   homgot
 } = require('../api/apiCall');
@@ -30,17 +30,17 @@ const {
   BASE_ANIMEFLV_JELU, BASE_JIKAN, BASE_IVOOX, BASE_QWANT, BASE_YOUTUBE, BASE_THEMEMOE, BASE_ANIMEFLV, BASE_ARUPPI
 } = require('./urls');
 
-const schedule = async (day) =>{
+const schedule = async (day) => {
   const data = await homgot(`${BASE_JIKAN}schedule/${day.current}`, { parse: true });
 
-  return data[day.current].map(doc =>({
-      title: doc.title,
-      malid: doc.mal_id,
-      image: doc.image_url
+  return data[day.current].map(doc => ({
+    title: doc.title,
+    malid: doc.mal_id,
+    image: doc.image_url
   }));
 };
 
-const top = async (top) =>{
+const top = async (top) => {
   let data;
 
   if (top.subtype !== undefined) {
@@ -49,7 +49,7 @@ const top = async (top) =>{
     data = await homgot(`${BASE_JIKAN}top/${top.type}/${top.page}`, { parse: true });
   }
 
-  return data.top.map(doc =>({
+  return data.top.map(doc => ({
     rank: doc.rank,
     title: doc.title,
     url: doc.url,
@@ -61,7 +61,7 @@ const top = async (top) =>{
   }));
 };
 
-const getAllAnimes = async () =>{
+const getAllAnimes = async () => {
   let data = await homgot(`${BASE_ANIMEFLV}api/animes/list`, { parse: true })
 
   return data.map(item => ({
@@ -74,20 +74,29 @@ const getAllAnimes = async () =>{
 };
 
 const getAllDirectory = async (genres) => {
-  let data;
-
   if (genres === 'sfw') {
-    data = directoryAnimes.filter(function (item) {
-      return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
+    return directoryAnimes.filter(function (doc) {
+      if (!doc.genres.includes('Ecchi') && !doc.genres.includes('ecchi')) {
+        return {
+          id: doc.id,
+          title: doc.title,
+          mal_id: doc.mal_id,
+          poster: doc.poster,
+          type: doc.type,
+          genres: doc.genres,
+          state: doc.state,
+          score: doc.score,
+          jkanime: false,
+          description: doc.description
+        };
+      }
     });
-  } else {
-    data = directoryAnimes;
   }
 
-  return data.map(doc => ({
+  return directoryAnimes.map(doc => ({
     id: doc.id,
     title: doc.title,
-    mal_title: doc.mal_title,
+    mal_id: doc.mal_id,
     poster: doc.poster,
     type: doc.type,
     genres: doc.genres,
@@ -105,9 +114,9 @@ const getAnitakume = async () => {
   await rss.load(BASE_IVOOX).then(rss => {
 
     const body = JSON.parse(JSON.stringify(rss, null, 3)).items
-    body.map(doc =>{
+    body.map(doc => {
 
-      let time = new Date(doc.created)
+      let time = new Date(doc.created);
       const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
       let day = time.getDate()
@@ -115,9 +124,9 @@ const getAnitakume = async () => {
       let year = time.getFullYear()
       let date
 
-      if(month < 10){
+      if (month < 10) {
         date = `${day} de 0${month} de ${year}`
-      }else{
+      } else {
         date = `${day} de ${month} de ${year}`
       }
 
@@ -135,10 +144,10 @@ const getAnitakume = async () => {
 
 };
 
-const getNews = async (pageRss) =>{
+const getNews = async (pageRss) => {
   let promises = [];
 
-  for(let i = 0; i <= pageRss.length -1; i++) {
+  for (let i = 0; i <= pageRss.length - 1; i++) {
     await rss.load(pageRss[i].url).then(rss => {
 
       const body = JSON.parse(JSON.stringify(rss, null, 3)).items
@@ -158,36 +167,36 @@ const getNews = async (pageRss) =>{
   return promises;
 };
 
-const season = async (season) =>{
+const season = async (season) => {
   const data = await homgot(`${BASE_JIKAN}season/${season.year}/${season.type}`, { parse: true });
 
-  return data.anime.map(doc =>({
+  return data.anime.map(doc => ({
     title: doc.title,
     image: doc.image_url,
     genres: doc.genres.map(x => x.name)
   }));
 };
 
-const allSeasons = async () =>{
+const allSeasons = async () => {
   const data = await homgot(`${BASE_JIKAN}season/archive`, { parse: true });
 
-  return data.archive.map(doc =>({
-      year: doc.year,
-      seasons: doc.seasons,
+  return data.archive.map(doc => ({
+    year: doc.year,
+    seasons: doc.seasons,
   }));
 };
 
-const laterSeasons = async () =>{
+const laterSeasons = async () => {
   const data = await homgot(`${BASE_JIKAN}season/later`, { parse: true });
 
-  return data.anime.map(doc =>({
-      title: doc.title,
-      image: doc.image_url,
-      malink: doc.url
+  return data.anime.map(doc => ({
+    title: doc.title,
+    image: doc.image_url,
+    malink: doc.url
   }));
 };
 
-const getLastEpisodes = async () =>{
+const getLastEpisodes = async () => {
   const data = await homgot(`${BASE_ANIMEFLV_JELU}LatestEpisodesAdded`, { parse: true });
 
   return await Promise.all(data.episodes.map(async (item) => ({
@@ -199,29 +208,34 @@ const getLastEpisodes = async () =>{
   })));
 };
 
-const getSpecials = async (data) =>{
+const getSpecials = async (data) => {
   const res = await homgot(`${BASE_ANIMEFLV_JELU}${data.url}/${data.type}/${data.page}`, { parse: true });
 
-  return res[data.prop].map(doc =>({
-      id: doc.id,
-      title: doc.title,
-      type: data.url.toLowerCase(),
-      page: data.page,
-      banner: doc.banner,
-      image: doc.poster,
-      synopsis: doc.synopsis,
-      status: doc.debut,
-      rate: doc.rating,
-      genres: doc.genres.map(x => x),
-      episodes: doc.episodes.map(x => x)
+  return res[data.prop].map(doc => ({
+    id: doc.id,
+    title: doc.title,
+    type: data.url.toLowerCase(),
+    page: data.page,
+    banner: doc.banner,
+    image: doc.poster,
+    synopsis: doc.synopsis,
+    status: doc.debut,
+    rate: doc.rating,
+    genres: doc.genres.map(x => x),
+    episodes: doc.episodes.map(x => x)
   }));
 
 };
 
-const getMoreInfo = async (title) =>{
+const getMoreInfo = async (title) => {
   try {
-    let data = directoryAnimes;
-    let result = data.filter(anime => fuzzball.ratio(anime.title, title) > 90)[0];
+    const result = directoryAnimes.filter(x => {
+      if (x.title === title) {
+        return x;
+      } else {
+        return x.title === `${title} (TV)` ? x : undefined;
+      }
+    })[0];
 
     if (!result.jkanime) {
       return {
@@ -237,7 +251,7 @@ const getMoreInfo = async (title) =>{
         characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
         related: await getRelatedAnimesFLV(result.id)
       };
-    }else {
+    } else {
       return {
         title: result.title || null,
         poster: result.poster || null,
@@ -257,10 +271,15 @@ const getMoreInfo = async (title) =>{
   }
 };
 
-const getEpisodes = async (title) =>{
+const getEpisodes = async (title) => {
   try {
-    let data = directoryAnimes;
-    const result = data.filter(x => x.title === title)[0];
+    const result = directoryAnimes.filter(x => {
+      if (x.title === title) {
+        return x;
+      } else {
+        return x.title === `${title} (TV)` ? x : undefined;
+      }
+    })[0];
 
     if (!result.jkanime) {
       return await animeflvInfo(result.id).then(episodes => episodes || null);
@@ -284,12 +303,12 @@ const getAnimeServers = async (id) => {
   }
 };
 
-const search = async (title) =>{ return await searchAnime(title); };
+const search = async (title) => { return await searchAnime(title); };
 
 const getImages = async (query) => {
   try {
     const data = await homgot(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`, { parse: true });
-    return data.data.result.items.map(doc =>({
+    return data.data.result.items.map(doc => ({
       type: doc.thumb_type,
       thumbnail: `https:${doc.thumbnail}`,
       fullsize: `https:${doc.media_fullsize}`
@@ -302,12 +321,12 @@ const getImages = async (query) => {
 const getYoutubeVideos = async (channelId) => {
   const data = await homgot(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`, { parse: true });
 
-  return data[channelId.prop].map(doc =>({
-     title: doc.snippet.title,
-     videoId: doc.id.videoId,
-     thumbDefault: doc.snippet.thumbnails.default.url,
-     thumbMedium: doc.snippet.thumbnails.medium.url,
-     thumbHigh: doc.snippet.thumbnails.high.url
+  return data[channelId.prop].map(doc => ({
+    title: doc.snippet.title,
+    videoId: doc.id.videoId,
+    thumbDefault: doc.snippet.thumbnails.default.url,
+    thumbMedium: doc.snippet.thumbnails.medium.url,
+    thumbHigh: doc.snippet.thumbnails.high.url
   }));
 };
 
@@ -315,7 +334,7 @@ const getSectionYoutubeVideos = async (type) => {
 
   if (type === 'learn') {
     let data = await homgot(`${BASE_YOUTUBE}UCCyQwSS6m2mVB0-H2FOFJtw&part=snippet,id&order=date&maxResults=50`, { parse: true });
-    return data.items.map(doc =>({
+    return data.items.map(doc => ({
       title: doc.snippet.title,
       videoId: doc.id.videoId,
       thumbDefault: doc.snippet.thumbnails.default.url,
@@ -325,18 +344,18 @@ const getSectionYoutubeVideos = async (type) => {
   } else if (type === 'amv') {
     let yt1 = await homgot(`${BASE_YOUTUBE}UCkTFkshjAsLMKwhAe1uPC1A&part=snippet,id&order=date&maxResults=25`, { parse: true });
     let yt2 = await homgot(`${BASE_YOUTUBE}UC2cpvlLeowpqnR6bQofwNew&part=snippet,id&order=date&maxResults=25`, { parse: true });
-    return yt1.items.concat(yt2.items).map(doc =>({
+    return yt1.items.concat(yt2.items).map(doc => ({
       title: doc.snippet.title,
       videoId: doc.id.videoId,
       thumbDefault: doc.snippet.thumbnails.default.url,
       thumbMedium: doc.snippet.thumbnails.medium.url,
       thumbHigh: doc.snippet.thumbnails.high.url
     }));
-  } else if (type === 'produccer'){
+  } else if (type === 'produccer') {
     let yt1 = await homgot(`${BASE_YOUTUBE}UC-5MT-BUxTzkPTWMediyV0w&part=snippet,id&order=date&maxResults=25`, { parse: true });
     let yt2 = await homgot(`${BASE_YOUTUBE}UCwUeTOXP3DD9DIvHttowuSA&part=snippet,id&order=date&maxResults=25`, { parse: true });
     let yt3 = await homgot(`${BASE_YOUTUBE}UCA8Vj7nN8bzT3rsukD2ypUg&part=snippet,id&order=date&maxResults=25`, { parse: true });
-    return yt1.items.concat(yt2.items.concat(yt3.items)).map(doc =>({
+    return yt1.items.concat(yt2.items.concat(yt3.items)).map(doc => ({
       title: doc.snippet.title,
       videoId: doc.id.videoId,
       thumbDefault: doc.snippet.thumbnails.default.url,
@@ -364,9 +383,9 @@ const getThemesYear = async (year) => {
 
 const getRandomTheme = async () => {
   let data = await homgot(`${BASE_THEMEMOE}roulette`, { parse: true });
-  let themes = await getThemes(data.themes)
+  let themes = await getThemes(data.themes);
 
-  return themes.map(doc =>({
+  return themes.map(doc => ({
     name: data.name,
     title: doc.name,
     link: doc.video
@@ -381,18 +400,18 @@ const getArtist = async (id) => {
   }
 };
 
-const getAnimeGenres = async(genres) => {
+const getAnimeGenres = async (genres) => {
   let res;
   let promises = [];
 
-  if (genres.genre === undefined && genres.page === undefined && genres.order === undefined)  {
+  if (genres.genre === undefined && genres.page === undefined && genres.order === undefined) {
     return animeGenres;
   } else {
 
     if (genres.page !== undefined) {
-      res = await homgot(`${BASE_ANIMEFLV_JELU}Genres/${genres.genre}/${genres.order}/${genres.page}`,{ parse: true })
+      res = await homgot(`${BASE_ANIMEFLV_JELU}Genres/${genres.genre}/${genres.order}/${genres.page}`, { parse: true })
     } else {
-      res = await homgot(`${BASE_ANIMEFLV_JELU}Genres/${genres.genre}/${genres.order}/1`,{ parse: true })
+      res = await homgot(`${BASE_ANIMEFLV_JELU}Genres/${genres.genre}/${genres.order}/1`, { parse: true })
     }
 
     let data = res.animes
@@ -421,7 +440,7 @@ const getAllThemes = async () => animeThemes;
 const getDestAnimePlatforms = async () => {
   let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/top.json`, { parse: true });
 
-  return data.map(doc =>({
+  return data.map(doc => ({
     id: doc.id,
     name: doc.name,
     logo: doc.logo,
@@ -436,7 +455,7 @@ const getPlatforms = async (id) => {
 
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/typeplatforms.json`, { parse: true });
 
-    return data.map(doc =>({
+    return data.map(doc => ({
       id: doc.id,
       name: doc.name,
       comming: doc.comming || false,
@@ -445,30 +464,27 @@ const getPlatforms = async (id) => {
 
   } if (id === "producers" || id === "apps" || id === "publishers" || "events") {
 
-        data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
+    data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
 
-        return data.map(doc =>({
-            id: doc.id,
-            name: doc.name,
-            logo: doc.logo,
-            cover: doc.cover,
-            description: doc.description,
-            type: doc.type,
-            moreInfo: doc.moreInfo,
-            facebook: doc.facebook,
-            twitter: doc.twitter,
-            instagram: doc.instagram,
-            webInfo: doc.webInfo,
-            webpage: doc.webpage,
-            latitude: doc.latitude || null,
-            longitude: doc.longitude || null
-        }));
-
+    return data.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      logo: doc.logo,
+      cover: doc.cover,
+      description: doc.description,
+      type: doc.type,
+      moreInfo: doc.moreInfo,
+      facebook: doc.facebook,
+      twitter: doc.twitter,
+      instagram: doc.instagram,
+      webInfo: doc.webInfo,
+      webpage: doc.webpage
+    }));
   } else {
 
     data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/type/${id}.json`, { parse: true });
 
-    return data.map(doc =>({
+    return data.map(doc => ({
       id: doc.id,
       name: doc.name,
       type: doc.type,
@@ -482,10 +498,10 @@ const getPlatforms = async (id) => {
 
 const getProfilePlatform = async (id) => {
   let data = await homgot(`${BASE_ARUPPI}res/documents/animelegal/platforms/${id}.json`, { parse: true });
-  let channelId = { id: data[0].youtubeId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items'  };
+  let channelId = { id: data[0].youtubeId, part: 'snippet,id', order: 'date', maxResults: '50', prop: 'items' };
   let videos = await getYoutubeVideos(channelId)
 
-  return data.map(doc =>({
+  return data.map(doc => ({
     id: doc.id,
     name: doc.name,
     logo: doc.logo,
@@ -505,10 +521,8 @@ const getProfilePlatform = async (id) => {
 };
 
 async function getRandomAnime() {
-  let data = directoryAnimes;
-
-  const randomNumber = Math.floor(Math.random() * data.length);
-  let result = data[randomNumber];
+  const randomNumber = Math.floor(Math.random() * directoryAnimes.length);
+  let result = directoryAnimes[randomNumber];
 
   if (!result.jkanime) {
     return {
@@ -524,7 +538,7 @@ async function getRandomAnime() {
       characters: await getAnimeCharacters(result.mal_id).then(characters => characters || null),
       related: await getRelatedAnimesFLV(result.id)
     };
-  }else {
+  } else {
     return {
       title: result.title || null,
       poster: result.poster || null,

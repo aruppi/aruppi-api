@@ -62,7 +62,7 @@ const top = async (type, subtype, page) =>{
 
 const getAllAnimes = async () =>{
 
-  let data = await getAnimes()
+  let data = await getAnimes();
 
   return data.map(item => ({
     index: item[0],
@@ -78,7 +78,7 @@ const getAllDirectory = async (genres) =>{ return await getDirectory(genres); };
 
 const getAnitakume = async () =>{
 
-  const promises = []
+  const promises = [];
 
   await rss.load(BASE_IVOOX).then(rss => {
 
@@ -121,7 +121,7 @@ const getNews = async (pageRss) =>{
 
     await rss.load(pageRss[i].url).then(rss => {
 
-      const body = JSON.parse(JSON.stringify(rss, null, 3)).items
+      const body = JSON.parse(JSON.stringify(rss, null, 3)).items;
       body.map(doc => {
 
         promises.push({
@@ -247,9 +247,13 @@ const getMoreInfo = async (title) =>{
   try {
 
     const promises = [];
-
-    let data = directoryAnimes;
-    const res = data.filter(x => x.title === title)[0];
+    const res = directoryAnimes.filter(x => {
+      if (x.title === title) {
+        return x;
+      } else {
+        return x.title === `${title} (TV)` ? x : undefined;
+      }
+    })[0];
 
     if (!res.jkanime) {
       promises.push({
@@ -307,7 +311,7 @@ const getImages = async (query) => {
   let options = { parse: true }
   const data = await homgot(`${BASE_QWANT}count=${query.count}&q=${query.title}&t=${query.type}&safesearch=${query.safesearch}&locale=${query.country}&uiv=4`, options);
   const body = data.data.result.items;
-  const promises = []
+  const promises = [];
 
   body.map(doc =>{
 
@@ -328,7 +332,7 @@ const getYoutubeVideos = async (channelId) => {
   let options = { parse: true }
   const data = await homgot(`${BASE_YOUTUBE}${channelId.id}&part=${channelId.part}&order=${channelId.order}&maxResults=${channelId.maxResults}`, options);
   const body = data[channelId.prop];
-  const promises = []
+  const promises = [];
 
   body.map(doc =>{
 
@@ -351,12 +355,12 @@ const getRadioStations = async () => {
 }
 
 const getOpAndEd = async (title) => {
-  let data = await parserThemes.serie(title)
-  return await structureThemes(data, true)
+  let data = await parserThemes.serie(title);
+  return await structureThemes(data, true);
 };
 
 const getThemesYear = async (year) => {
-  let data = []
+  let data = [];
 
   if (year === undefined) {
     return await parserThemes.allYears();
@@ -369,7 +373,7 @@ const getThemesYear = async (year) => {
 
 const getRandomTheme = async () => {
 
-  let promise = []
+  let promise = [];
   let options = { parse: true }
   const data = await homgot(`${BASE_THEMEMOE}roulette`, options);
   let themes = await getThemes(data.themes)
@@ -378,14 +382,14 @@ const getRandomTheme = async () => {
     name: data.name,
     title: themes[0].name,
     link: themes[0].video
-  })
+  });
 
   return promise;
 };
 
 const getArtist = async (id) => {
 
-  let data
+  let data;
 
   if (id === undefined) {
     return await parserThemes.artists();

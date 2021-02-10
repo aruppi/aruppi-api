@@ -307,7 +307,7 @@ const searchAnime = async (query) => {
 
 const obtainAnimeSeries = async ($) => {
 
-    let promises = []
+    let promises = [];
 
     await asyncForEach($('div.Container ul.ListAnimes li article'), async (element) => {
 
@@ -472,20 +472,29 @@ const getThemes = async (themes) => {
 const getAnimes = async () => await homgot(`${BASE_ANIMEFLV}api/animes/list`, { parse: true });
 
 const getDirectory = async (genres) => {
-
-    let data
-    if (genres === "sfw") {
-        data = directoryAnimes.filter(function (item) {
-            return !item.genres.includes("Ecchi") && !item.genres.includes("ecchi");
-        })
-    } else {
-        data = directoryAnimes;
-    }
-
-    return data.map(doc => ({
+    if (genres === 'sfw') {
+        return directoryAnimes.filter(function (doc) {
+          if (!doc.genres.includes('Ecchi') && !doc.genres.includes('ecchi')) {
+            return {
+              id: doc.id,
+              title: doc.title,
+              mal_id: doc.mal_id,
+              poster: doc.poster,
+              type: doc.type,
+              genres: doc.genres,
+              state: doc.state,
+              score: doc.score,
+              jkanime: false,
+              description: doc.description
+            };
+          }
+        });
+      }
+    
+      return directoryAnimes.map(doc => ({
         id: doc.id,
         title: doc.title,
-        mal_title: doc.mal_title,
+        mal_id: doc.mal_id,
         poster: doc.poster,
         type: doc.type,
         genres: doc.genres,
@@ -493,8 +502,7 @@ const getDirectory = async (genres) => {
         score: doc.score,
         jkanime: false,
         description: doc.description
-    }));
-
+      }));
 };
 
 module.exports = {
