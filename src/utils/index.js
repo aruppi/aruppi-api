@@ -56,13 +56,13 @@ async function videoServersJK(id) {
             serverList.push({
                 id: serverNames[serverNames.indexOf(server)].toLowerCase(),
                 url: await desuServerUrl(servers[server]) !== null ? await desuServerUrl(servers[server]) : servers[server],
-                direct: true
+                direct: false
             });
         }else {
             serverList.push({
                 id: serverNames[serverNames.indexOf(server)].toLowerCase(),
                 url: servers[server],
-                direct: true
+                direct: false
             });
         }
 
