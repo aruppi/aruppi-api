@@ -7,8 +7,6 @@ const version = require('./../package.json').version;
 const middlewares = require('./middlewares/index').middleware;
 const api = require('./api');
 
-const api_legacy = require('./v2/api');
-
 const app = express();
 
 app.use(helmet());
@@ -41,7 +39,13 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
-app.use('/api/v2', api_legacy);
+app.get('/api/v2', (req, res) => {
+  res.set('Cache-Control', 'no-cache,proxy-revalidate');
+  res.json({
+    message: 'Sorry, version v2 is not avaiable, if you want to see content go to v3'
+  });
+});
+
 app.use('/api/v3', api);
 
 app.use(middlewares);
