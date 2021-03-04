@@ -399,8 +399,9 @@ const imageUrlToBase64 = async (url) => {
 };
 
 const searchAnime = async (query) => {
-    let queryLowerCase = query.toLowerCase();
-    const res = directoryAnimes.filter(x => x.title.toLowerCase().includes(queryLowerCase));
+    
+    let queryLowerCase = query.toLowerCase().replace(/\s/g, '');
+    const res = data.filter(x => x.title.toLowerCase().replace(/\s/g, '').includes(queryLowerCase));
 
     return res.map(doc => ({
         id: doc.id || null,
