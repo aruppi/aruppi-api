@@ -1,9 +1,8 @@
 # **Aruppi API** (v4.0.0)
 
-> This API has everything about Japan, from anime, music, radio, images, videos ... to japanese culture 
+> This API has everything about Japan, from anime, music, radio, images, videos ... to japanese culture
 >
 > These are the services used for the Aruppi App (only available in Spanish language)
-
 
 ![node version](https://img.shields.io/badge/node->=12.17.x-brightgreen.svg)
 ![npm version](https://img.shields.io/badge/npm->=6.14.x-brightgreen.svg)
@@ -11,18 +10,22 @@
 ![maintenance](https://img.shields.io/badge/maintained-Yes-brightgreen.svg)
 ![now](https://badgen.net/badge/icon/now?icon=now&label)
 ![gitrepo](https://img.shields.io/github/stars/aruppi/aruppi-api?style=social)
+
 ---
 
 <img src="./assets/img/logo.png" width="100%" alt="">
 
 ## 📖 API Documentation
+
 Soon we will add the documentation information in a link
 
 ## :rocket: Custom Aruppi API Link
+
 Link to access the [Aruppi API](https://aruppi-api.jeluchu.now.sh/api/v2)
 
 ## 📚 **Development Diary**
-Describe the purpose of the project and give clues about what the code does. 
+
+Describe the purpose of the project and give clues about what the code does.
 For more information go to the following link [Diary Reference](./development_diary/README.md).
 
 ## **:wrench: Developer usage**
@@ -32,7 +35,12 @@ For more information go to the following link [Diary Reference](./development_di
 Before cloning the repo **be sure** you have installed:
 
 - [**NODE**](https://www.google.com/search?q=how+to+install+node) (version >= 12.17.x)
+
+In your package manager you can use either **yarn** or **npm**,
+you need to have installed these versions:
+
 - [**NPM**](https://www.google.com/search?q=how+to+install+npm) (version >= 6.14.x)
+- [**YARN**](https://www.google.com/search?q=how+to+install+yarn) (version >= 1.22.x)
 
 Then:
 
@@ -44,6 +52,7 @@ Then:
 ### **Installation**
 
 In order to install the project and all dependencies, enter in the project folder and run `npm install`
+or you can do the same with yarn with `yarn` in the project
 
 ---
 
@@ -53,15 +62,38 @@ In order to install the project and all dependencies, enter in the project folde
 npm start
 ```
 
+or
+
+```bash
+yarn start
+```
+
+### Build the Project
+
+```bash
+npm build
+```
+
+or
+
+```bash
+yarn build
+```
+
 ### Test the project
 
 ```bash
 npm test
 ```
 
+```bash
+yarn test
+```
+
 ---
 
 ## Deprecated v1 for API
+
 Aruppi has grown since it was launched and we need to continue improving the application along with the services to be able to give new features.
 
 But if you need to see the code or the operation of the old version you can do it
@@ -89,6 +121,7 @@ At this time version 2.6.9 will remain functional until Aruppi App users fully m
 
 - [Darkangeel](https://github.com/Darkangeel-hd) (System administration authority (SYSADM))
 - [Jéluchu](https://github.com/Jeluchu) (Android Developer, designer, and others)
+- [Capitanwesler](https://github.com/capitanwesler) (Backend developer, web developer and others)
 
 ---
 
@@ -96,7 +129,6 @@ At this time version 2.6.9 will remain functional until Aruppi App users fully m
 
 Please :star: this repository if you like it or this project helped you!\
 Feel free to open issues or submit pull-requests to help me improving my work.
-
 
 ---
 
@@ -127,13 +159,12 @@ Feel free to open issues or submit pull-requests to help me improving my work.
   </tr>
 </table>
 
-
 ### **:robot: Author**
 
 _*Jéluchu*_
 
 > You can follow me on
-[github](https://github.com/Jeluchu)&nbsp;&middot;&nbsp;[twitter](https://twitter.com/Jeluchu)
+> [github](https://github.com/Jeluchu)&nbsp;&middot;&nbsp;[twitter](https://twitter.com/Jeluchu)
 
 ---
 
