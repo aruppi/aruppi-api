@@ -39,8 +39,12 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
+app.get('/api/v2/*', (req, res) => {
+  res.redirect('/api/v2')
+});
+
+
 app.get('/api/v2', (req, res) => {
-  res.set('Cache-Control', 'no-cache,proxy-revalidate');
   res.json({
     message: 'Sorry, version v2 is not avaiable, if you want to see content go to v3'
   });

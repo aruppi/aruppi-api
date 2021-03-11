@@ -1,4 +1,4 @@
-# **Aruppi API** (v3.4.6)
+# **Aruppi API** (v3.4.7)
 
 > This API has everything about Japan, from anime, music, radio, images, videos ... to japanese culture 
 >
