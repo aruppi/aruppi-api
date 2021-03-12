@@ -1890,7 +1890,7 @@
   {
     "id": "yosuga-no-sora",
     "title": "Yosuga no Sora",
-    "mal_id": 8161,
+    "mal_id": 8861,
     "poster": "https://aruppi.jeluchu.xyz/res/directory/106.jpg",
     "type": "Anime",
     "genres": [
@@ -57175,5 +57175,24 @@
     "score": "4.4",
     "jkanime": false,
     "description": "Un fatídico día, toda la humanidad quedó petrificada por un destello de luz cegadora. Después de varios milenios, el estudiante de instituto Taiju se despierta y se encuentra perdido en un mundo de estatuas. Sin embargo, no está solo; su amigo, amante de la ciencia, ha estado trabajando durante unos meses y tiene un gran plan en mente: ¡poner en marcha la civilización con el poder de la ciencia!"
+  },
+  {
+    "id": "higurashi-no-naku-koro-ni-2020",
+    "title": "Higurashi no Naku Koro ni (2020)",
+    "mal_id": 41006,
+    "poster": "https://aruppi.jeluchu.xyz/res/directory/3381.jpg",
+    "type": "Anime",
+    "genres": [
+    "Demencia",
+    "Misterio",
+    "Psicológico",
+    "Sobrenatural",
+    "Suspenso",
+    "Terror"
+    ],
+    "state": "En emision",
+    "score": "4.6",
+    "jkanime": false,
+    "description": "Un cálido día de verano en 1983, el estudiante transferido Maebara Keiichi llega a un pacífico pueblo rural en Hinamizawa. Allí, se hace amigo de sus compañeras de clase Rena, Mion, Rika y Satoko. Aceptado como un miembro oficial del “club”, Keiichi y la pandilla realizan diversas actividades como juegos de cartas y de mesa, así como a las escondidas. Pero justo cuando Keiichi comenzaba a acostumbrarse a la vida en el campo, se encuentra con la oscura historia detrás de Hinamizawa. Mientras Keiichi va desentrañando este oscuro misterio, descubrirá que sus nuevos amigos podrían no ser lo que aparentan."
   }
 ]
