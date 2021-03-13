@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
+import { animeFlvInfo, jkanimeInfo, videoServersJK } from '../utils/util';
 import { transformUrlServer } from '../utils/transformerUrl';
+import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
 import urls from '../utils/urls';
 
 /*
@@ -189,42 +191,80 @@ export default class AnimeController {
     const { type, page, url } = req.params;
     let data: any;
 
+    if (['movie', 'ova', 'tv', 'special'].indexOf(type) !== -1) {
+      try {
+        data = await requestGot(
+          `${urls.BASE_ANIMEFLV_JELU}${
+            url.charAt(0).toUpperCase() + url.slice(1)
+          }/${type}/${page}`,
+          {
+            parse: true,
+            scrapy: false,
+          },
+        );
+      } catch (err) {
+        return next(err);
+      }
+
+      const animes: Movie[] = data[url.toLowerCase()].map((item: any) => {
+        return {
+          id: item.id,
+          title: item.title,
+          type: url.toLowerCase(),
+          page: page,
+          banner: item.banner,
+          image: item.poster,
+          synopsis: item.synopsis,
+          status: item.debut,
+          rate: item.rating,
+          genres: item.genres.map((genre: any) => genre),
+          episodes: item.episodes.map((episode: any) => episode),
+        };
+      });
+
+      if (animes.length > 0) {
+        res.status(200).json({
+          animes,
+        });
+      } else {
+        res.status(500).json({ message: 'Aruppi lost in the shell' });
+      }
+    } else {
+      next();
+    }
+  }
+
+  async getEpisodes(req: Request, res: Response, next: NextFunction) {
+    const { title } = req.params;
+    let searchAnime: ModelA | null;
+
     try {
-      data = await requestGot(
-        `${urls.BASE_ANIMEFLV_JELU}${
-          url.charAt(0).toUpperCase() + url.slice(1)
-        }/${type}/${page}`,
-        {
-          parse: true,
-          scrapy: false,
-        },
-      );
+      searchAnime = await AnimeModel.findOne({ title: { $eq: title } });
     } catch (err) {
       return next(err);
     }
 
-    const animes: Movie[] = data[url.toLowerCase()].map((item: any) => {
-      return {
-        id: item.id,
-        title: item.title,
-        type: url.toLowerCase(),
-        page: page,
-        banner: item.banner,
-        image: item.poster,
-        synopsis: item.synopsis,
-        status: item.debut,
-        rate: item.rating,
-        genres: item.genres.map((genre: any) => genre),
-        episodes: item.episodes.map((episode: any) => episode),
-      };
-    });
-
-    if (animes.length > 0) {
-      res.status(200).json({
-        animes,
-      });
+    if (!searchAnime?.jkanime) {
+      res.status(200).json({ episodes: await animeFlvInfo(searchAnime?.id) });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(200).json({ episodes: await jkanimeInfo(searchAnime?.id) });
+    }
+  }
+
+  async getServers(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+
+    if (isNaN(parseInt(id.split('/')[0]))) {
+      res.status(200).json({ servers: await videoServersJK(id) });
+    } else {
+      const data: any = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
+        { parse: true, scrapy: false },
+      );
+
+      console.log(data);
+
+      res.status(200).json({ servers: await transformUrlServer(data.servers) });
     }
   }
 }

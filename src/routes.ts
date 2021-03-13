@@ -74,6 +74,11 @@ routes.get('/api/v4/top/:type/:page/:subtype?/', animeController.top);
 routes.get('/api/v4/allAnimes', animeController.getAllAnimes);
 routes.get('/api/v4/lastEpisodes', animeController.getLastEpisodes);
 routes.get('/api/v4/:url/:type/:page', animeController.getContent);
+routes.get('/api/v4/getEpisodes/:title', animeController.getEpisodes);
+routes.get(
+  '/api/v4/getAnimeServers/:id([^/]+/[^/]+)',
+  animeController.getServers,
+);
 
 /* Directory Controller */
 routes.get(

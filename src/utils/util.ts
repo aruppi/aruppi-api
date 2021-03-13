@@ -150,10 +150,13 @@ const getPosterAndType = async (
 };
 
 export const getRelatedAnimesFLV = async (id: string) => {
-  const $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
-    parse: false,
-    scrapy: true,
-  });
+  const $: cheerio.Root = await requestGot(
+    `${urls.BASE_ANIMEFLV}/anime/${id}`,
+    {
+      parse: false,
+      scrapy: true,
+    },
+  );
   let listRelated: any = {};
   let relatedAnimes: RelatedAnime[] = [];
 
@@ -184,10 +187,13 @@ export const getRelatedAnimesFLV = async (id: string) => {
 };
 
 export const getRelatedAnimesMAL = async (mal_id: number) => {
-  const $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
-    parse: false,
-    scrapy: true,
-  });
+  const $: cheerio.Root = await requestGot(
+    `https://myanimelist.net/anime/${mal_id}`,
+    {
+      parse: false,
+      scrapy: true,
+    },
+  );
 
   let listRelated: any = {};
   let relatedAnimes: RelatedAnime[] = [];
@@ -196,7 +202,7 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
     $('table.anime_detail_related_anime')
       .find('tbody tr')
       .each((index: number, element: any) => {
-        if ($(element).find('td').eq(0) !== 'Adaptation:') {
+        if ($(element).find('td').eq(0).text() !== 'Adaptation:') {
           listRelated[$(element).find('td').eq(1).text()] = $(element)
             .find('td')
             .children('a')
@@ -224,3 +230,182 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
     return [];
   }
 };
+
+export const animeFlvInfo = async (id: string | undefined) => {
+  let $: cheerio.Root;
+  let anime_info: string[] = [];
+  let anime_eps: string[] = [];
+  let nextEpisodeDate: string | null;
+  let episodes: any[] = [];
+
+  try {
+    $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
+      scrapy: true,
+      parse: false,
+    });
+  } catch (err) {
+    return err;
+  }
+
+  const scripts: cheerio.Element[] = $('script').toArray();
+
+  for (const script of scripts) {
+    if ($(script).html()!.includes('anime_info')) {
+      anime_info = JSON.parse(
+        $(script).html()!.split('var anime_info = ')[1].split(';\n')[0],
+      );
+
+      anime_eps = JSON.parse(
+        $(script).html()!.split('var episodes = ')[1].split(';')[0],
+      );
+    }
+  }
+
+  if (anime_info.length === 4) {
+    nextEpisodeDate = anime_info[3];
+  } else {
+    nextEpisodeDate = null;
+  }
+
+  episodes.push({ nextEpisodeDate });
+
+  for (const episode of anime_eps) {
+    episodes.push({
+      episode: episode[0],
+      id: `${episode[1]}/${id}-${episode[0]}`,
+    });
+  }
+
+  return episodes;
+};
+
+export const jkanimeInfo = async (id: string | undefined) => {
+  let $: cheerio.Root;
+  let nextEpisodeDate: string | null;
+  let imageLink: string | undefined;
+  let episodesList: any[] = [];
+  let countEpisodes: string[] = [];
+
+  try {
+    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+      scrapy: true,
+      parse: false,
+    });
+  } catch (err) {
+    return err;
+  }
+
+  countEpisodes = $('div.navigation a')
+    .map((index: number, element: cheerio.Element) => {
+      return $(element).text();
+    })
+    .get();
+
+  const episodesCount: string = countEpisodes[countEpisodes.length - 1].split(
+    '-',
+  )[1];
+
+  nextEpisodeDate = $('div.proxep p').text() || null;
+
+  episodesList.push({ nextEpisodeDate });
+
+  for (let i = 1; i <= parseInt(episodesCount); i++) {
+    episodesList.push({
+      episode: i,
+      id: `${id}/${i}`,
+    });
+  }
+
+  return episodesList;
+};
+
+export const videoServersJK = async (id: string) => {
+  let $: cheerio.Root;
+  let servers: any = {};
+  let script: string | null = '';
+
+  try {
+    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+      scrapy: true,
+      parse: false,
+    });
+  } catch (err) {
+    return err;
+  }
+
+  const serverNames: string[] = $('div#reproductor-box li')
+    .map((index: number, element: cheerio.Element) => {
+      return $(element).find('a').text();
+    })
+    .get();
+
+  $('script').each((index: number, element: cheerio.Element) => {
+    if ($(element).html()!.includes('var video = [];')) {
+      script = $(element).html();
+    }
+  });
+
+  try {
+    let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
+
+    for (let i = 0; i < serverNames.length; i++) {
+      servers[serverNames[i]] = videoUrls![i];
+    }
+  } catch (err) {
+    return null;
+  }
+
+  let serverList = [];
+
+  for (let server in servers) {
+    if (serverNames[serverNames.indexOf(server)].toLowerCase() === 'desu') {
+      serverList.push({
+        id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+        url:
+          (await desuServerUrl(servers[server])) !== null
+            ? await desuServerUrl(servers[server])
+            : servers[server],
+        direct: false,
+      });
+    } else {
+      serverList.push({
+        id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+        url: servers[server],
+        direct: false,
+      });
+    }
+  }
+
+  serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
+
+  return serverList;
+};
+
+async function desuServerUrl(url: string) {
+  let $: cheerio.Root;
+
+  try {
+    $ = await requestGot(url, { scrapy: true, parse: false });
+  } catch (err) {
+    return err;
+  }
+
+  let script: string | null = '';
+
+  $('script').each((index: number, element: cheerio.Element) => {
+    if ($(element).html()!.includes('var parts = {')) {
+      if ($(element).html()) {
+        script = $(element).html();
+      } else {
+        return null;
+      }
+    }
+  });
+
+  let result = script
+    .match(/swarmId: '(https:\/\/\S+)'/gi)!
+    .toString()
+    .split("'")[1];
+
+  return result;
+}
