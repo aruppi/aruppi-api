@@ -79,6 +79,7 @@ routes.get(
   '/api/v4/getAnimeServers/:id([^/]+/[^/]+)',
   animeController.getServers,
 );
+routes.get('/api/v4/randomAnime', animeController.getRandomAnime);
 
 /* Directory Controller */
 routes.get(
@@ -90,6 +91,10 @@ routes.get('/api/v4/allSeasons', directoryController.allSeasons);
 routes.get('/api/v4/laterSeasons', directoryController.laterSeasons);
 routes.get('/api/v4/moreInfo/:title', directoryController.getMoreInfo);
 routes.get('/api/v4/search/:title', directoryController.search);
+routes.get(
+  '/api/v4/getByGenres/:genre?/:order?/:page?',
+  directoryController.getAnimeGenres,
+);
 
 /* Utils Controller */
 routes.get('/api/v4/anitakume', utilsController.getAnitakume);
@@ -103,5 +108,7 @@ routes.get('/api/v4/themes/:title', utilsController.getOpAndEd);
 routes.get('/api/v4/themesYear/:year?', utilsController.getThemesYear);
 routes.get('/api/v4/randomTheme', utilsController.randomTheme);
 routes.get('/api/v4/artists/:id?', utilsController.getArtist);
+routes.get('/api/v4/destAnimePlatforms', utilsController.getDestAnimePlatforms);
+routes.get('/api/v4/platforms/:id?', utilsController.getPlatforms);
 
 export default routes;

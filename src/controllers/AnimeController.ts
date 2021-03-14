@@ -3,6 +3,13 @@ import { requestGot } from '../utils/requestCall';
 import { animeFlvInfo, jkanimeInfo, videoServersJK } from '../utils/util';
 import { transformUrlServer } from '../utils/transformerUrl';
 import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
+import {
+  animeExtraInfo,
+  getAnimeVideoPromo,
+  getAnimeCharacters,
+  getRelatedAnimesFLV,
+  getRelatedAnimesMAL,
+} from '../utils/util';
 import urls from '../utils/urls';
 
 /*
@@ -272,7 +279,51 @@ export default class AnimeController {
     }
   }
 
-  async getAnimeGenres(req: Request, res: Response, next: NextFunction) {
-    const { genre, order, page } = req.params;
+  async getRandomAnime(req: Request, res: Response, next: NextFunction) {
+    let animeQuery: ModelA[] | null;
+    let animeResult: any;
+
+    try {
+      animeQuery = await AnimeModel.aggregate([{ $sample: { size: 1 } }]);
+    } catch (err) {
+      return next(err);
+    }
+
+    if (!animeQuery[0].jkanime) {
+      animeResult = {
+        title: animeQuery[0].title || null,
+        poster: animeQuery[0].poster || null,
+        synopsis: animeQuery[0].description || null,
+        status: animeQuery[0].state || null,
+        type: animeQuery[0].type || null,
+        rating: animeQuery[0].score || null,
+        genres: animeQuery[0].genres || null,
+        moreInfo: await animeExtraInfo(animeQuery[0].mal_id),
+        promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
+        characters: await getAnimeCharacters(animeQuery[0].mal_id),
+        related: await getRelatedAnimesFLV(animeQuery[0].id),
+      };
+    } else {
+      animeResult = {
+        title: animeQuery[0].title || null,
+        poster: animeQuery[0].poster || null,
+        synopsis: animeQuery[0].description || null,
+        status: animeQuery[0].state || null,
+        type: animeQuery[0].type || null,
+        rating: animeQuery[0].score || null,
+        genres: animeQuery[0].genres || null,
+        moreInfo: await animeExtraInfo(animeQuery[0].mal_id),
+        promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
+        characters: await getAnimeCharacters(animeQuery[0].mal_id),
+        related: await getRelatedAnimesMAL(animeQuery[0].mal_id),
+      };
+    }
+
+    if (animeResult) {
+      res.set('Cache-Control', 'no-store');
+      res.status(200).json({ animeResult });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
   }
 }

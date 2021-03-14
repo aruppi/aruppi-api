@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
 import AnimeModel, { Anime } from '../database/models/anime.model';
+import GenreModel, { Genre } from '../database/models/genre.model';
 import {
   animeExtraInfo,
   getAnimeVideoPromo,
@@ -205,6 +206,53 @@ export default class DirectoryController {
 
     if (resultAnimes.length > 0) {
       res.status(200).json({ search: resultAnimes });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getAnimeGenres(req: Request, res: Response, next: NextFunction) {
+    const { genre, order, page } = req.params;
+    let data: Genre[];
+    let resultReq: any;
+
+    try {
+      if (genre === undefined && order === undefined && page === undefined) {
+        data = await GenreModel.find();
+      } else {
+        if (page !== undefined) {
+          resultReq = await requestGot(
+            `${urls.BASE_ANIMEFLV_JELU}Genres/${genre}/${order}/${page}`,
+            { parse: true, scrapy: false },
+          );
+        } else {
+          resultReq = await requestGot(
+            `${urls.BASE_ANIMEFLV_JELU}Genres/${genre}/${order}/1`,
+            { parse: true, scrapy: false },
+          );
+        }
+      }
+    } catch (err) {
+      return next(err);
+    }
+
+    const result: any[] = resultReq.animes.map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title.trim(),
+        mention: genre,
+        page: page,
+        poster: item.poster,
+        banner: item.banner,
+        synopsis: item.synopsis,
+        type: item.type,
+        rating: item.rating,
+        genre: item.genre,
+      };
+    });
+
+    if (result.length > 0) {
+      res.status(200).json({ result });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }

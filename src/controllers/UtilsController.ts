@@ -415,4 +415,76 @@ export default class UtilsController {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
   }
+
+  async getDestAnimePlatforms(req: Request, res: Response, next: NextFunction) {
+    let data: any;
+
+    try {
+      data = await requestGot(
+        `${urls.BASE_ARUPPI}res/documents/animelegal/top.json`,
+        { parse: true, scrapy: false },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const result: any[] = data.map((item: any) => {
+      return {
+        id: item.id,
+        name: item.name,
+        logo: item.logo,
+        link: item.link,
+      };
+    });
+
+    if (result.length > 0) {
+      res.status(200).json({ result });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getPlatforms(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    let data: any;
+
+    if (id === undefined) {
+      data = await requestGot(
+        `${urls.BASE_ARUPPI}res/documents/animelegal/type/platforms.json`,
+        { parse: true, scrapy: false },
+      );
+    } else if (
+      id === 'producers' ||
+      id === 'apps' ||
+      id === 'publishers' ||
+      'events'
+    ) {
+      data = await requestGot(
+        `${urls.BASE_ARUPPI}res/documents/animelegal/type/${id}.json`,
+        { parse: true, scrapy: false },
+      );
+    } else {
+      data = await requestGot(
+        `${urls.BASE_ARUPPI}res/documents/animelegal/type/${id}.json`,
+        { parse: true, scrapy: false },
+      );
+    }
+
+    const result: any[] = data.map((item: any) => {
+      return {
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        logo: item.logo,
+        cover: item.cover,
+        webpage: item.webpage,
+      };
+    });
+
+    if (result.length > 0) {
+      res.status(200).json({ result });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
 }
