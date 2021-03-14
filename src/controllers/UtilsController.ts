@@ -6,12 +6,18 @@ import { requestGot } from '../utils/requestCall';
 import RadioStationModel, {
   RadioStation,
 } from '../database/models/radiostation.model';
+import ThemeModel, { Theme } from '../database/models/theme.model';
+import ThemeParser from '../utils/animeTheme';
+import { structureThemes } from '../utils/util';
+import { getThemes } from '../utils/util';
 
 /*
   UtilsController - controller to parse the
   feed and get news, all with scraping and
   parsing RSS.
 */
+
+const themeParser = new ThemeParser();
 
 type CustomFeed = {
   foo: string;
@@ -299,6 +305,112 @@ export default class UtilsController {
 
     if (results.length > 0) {
       res.status(200).json({ stations: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getAllThemes(req: Request, res: Response, next: NextFunction) {
+    let data: Theme[];
+
+    try {
+      data = await ThemeModel.find();
+    } catch (err) {
+      return next(err);
+    }
+
+    const results: any[] = data.map((item: Theme) => {
+      return {
+        id: item.id,
+        title: item.title,
+        year: item.year,
+        themes: item.themes,
+      };
+    });
+
+    if (results.length > 0) {
+      res.status(200).json({ themes: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getOpAndEd(req: Request, res: Response, next: NextFunction) {
+    const { title } = req.params;
+    let result: any;
+
+    try {
+      result = await structureThemes(await themeParser.serie(title), true);
+    } catch (err) {
+      return next(err);
+    }
+
+    if (result) {
+      res.status(200).json({ result });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getThemesYear(req: Request, res: Response, next: NextFunction) {
+    const { year } = req.params;
+    let data: any;
+
+    try {
+      if (year === undefined) {
+        data = await themeParser.allYears();
+      } else {
+        data = await structureThemes(await themeParser.year(year), false);
+      }
+    } catch (err) {
+      return next(err);
+    }
+
+    if (data.length > 0) {
+      res.status(200).json({ data });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async randomTheme(req: Request, res: Response, next: NextFunction) {
+    let data: any;
+
+    try {
+      data = await requestGot(`${urls.BASE_THEMEMOE}roulette`, {
+        parse: true,
+        scrapy: false,
+      });
+    } catch (err) {
+      return next(err);
+    }
+
+    const result: any[] = getThemes(data.themes);
+
+    if (result.length > 0) {
+      res.set('Cache-Control', 'no-store');
+      res.status(200).json({ result });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getArtist(req: Request, res: Response, next: NextFunction) {
+    const { id } = req.params;
+    let data: any;
+
+    try {
+      if (id === undefined) {
+        data = await themeParser.artists();
+      } else {
+        data = await structureThemes(await themeParser.artist(id), false);
+      }
+    } catch (err) {
+      return next(err);
+    }
+
+    if (data.length > 0) {
+      res.status(200).json({ data });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }

@@ -271,4 +271,8 @@ export default class AnimeController {
       return next(err);
     }
   }
+
+  async getAnimeGenres(req: Request, res: Response, next: NextFunction) {
+    const { genre, order, page } = req.params;
+  }
 }

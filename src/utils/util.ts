@@ -409,3 +409,49 @@ async function desuServerUrl(url: string) {
 
   return result;
 }
+
+export const structureThemes = async (body: any, indv: boolean) => {
+  let themes: any[] = [];
+
+  if (indv === true) {
+    return {
+      title: body.title,
+      year: body.year,
+      themes: await getThemesData(body.themes),
+    };
+  } else {
+    for (let i = 0; i <= body.length - 1; i++) {
+      themes.push({
+        title: body[i].title,
+        year: body[i].year,
+        themes: await getThemesData(body[i].themes),
+      });
+    }
+
+    return themes;
+  }
+};
+
+function getThemesData(themes: any[]): any {
+  let items: any[] = [];
+
+  for (let i = 0; i <= themes.length - 1; i++) {
+    items.push({
+      title: themes[i].name.split('"')[1] || 'Remasterización',
+      type: themes[i].type,
+      episodes: themes[i].episodes !== '' ? themes[i].episodes : null,
+      notes: themes[i].notes !== '' ? themes[i].notes : null,
+      video: themes[i].link,
+    });
+  }
+
+  return items.filter(x => x.title !== 'Remasterización');
+}
+
+export function getThemes(themes: any[]) {
+  return themes.map((item: any) => ({
+    name: item.themeName,
+    type: item.themeType,
+    video: item.mirror.mirrorURL,
+  }));
+}

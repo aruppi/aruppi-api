@@ -98,5 +98,10 @@ routes.get('/api/v4/images/:title', utilsController.getImages);
 routes.get('/api/v4/videos/:channelId', utilsController.getVideos);
 routes.get('/api/v4/sectionedVideos/:type', utilsController.getSectionVideos);
 routes.get('/api/v4/radio', utilsController.getRadioStations);
+routes.get('/api/v4/allThemes', utilsController.getAllThemes);
+routes.get('/api/v4/themes/:title', utilsController.getOpAndEd);
+routes.get('/api/v4/themesYear/:year?', utilsController.getThemesYear);
+routes.get('/api/v4/randomTheme', utilsController.randomTheme);
+routes.get('/api/v4/artists/:id?', utilsController.getArtist);
 
 export default routes;
