@@ -199,4 +199,82 @@ export default class UtilsController {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
   }
+
+  async getSectionVideos(req: Request, res: Response, next: NextFunction) {
+    const { type } = req.params;
+    let y1: any, y2: any, y3: any;
+    let data: any;
+
+    try {
+      if (type === 'learn') {
+        data = await requestGot(
+          `${urls.BASE_YOUTUBE}UCCyQwSS6m2mVB0-H2FOFJtw&part=snippet,id&order=date&maxResults=50`,
+          { parse: true, scrapy: false },
+        );
+      } else if (type === 'amv') {
+        y1 = await requestGot(
+          `${urls.BASE_YOUTUBE}UCkTFkshjAsLMKwhAe1uPC1A&part=snippet,id&order=date&maxResults=25`,
+          { parse: true, scrapy: false },
+        );
+
+        y2 = await requestGot(
+          `${urls.BASE_YOUTUBE}UC2cpvlLeowpqnR6bQofwNew&part=snippet,id&order=date&maxResults=25`,
+          { parse: true, scrapy: false },
+        );
+      } else if (type === 'produccer') {
+        y1 = await requestGot(
+          `${urls.BASE_YOUTUBE}UC-5MT-BUxTzkPTWMediyV0w&part=snippet,id&order=date&maxResults=25`,
+          { parse: true, scrapy: false },
+        );
+
+        y2 = await requestGot(
+          `${urls.BASE_YOUTUBE}UCwUeTOXP3DD9DIvHttowuSA&part=snippet,id&order=date&maxResults=25`,
+          { parse: true, scrapy: false },
+        );
+
+        y3 = await requestGot(
+          `${urls.BASE_YOUTUBE}UCA8Vj7nN8bzT3rsukD2ypUg&part=snippet,id&order=date&maxResults=25`,
+          { parse: true, scrapy: false },
+        );
+      }
+    } catch (err) {
+      return next(err);
+    }
+
+    if (data && !y1 && !y2 && !y3) {
+      const results: any[] = data.items.map((item: any) => ({
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+        thumbDefault: item.snippet.thumbnails.default.url,
+        thumbMedium: item.snippet.thumbnails.medium.url,
+        thumbHigh: item.snippet.thumbnails.high.url,
+      }));
+
+      res.status(200).json({ videos: results });
+    } else if (!data && y1 && y2 && !y3) {
+      const results: any[] = y1.items.concat(y2.items).map((item: any) => ({
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+        thumbDefault: item.snippet.thumbnails.default.url,
+        thumbMedium: item.snippet.thumbnails.medium.url,
+        thumbHigh: item.snippet.thumbnails.high.url,
+      }));
+
+      res.status(200).json({ videos: results });
+    } else if (!data && y1 && y2 && y3) {
+      const results: any[] = y1.items
+        .concat(y2.items.concat(y3.items))
+        .map((item: any) => ({
+          title: item.snippet.title,
+          videoId: item.id.videoId,
+          thumbDefault: item.snippet.thumbnails.default.url,
+          thumbMedium: item.snippet.thumbnails.medium.url,
+          thumbHigh: item.snippet.thumbnails.high.url,
+        }));
+
+      res.status(200).json({ videos: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
 }

@@ -96,5 +96,6 @@ routes.get('/api/v4/anitakume', utilsController.getAnitakume);
 routes.get('/api/v4/news', utilsController.getNews);
 routes.get('/api/v4/images/:title', utilsController.getImages);
 routes.get('/api/v4/videos/:channelId', utilsController.getVideos);
+routes.get('/api/v4/sectionedVideos/:type', utilsController.getSectionVideos);
 
 export default routes;
