@@ -89,6 +89,7 @@ routes.get('/api/v4/season/:year/:type', directoryController.getSeason);
 routes.get('/api/v4/allSeasons', directoryController.allSeasons);
 routes.get('/api/v4/laterSeasons', directoryController.laterSeasons);
 routes.get('/api/v4/moreInfo/:title', directoryController.getMoreInfo);
+routes.get('/api/v4/search/:title', directoryController.search);
 
 /* Utils Controller */
 routes.get('/api/v4/anitakume', utilsController.getAnitakume);

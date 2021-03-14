@@ -181,4 +181,32 @@ export default class DirectoryController {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
   }
+
+  async search(req: Request, res: Response, next: NextFunction) {
+    const { title } = req.params;
+    let results: Anime[] | null;
+
+    try {
+      results = await AnimeModel.find({
+        title: { $regex: new RegExp(title, 'i') },
+      });
+    } catch (err) {
+      return next(err);
+    }
+
+    const resultAnimes: any[] = results.map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title,
+        type: item.type,
+        image: item.poster,
+      };
+    });
+
+    if (resultAnimes.length > 0) {
+      res.status(200).json({ search: resultAnimes });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
 }
