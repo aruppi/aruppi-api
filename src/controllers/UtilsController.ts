@@ -3,6 +3,9 @@ import Parser from 'rss-parser';
 import urls from '../utils/urls';
 import { obtainPreviewNews } from '../utils/obtainPreviews';
 import { requestGot } from '../utils/requestCall';
+import RadioStationModel, {
+  RadioStation,
+} from '../database/models/radiostation.model';
 
 /*
   UtilsController - controller to parse the
@@ -273,6 +276,29 @@ export default class UtilsController {
         }));
 
       res.status(200).json({ videos: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getRadioStations(req: Request, res: Response, next: NextFunction) {
+    let data: RadioStation[];
+
+    try {
+      data = await RadioStationModel.find();
+    } catch (err) {
+      return next(err);
+    }
+
+    const results: any[] = data.map((item: RadioStation) => {
+      return {
+        name: item.name,
+        url: item.url,
+      };
+    });
+
+    if (results.length > 0) {
+      res.status(200).json({ stations: results });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
