@@ -254,17 +254,21 @@ export default class AnimeController {
   async getServers(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
-    if (isNaN(parseInt(id.split('/')[0]))) {
-      res.status(200).json({ servers: await videoServersJK(id) });
-    } else {
-      const data: any = await requestGot(
-        `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
-        { parse: true, scrapy: false },
-      );
+    try {
+      if (isNaN(parseInt(id.split('/')[0]))) {
+        res.status(200).json({ servers: await videoServersJK(id) });
+      } else {
+        const data: any = await requestGot(
+          `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
+          { parse: true, scrapy: false },
+        );
 
-      console.log(data);
-
-      res.status(200).json({ servers: await transformUrlServer(data.servers) });
+        res
+          .status(200)
+          .json({ servers: await transformUrlServer(data.servers) });
+      }
+    } catch (err) {
+      return next(err);
     }
   }
 }

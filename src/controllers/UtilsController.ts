@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Parser from 'rss-parser';
 import urls from '../utils/urls';
 import { obtainPreviewNews } from '../utils/obtainPreviews';
+import { requestGot } from '../utils/requestCall';
 
 /*
   UtilsController - controller to parse the
@@ -139,5 +140,33 @@ export default class UtilsController {
     }
 
     res.json({ news });
+  }
+
+  async getImages(req: Request, res: Response, next: NextFunction) {
+    const { title } = req.params;
+    let data: any;
+
+    try {
+      data = await requestGot(
+        `${urls.BASE_QWANT}count=51&q=${title}&t=images&safesearch=1&locale=es_ES&uiv=4`,
+        { scrapy: false, parse: true },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const results: any[] = data.data.result.items.map((item: any) => {
+      return {
+        type: item.thumb_type,
+        thumbnail: `https:${item.thumbnail}`,
+        fullsize: `https:${item.media_fullsize}`,
+      };
+    });
+
+    if (results.length > 0) {
+      res.status(200).json({ images: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
   }
 }
