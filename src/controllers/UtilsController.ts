@@ -169,4 +169,34 @@ export default class UtilsController {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
   }
+
+  async getVideos(req: Request, res: Response, next: NextFunction) {
+    const { channelId } = req.params;
+    let data: any;
+
+    try {
+      data = await requestGot(
+        `${urls.BASE_YOUTUBE}${channelId}&part=snippet,id&order=date&maxResults=50`,
+        { scrapy: false, parse: true },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const results: any[] = data.items.map((item: any) => {
+      return {
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+        thumbDefault: item.snippet.thumbnails.default.url,
+        thumbMedium: item.snippet.thumbnails.medium.url,
+        thumbHigh: item.snippet.thumbnails.high.url,
+      };
+    });
+
+    if (results.length > 0) {
+      res.status(200).json({ videos: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
 }
