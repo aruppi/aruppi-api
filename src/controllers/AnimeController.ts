@@ -175,7 +175,7 @@ export default class AnimeController {
 
     for (const episode of data.episodes) {
       const formattedEpisode: Episode = {
-        id: episode.id,
+        id: "12345/" + episode.id,
         title: episode.title,
         image: episode.poster,
         episode: episode.episode,
