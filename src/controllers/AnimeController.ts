@@ -81,7 +81,7 @@ export default class AnimeController {
 
     const animeList: Schedule[] = data[day].map((item: Schedule) => ({
       title: item.title,
-      mal_id: item.mal_id,
+      malid: item.mal_id,
       image: item.image_url,
     }));
 
