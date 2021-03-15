@@ -40,13 +40,60 @@ export default class DirectoryController {
 
     try {
       if (genres === 'sfw') {
-        res.status(200).json(
-          await AnimeModel.find({
+        await AnimeModel.find(
+          {
             genres: { $nin: ['ecchi', 'Ecchi'] },
-          }),
+          },
+          (err: any, docs: Anime[]) => {
+            let results: any[] = [];
+
+            for (const item of docs) {
+              results.push({
+                id: item.id,
+                title: item.title,
+                mal_id: item.mal_id,
+                poster: item.poster,
+                type: item.type,
+                genres: item.genres,
+                state: item.state,
+                score: item.score,
+                jkanime: item.jkanime,
+                description: item.description,
+              });
+            }
+
+            if (results.length > 0) {
+              res.status(200).json({ results });
+            } else {
+              res.status(500).json({ message: 'Aruppi lost in the shell' });
+            }
+          },
         );
       } else {
-        res.status(200).json(await AnimeModel.find());
+        await AnimeModel.find((err: any, docs: Anime[]) => {
+          let results: any[] = [];
+
+          for (const item of docs) {
+            results.push({
+              id: item.id,
+              title: item.title,
+              mal_id: item.mal_id,
+              poster: item.poster,
+              type: item.type,
+              genres: item.genres,
+              state: item.state,
+              score: item.score,
+              jkanime: item.jkanime,
+              description: item.description,
+            });
+          }
+
+          if (results.length > 0) {
+            res.status(200).json({ results });
+          } else {
+            res.status(500).json({ message: 'Aruppi lost in the shell' });
+          }
+        });
       }
     } catch (err) {
       return next(err);
