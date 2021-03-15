@@ -205,7 +205,7 @@ export default class DirectoryController {
           type: resultAnime.type || null,
           rating: resultAnime.score || null,
           genres: resultAnime.genres || null,
-          moreInfo: await animeExtraInfo(resultAnime.mal_id),
+          moreInfo: [await animeExtraInfo(resultAnime.mal_id)],
           promo: await getAnimeVideoPromo(resultAnime.mal_id),
           characters: await getAnimeCharacters(resultAnime.mal_id),
           related: await getRelatedAnimesFLV(resultAnime.id),
