@@ -6,6 +6,7 @@
 
 ![node version](https://img.shields.io/badge/node->=12.17.x-brightgreen.svg)
 ![npm version](https://img.shields.io/badge/npm->=6.14.x-brightgreen.svg)
+![yarn version](https://img.shields.io/badge/yarn->=1.22.x-brightgreen.svg)
 ![type code](https://img.shields.io/badge/aruppi-API-brightgreen.svg)
 ![maintenance](https://img.shields.io/badge/maintained-Yes-brightgreen.svg)
 ![now](https://badgen.net/badge/icon/now?icon=now&label)
