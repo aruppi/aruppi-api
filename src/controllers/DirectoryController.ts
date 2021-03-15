@@ -283,7 +283,7 @@ export default class DirectoryController {
       return next(err);
     }
 
-    const result: any[] = resultReq.animes.map((item: any) => {
+    const animes: any[] = resultReq.animes.map((item: any) => {
       return {
         id: item.id,
         title: item.title.trim(),
@@ -298,8 +298,8 @@ export default class DirectoryController {
       };
     });
 
-    if (result.length > 0) {
-      res.status(200).json({ result });
+    if (animes.length > 0) {
+      res.status(200).json({ animes });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
