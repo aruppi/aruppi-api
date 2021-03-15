@@ -87,7 +87,7 @@ export default class AnimeController {
 
     if (animeList.length > 0) {
       res.status(200).json({
-        day,
+        day: animeList,
       });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
@@ -198,7 +198,7 @@ export default class AnimeController {
     const { type, page, url } = req.params;
     let data: any;
 
-    if (['movie', 'ova', 'tv', 'special'].indexOf(url) > -1) {
+    if (['movies', 'ova', 'tv', 'special'].indexOf(url) > -1) {
       try {
         data = await requestGot(
           `${urls.BASE_ANIMEFLV_JELU}${
