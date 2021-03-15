@@ -87,7 +87,7 @@ export default class AnimeController {
 
     if (animeList.length > 0) {
       res.status(200).json({
-        animeList,
+        day,
       });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
@@ -120,9 +120,9 @@ export default class AnimeController {
       title: item.title,
       url: item.url,
       image_url: item.image_url,
-      type: item.type,
-      subtype: item.subtype,
-      page: item.page,
+      type: type,
+      subtype: subtype,
+      page: page,
       score: item.score,
     }));
 
@@ -198,7 +198,7 @@ export default class AnimeController {
     const { type, page, url } = req.params;
     let data: any;
 
-    if (['movie', 'ova', 'tv', 'special'].indexOf(type) !== -1) {
+    if (['movie', 'ova', 'tv', 'special'].indexOf(url) > -1) {
       try {
         data = await requestGot(
           `${urls.BASE_ANIMEFLV_JELU}${
@@ -321,7 +321,7 @@ export default class AnimeController {
 
     if (animeResult) {
       res.set('Cache-Control', 'no-store');
-      res.status(200).json({ animeResult });
+      res.status(200).json(animeResult);
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }

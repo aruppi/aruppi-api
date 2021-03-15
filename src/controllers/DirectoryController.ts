@@ -45,10 +45,10 @@ export default class DirectoryController {
             genres: { $nin: ['ecchi', 'Ecchi'] },
           },
           (err: any, docs: Anime[]) => {
-            let results: any[] = [];
+            let directory: any[] = [];
 
             for (const item of docs) {
-              results.push({
+              directory.push({
                 id: item.id,
                 title: item.title,
                 mal_id: item.mal_id,
@@ -62,8 +62,8 @@ export default class DirectoryController {
               });
             }
 
-            if (results.length > 0) {
-              res.status(200).json({ results });
+            if (directory.length > 0) {
+              res.status(200).json({ directory });
             } else {
               res.status(500).json({ message: 'Aruppi lost in the shell' });
             }
@@ -71,10 +71,10 @@ export default class DirectoryController {
         );
       } else {
         await AnimeModel.find((err: any, docs: Anime[]) => {
-          let results: any[] = [];
+          let directory: any[] = [];
 
           for (const item of docs) {
-            results.push({
+            directory.push({
               id: item.id,
               title: item.title,
               mal_id: item.mal_id,
@@ -88,8 +88,8 @@ export default class DirectoryController {
             });
           }
 
-          if (results.length > 0) {
-            res.status(200).json({ results });
+          if (directory.length > 0) {
+            res.status(200).json({ directory });
           } else {
             res.status(500).json({ message: 'Aruppi lost in the shell' });
           }

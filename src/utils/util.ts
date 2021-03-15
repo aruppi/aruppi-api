@@ -29,6 +29,8 @@ interface RelatedAnime {
 
 export const animeExtraInfo = async (mal_id: number) => {
   let data: any;
+  let broadcast: any;
+
   const airDay: any = {
     mondays: 'Lunes',
     monday: 'Lunes',
@@ -52,14 +54,14 @@ export const animeExtraInfo = async (mal_id: number) => {
       parse: true,
       scrapy: false,
     });
+
+    broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
   } catch (err) {
     return err;
   }
 
-  if (
-    airDay.hasOwnProperty(data.broadcast.split('at')[0].trim().toLowerCase())
-  ) {
-    data.broadcast = airDay[data.broadcast.split('at')[0].trim().toLowerCase()];
+  if (airDay.hasOwnProperty(broadcast)) {
+    data.broadcast = airDay[broadcast];
   } else {
     data.broadcast = null;
   }
@@ -451,7 +453,7 @@ function getThemesData(themes: any[]): any {
 export function getThemes(themes: any[]) {
   return themes.map((item: any) => ({
     name: item.themeName,
-    type: item.themeType,
-    video: item.mirror.mirrorURL,
+    title: item.themeType,
+    link: item.mirror.mirrorURL,
   }));
 }

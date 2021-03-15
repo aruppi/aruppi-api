@@ -70,7 +70,7 @@ routes.get('/api/v4/', (req: Request, res: Response) => {
 
 /* Anime Controller */
 routes.get('/api/v4/schedule/:day', animeController.schedule);
-routes.get('/api/v4/top/:type/:page/:subtype?/', animeController.top);
+routes.get('/api/v4/top/:type/:subtype?/:page', animeController.top);
 routes.get('/api/v4/allAnimes', animeController.getAllAnimes);
 routes.get('/api/v4/lastEpisodes', animeController.getLastEpisodes);
 routes.get('/api/v4/:url/:type/:page', animeController.getContent);

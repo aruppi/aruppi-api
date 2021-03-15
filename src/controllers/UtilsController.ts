@@ -337,16 +337,16 @@ export default class UtilsController {
 
   async getOpAndEd(req: Request, res: Response, next: NextFunction) {
     const { title } = req.params;
-    let result: any;
+    let themes: any;
 
     try {
-      result = await structureThemes(await themeParser.serie(title), true);
+      themes = await structureThemes(await themeParser.serie(title), true);
     } catch (err) {
       return next(err);
     }
 
-    if (result) {
-      res.status(200).json({ result });
+    if (themes) {
+      res.status(200).json({ themes });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
@@ -354,20 +354,20 @@ export default class UtilsController {
 
   async getThemesYear(req: Request, res: Response, next: NextFunction) {
     const { year } = req.params;
-    let data: any;
+    let themes: any;
 
     try {
       if (year === undefined) {
-        data = await themeParser.allYears();
+        themes = await themeParser.allYears();
       } else {
-        data = await structureThemes(await themeParser.year(year), false);
+        themes = await structureThemes(await themeParser.year(year), false);
       }
     } catch (err) {
       return next(err);
     }
 
-    if (data.length > 0) {
-      res.status(200).json({ data });
+    if (themes.length > 0) {
+      res.status(200).json({ themes });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
@@ -385,11 +385,11 @@ export default class UtilsController {
       return next(err);
     }
 
-    const result: any[] = getThemes(data.themes);
+    const random: any[] = getThemes(data.themes);
 
-    if (result.length > 0) {
+    if (random.length > 0) {
       res.set('Cache-Control', 'no-store');
-      res.status(200).json({ result });
+      res.status(200).json({ random });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
@@ -397,20 +397,20 @@ export default class UtilsController {
 
   async getArtist(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
-    let data: any;
+    let artists: any;
 
     try {
       if (id === undefined) {
-        data = await themeParser.artists();
+        artists = await themeParser.artists();
       } else {
-        data = await structureThemes(await themeParser.artist(id), false);
+        artists = await structureThemes(await themeParser.artist(id), false);
       }
     } catch (err) {
       return next(err);
     }
 
-    if (data.length > 0) {
-      res.status(200).json({ data });
+    if (artists.length > 0) {
+      res.status(200).json({ artists });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
@@ -428,7 +428,7 @@ export default class UtilsController {
       return next(err);
     }
 
-    const result: any[] = data.map((item: any) => {
+    const destPlatforms: any[] = data.map((item: any) => {
       return {
         id: item.id,
         name: item.name,
@@ -437,8 +437,8 @@ export default class UtilsController {
       };
     });
 
-    if (result.length > 0) {
-      res.status(200).json({ result });
+    if (destPlatforms.length > 0) {
+      res.status(200).json({ destPlatforms });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
@@ -448,41 +448,74 @@ export default class UtilsController {
     const { id } = req.params;
     let data: any;
 
-    if (id === undefined) {
-      data = await requestGot(
-        `${urls.BASE_ARUPPI}res/documents/animelegal/type/platforms.json`,
-        { parse: true, scrapy: false },
-      );
-    } else if (
-      id === 'producers' ||
-      id === 'apps' ||
-      id === 'publishers' ||
-      'events'
-    ) {
-      data = await requestGot(
-        `${urls.BASE_ARUPPI}res/documents/animelegal/type/${id}.json`,
-        { parse: true, scrapy: false },
-      );
-    } else {
-      data = await requestGot(
-        `${urls.BASE_ARUPPI}res/documents/animelegal/type/${id}.json`,
-        { parse: true, scrapy: false },
-      );
+    try {
+      if (id === undefined) {
+        data = await requestGot(
+          `${urls.BASE_ARUPPI}res/documents/animelegal/typeplatforms.json`,
+          { parse: true, scrapy: false },
+        );
+      } else if (
+        id === 'producers' ||
+        id === 'apps' ||
+        id === 'publishers' ||
+        'events'
+      ) {
+        data = await requestGot(
+          `${urls.BASE_ARUPPI}res/documents/animelegal/type/${id}.json`,
+          { parse: true, scrapy: false },
+        );
+      } else {
+        data = await requestGot(
+          `${urls.BASE_ARUPPI}res/documents/animelegal/type/${id}.json`,
+          { parse: true, scrapy: false },
+        );
+      }
+    } catch (err) {
+      return next(err);
     }
 
-    const result: any[] = data.map((item: any) => {
-      return {
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        logo: item.logo,
-        cover: item.cover,
-        webpage: item.webpage,
-      };
+    const platforms: any[] = data.map((item: any) => {
+      if (id === undefined) {
+        return {
+          id: item.id,
+          name: item.name,
+          comming: item.comming || false,
+          cover: item.cover,
+        };
+      } else if (
+        id === 'producers' ||
+        id === 'apps' ||
+        id === 'publishers' ||
+        'events'
+      ) {
+        return {
+          id: item.id,
+          name: item.name,
+          logo: item.logo,
+          cover: item.cover,
+          description: item.description,
+          type: item.type,
+          moreInfo: item.moreInfo,
+          facebook: item.facebook,
+          twitter: item.twitter,
+          instagram: item.instagram,
+          webInfo: item.webInfo,
+          webpage: item.webpage,
+        };
+      } else {
+        return {
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          logo: item.logo,
+          cover: item.cover,
+          webpage: item.webpage,
+        };
+      }
     });
 
-    if (result.length > 0) {
-      res.status(200).json({ result });
+    if (platforms.length > 0) {
+      res.status(200).json({ platforms });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
