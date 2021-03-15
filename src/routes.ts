@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import AnimeController from './controllers/AnimeController';
 import DirectoryController from './controllers/DirectoryController';
 import UtilsController from './controllers/UtilsController';
@@ -110,5 +110,29 @@ routes.get('/api/v4/randomTheme', utilsController.randomTheme);
 routes.get('/api/v4/artists/:id?', utilsController.getArtist);
 routes.get('/api/v4/destAnimePlatforms', utilsController.getDestAnimePlatforms);
 routes.get('/api/v4/platforms/:id?', utilsController.getPlatforms);
+
+/* Routes to handling the v3 deprecated */
+// routes.get('/api/v3/*', (req: Request, res: Response, next: NextFunction) => {
+//   res.status(302).redirect('/api/v2');
+// });
+
+// routes.get('/api/v3', (req: Request, res: Response, next: NextFunction) => {
+//   res.status(200).json({
+//     message:
+//       'Sorry, version v3 is not avaiable, if you want to see content go to v4',
+//   });
+// });
+
+/* Routes to handling the v2 deprecated */
+routes.get('/api/v2/*', (req: Request, res: Response, next: NextFunction) => {
+  res.status(302).redirect('/api/v2');
+});
+
+routes.get('/api/v2', (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).json({
+    message:
+      'Sorry, version v2 is not avaiable, if you want to see content go to v4',
+  });
+});
 
 export default routes;
