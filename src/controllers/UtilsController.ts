@@ -138,7 +138,7 @@ export default class UtilsController {
               ? 'Crunchyroll'
               : feed.title,
             thumbnail: obtainPreviewNews(item['content:encoded']),
-            content: item['content:encodedSnippet'],
+            content: item['content:encoded'],
           };
 
           news.push(formattedObject);
