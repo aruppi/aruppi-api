@@ -93,6 +93,28 @@ yarn test
 
 ---
 
+## Documentation for the V4 of the API
+
+First of all you need to have installed **yarn** or **npm**, the required versions that
+we mentioned above in this README, we need to have installed too **MongoDB** (you can configure
+the port for the database in the .env file).
+
+In order to install and migrate the data to the database, we need to have some scripts first for each collections that you want to have in the database.
+
+Installing **mongodb** in **Linux**:
+
+- First we need to install **MongoDB Community**, in this link you have a more specific installation method - [MongoDB Community Version 4.4 for Ubuntu 20.04 (Focal)](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)
+- After these you only need a **sudo systemctl status mongod** to check if the service of mongo is already running, if all is good you can continue with the docs
+- Next step is migrating the data from the JSON's to the database, in this case we are having a separate folder for these scripts
+
+Running the scripts for the poblation of the database of **mongodb**:
+
+- We need to download the **mongoScripts** folder, in order to run all of these scripts, we need to run first (if you have npm, it would be **npm install** to install all the dependencies of this folder) **yarn** to install the dependencies
+- After installing the dependencies of this folder, next we are building the project what is in TypeScript and we need to build to JavaScript, we do a **yarn build** (in npm would be **npm build**)
+- Next in order to migrate all the information from the JSON files, we are going to execute the following commands (if you have npm, the only difference is change the word of **yarn** to **npm**): **yarn radio**; **yarn genre**; **yarn theme**; **yarn directory**; **yarn waifu**;
+ 
+
+
 ## Deprecated v1 for API
 
 Aruppi has grown since it was launched and we need to continue improving the application along with the services to be able to give new features.
