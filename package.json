@@ -5,8 +5,8 @@
   "main": "./src/api/api.ts",
   "scripts": {
     "start": "node ./dist/server.js",
-    "dev": "tsnd --transpile-only --ignore-watch node_modules --respawn src/server.ts",
-    "build": "tsc -p ."
+    "dev": "yarn tsnd --transpile-only --ignore-watch node_modules --respawn src/server.ts",
+    "build": "yarn tsc -p ."
   },
   "keywords": [
     "aruppi",
