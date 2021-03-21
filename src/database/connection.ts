@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-// import redis, { RedisClient } from 'redis';
+import redis, { RedisClient } from 'redis';
 
 /* 
   Create the connection to the database
@@ -26,16 +26,17 @@ export const createConnectionMongo = (databaseObj: {
   });
 };
 
-// export const createConnectionRedis = (redisObj: {
-//   host: string;
-//   port: number;
-// }) => {
-//   const client: RedisClient = redis.createClient({
-//     host: redisObj.host,
-//     port: redisObj.port,
-//   });
+/* 
+  Create the connection to the cache of
+  redis, and exporting the redis client
+  with the call of this file.
+*/
 
-//   client.on('connect', () => {
-//     console.log('Redis connected: redis.');
-//   });
-// };
+export const redisClient: RedisClient = redis.createClient({
+  host: process.env.REDIS_HOST,
+  port: parseInt(process.env.REDIS_PORT!),
+});
+
+redisClient.on('connect', () => {
+  console.log('Redis connected: redis.');
+});

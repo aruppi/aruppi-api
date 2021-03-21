@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
 import AnimeModel, { Anime } from '../database/models/anime.model';
 import GenreModel, { Genre } from '../database/models/genre.model';
+import util from 'util';
 import {
   animeExtraInfo,
   getAnimeVideoPromo,
@@ -10,6 +11,10 @@ import {
   getRelatedAnimesMAL,
 } from '../utils/util';
 import urls from '../utils/urls';
+import { redisClient } from '../database/connection';
+
+// @ts-ignore
+redisClient.get = util.promisify(redisClient.get);
 
 /*
   DirectoryController - async functions controlling the directory
@@ -185,46 +190,59 @@ export default class DirectoryController {
 
   async getMoreInfo(req: Request, res: Response, next: NextFunction) {
     const { title } = req.params;
-    let resultAnime: Anime | null;
+    let resultQuery: Anime | null;
+    let resultAnime: any;
 
     try {
-      resultAnime = await AnimeModel.findOne({
-        $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
-      });
+      const resultQueryRedis: any = await redisClient.get(title);
+        
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return res.status(200).json(resultRedis);
+      } else {
+        resultQuery = await AnimeModel.findOne({
+          $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
+        });
+
+        if (resultQuery?.jkanime) {
+          resultAnime = {
+            title: resultQuery?.title,
+            poster: resultQuery?.poster,
+            synopsis: resultQuery?.description,
+            status: resultQuery?.state,
+            type: resultQuery?.type,
+            rating: resultQuery?.score,
+            genres: resultQuery?.genres,
+            moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+            characters: await getAnimeCharacters(resultQuery!.mal_id),
+            related: await getRelatedAnimesFLV(resultQuery!.id),
+          };
+        } else {
+          resultAnime = {
+            title: resultQuery?.title,
+            poster: resultQuery?.poster,
+            synopsis: resultQuery?.description,
+            status: resultQuery?.state,
+            type: resultQuery?.type,
+            rating: resultQuery?.score,
+            genres: resultQuery?.genres,
+            moreInfo: await animeExtraInfo(resultQuery!.mal_id),
+            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+            characters: await getAnimeCharacters(resultQuery!.mal_id),
+            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+          };
+        }
+
+        redisClient.set(title, JSON.stringify(resultAnime));
+      }
     } catch (err) {
       return next(err);
     }
 
     if (resultAnime) {
-      if (!resultAnime?.jkanime) {
-        res.status(200).json({
-          title: resultAnime.title || null,
-          poster: resultAnime.poster || null,
-          synopsis: resultAnime.description || null,
-          status: resultAnime.state || null,
-          type: resultAnime.type || null,
-          rating: resultAnime.score || null,
-          genres: resultAnime.genres || null,
-          moreInfo: [await animeExtraInfo(resultAnime.mal_id)],
-          promo: await getAnimeVideoPromo(resultAnime.mal_id),
-          characters: await getAnimeCharacters(resultAnime.mal_id),
-          related: await getRelatedAnimesFLV(resultAnime.id),
-        });
-      } else {
-        res.status(200).json({
-          title: resultAnime.title || null,
-          poster: resultAnime.poster || null,
-          synopsis: resultAnime.description || null,
-          status: resultAnime.state || null,
-          type: resultAnime.type || null,
-          rating: resultAnime.score || null,
-          genres: resultAnime.genres || null,
-          moreInfo: await animeExtraInfo(resultAnime.mal_id),
-          promo: await getAnimeVideoPromo(resultAnime.mal_id),
-          characters: await getAnimeCharacters(resultAnime.mal_id),
-          related: await getRelatedAnimesMAL(resultAnime.mal_id),
-        });
-      }
+      res.status(200).json(resultAnime);
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }

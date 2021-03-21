@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import { errorHandler, notFound } from './middlewares/middleware';
 import {
   createConnectionMongo,
-  // createConnectionRedis,
 } from './database/connection';
 import routes from './routes';
 import { Server } from 'node:http';
@@ -17,10 +16,6 @@ createConnectionMongo({
   host: process.env.DATABASE_HOST,
   port: process.env.DATABASE_PORT,
 });
-// createConnectionRedis({
-//   host: process.env.REDIS_HOST!,
-//   port: parseInt(process.env.REDIS_PORT!),
-// });
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
