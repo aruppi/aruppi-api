@@ -110,6 +110,7 @@ routes.get('/api/v4/randomTheme', utilsController.randomTheme);
 routes.get('/api/v4/artists/:id?', utilsController.getArtist);
 routes.get('/api/v4/destAnimePlatforms', utilsController.getDestAnimePlatforms);
 routes.get('/api/v4/platforms/:id?', utilsController.getPlatforms);
+routes.get('/api/v4/generateWaifu/', utilsController.getWaifuRandom);
 
 /* Routes to handling the v3 deprecated */
 // routes.get('/api/v3/*', (req: Request, res: Response, next: NextFunction) => {

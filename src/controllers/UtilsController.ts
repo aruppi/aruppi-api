@@ -10,6 +10,7 @@ import ThemeModel, { Theme } from '../database/models/theme.model';
 import ThemeParser from '../utils/animeTheme';
 import { structureThemes } from '../utils/util';
 import { getThemes } from '../utils/util';
+import WaifuModel, { Waifu } from '../database/models/waifu.model';
 
 /*
   UtilsController - controller to parse the
@@ -516,6 +517,43 @@ export default class UtilsController {
 
     if (platforms.length > 0) {
       res.status(200).json({ platforms });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getWaifuRandom(req: Request, res: Response, next: NextFunction) {
+    let waifuQuery: Waifu[] | null;
+    let waifuResult: any;
+
+    try {
+      waifuQuery = await WaifuModel.aggregate([{ $sample: { size: 1 } }]);
+    } catch (err) {
+      return next(err);
+    }
+
+    if (waifuQuery.length > 0) {
+      waifuResult = {
+        id: waifuQuery[0].id,
+        name: waifuQuery[0].name,
+        weight: waifuQuery[0].weight,
+        series: waifuQuery[0].series,
+        height: waifuQuery[0].height,
+        birthday: waifuQuery[0].birthday,
+        likes: waifuQuery[0].likes,
+        trash: waifuQuery[0].trash,
+        blood_type: waifuQuery[0].blood_type,
+        hip: waifuQuery[0].hip,
+        bust: waifuQuery[0].bust,
+        description: waifuQuery[0].description,
+        display_picture: waifuQuery[0].display_picture,
+        waist: waifuQuery[0].waist,
+      };
+    }
+
+    if (waifuResult) {
+      res.set('Cache-Control', 'no-store');
+      res.status(200).json(waifuResult);
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
