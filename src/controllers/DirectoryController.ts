@@ -3,6 +3,7 @@ import { requestGot } from '../utils/requestCall';
 import AnimeModel, { Anime } from '../database/models/anime.model';
 import GenreModel, { Genre } from '../database/models/genre.model';
 import util from 'util';
+import { hashStringMd5 } from '../utils/util';
 import {
   animeExtraInfo,
   getAnimeVideoPromo,
@@ -194,8 +195,10 @@ export default class DirectoryController {
     let resultAnime: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(title);
-        
+      const resultQueryRedis: any = await redisClient.get(
+        `moreInfo_${hashStringMd5(title)}`,
+      );
+
       if (resultQueryRedis) {
         const resultRedis: any = JSON.parse(resultQueryRedis);
 
@@ -235,7 +238,19 @@ export default class DirectoryController {
           };
         }
 
-        redisClient.set(title, JSON.stringify(resultAnime));
+        /* Set the key in the redis cache. */
+
+        redisClient.set(
+          `moreInfo_${hashStringMd5(title)}`,
+          JSON.stringify(resultAnime),
+        );
+
+        /* After 24hrs expire the key. */
+
+        redisClient.expireat(
+          `moreInfo_${hashStringMd5(title)}`,
+          new Date().getTime() + 86400000,
+        );
       }
     } catch (err) {
       return next(err);

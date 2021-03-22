@@ -1,6 +1,7 @@
 import urls from './urls';
 import { requestGot } from './requestCall';
 import AnimeModel, { Anime } from '../database/models/anime.model';
+import crypto from 'crypto';
 
 /*
   Utils fuctions - functions to get information
@@ -456,4 +457,8 @@ export function getThemes(themes: any[]) {
     title: item.themeType,
     link: item.mirror.mirrorURL,
   }));
+}
+
+export function hashStringMd5(string: string) {
+  return crypto.createHash('md5').update(string).digest('hex');
 }
