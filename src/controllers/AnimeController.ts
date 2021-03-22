@@ -3,6 +3,7 @@ import { requestGot } from '../utils/requestCall';
 import { animeFlvInfo, jkanimeInfo, videoServersJK } from '../utils/util';
 import { transformUrlServer } from '../utils/transformerUrl';
 import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
+import util from 'util';
 import { hashStringMd5 } from '../utils/util';
 import {
   animeExtraInfo,
