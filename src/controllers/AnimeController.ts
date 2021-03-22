@@ -3,6 +3,7 @@ import { requestGot } from '../utils/requestCall';
 import { animeFlvInfo, jkanimeInfo, videoServersJK } from '../utils/util';
 import { transformUrlServer } from '../utils/transformerUrl';
 import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
+import { hashStringMd5 } from '../utils/util';
 import {
   animeExtraInfo,
   getAnimeVideoPromo,
@@ -11,6 +12,10 @@ import {
   getRelatedAnimesMAL,
 } from '../utils/util';
 import urls from '../utils/urls';
+import { redisClient } from '../database/connection';
+
+// @ts-ignore
+redisClient.get = util.promisify(redisClient.get);
 
 /*
   AnimeController - a class to manage the schedule,
@@ -175,7 +180,7 @@ export default class AnimeController {
 
     for (const episode of data.episodes) {
       const formattedEpisode: Episode = {
-        id: "12345/" + episode.id,
+        id: '12345/' + episode.id,
         title: episode.title,
         image: episode.poster,
         episode: episode.episode,
@@ -260,19 +265,48 @@ export default class AnimeController {
 
   async getServers(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
+    let data: any;
 
     try {
-      if (isNaN(parseInt(id.split('/')[0]))) {
-        res.status(200).json({ servers: await videoServersJK(id) });
-      } else {
-        const data: any = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
-          { parse: true, scrapy: false },
-        );
+      const resultQueryRedis: any = await redisClient.get(
+        `servers_${hashStringMd5(id)}`,
+      );
 
-        res
-          .status(200)
-          .json({ servers: await transformUrlServer(data.servers) });
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return res.status(200).json(resultRedis);
+      } else {
+        if (isNaN(parseInt(id.split('/')[0]))) {
+          data = await videoServersJK(id);
+        } else {
+          data = await requestGot(
+            `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
+            { parse: true, scrapy: false },
+          );
+
+          data = await transformUrlServer(data.servers);
+        }
+
+        if (data) {
+          /* Set the key in the redis cache. */
+
+          redisClient.set(
+            `moreInfo_${hashStringMd5(id)}`,
+            JSON.stringify(data),
+          );
+
+          /* After 24hrs expire the key. */
+
+          redisClient.expireat(
+            `moreInfo_${hashStringMd5(id)}`,
+            new Date().getTime() + 86400000,
+          );
+
+          res.status(200).json({ servers: data });
+        } else {
+          res.status(500).json({ message: 'Aruppi lost in the shell' });
+        }
       }
     } catch (err) {
       return next(err);
