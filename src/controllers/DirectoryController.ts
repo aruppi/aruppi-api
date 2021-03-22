@@ -237,26 +237,26 @@ export default class DirectoryController {
             related: await getRelatedAnimesMAL(resultQuery!.mal_id),
           };
         }
-
-        /* Set the key in the redis cache. */
-
-        redisClient.set(
-          `moreInfo_${hashStringMd5(title)}`,
-          JSON.stringify(resultAnime),
-        );
-
-        /* After 24hrs expire the key. */
-
-        redisClient.expireat(
-          `moreInfo_${hashStringMd5(title)}`,
-          new Date().getTime() + 86400000,
-        );
       }
     } catch (err) {
       return next(err);
     }
 
     if (resultAnime) {
+      /* Set the key in the redis cache. */
+
+      redisClient.set(
+        `moreInfo_${hashStringMd5(title)}`,
+        JSON.stringify(resultAnime),
+      );
+
+      /* After 24hrs expire the key. */
+
+      redisClient.expireat(
+        `moreInfo_${hashStringMd5(title)}`,
+        new Date().getTime() + 86400000,
+      );
+
       res.status(200).json(resultAnime);
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
