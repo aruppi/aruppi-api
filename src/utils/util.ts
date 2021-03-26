@@ -2,6 +2,11 @@ import urls from './urls';
 import { requestGot } from './requestCall';
 import AnimeModel, { Anime } from '../database/models/anime.model';
 import crypto from 'crypto';
+import util from 'util';
+import { redisClient } from '../database/connection';
+
+// @ts-ignore
+redisClient.get = util.promisify(redisClient.get);
 
 /*
   Utils fuctions - functions to get information
@@ -190,13 +195,26 @@ export const getRelatedAnimesFLV = async (id: string) => {
 };
 
 export const getRelatedAnimesMAL = async (mal_id: number) => {
-  const $: cheerio.Root = await requestGot(
-    `https://myanimelist.net/anime/${mal_id}`,
-    {
-      parse: false,
-      scrapy: true,
-    },
-  );
+  let $: cheerio.Root;
+
+  try {
+    const resultQueryRedis: any = await redisClient.get(
+      `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
+        parse: false,
+        scrapy: true,
+      });
+    }
+  } catch (err) {
+    return err;
+  }
 
   let listRelated: any = {};
   let relatedAnimes: RelatedAnime[] = [];
@@ -228,7 +246,23 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
       }
     }
 
-    return relatedAnimes;
+    if (relatedAnimes.length > 0) {
+      /* Set the key in the redis cache. */
+
+      redisClient.set(
+        `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+        JSON.stringify(relatedAnimes),
+      );
+
+      /* After 24hrs expire the key. */
+
+      redisClient.expireat(
+        `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+        new Date().getTime() + 86400000,
+      );
+
+      return relatedAnimes;
+    }
   } else {
     return [];
   }
@@ -242,10 +276,20 @@ export const animeFlvInfo = async (id: string | undefined) => {
   let episodes: any[] = [];
 
   try {
-    $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
-      scrapy: true,
-      parse: false,
-    });
+    const resultQueryRedis: any = await redisClient.get(
+      `animeflvInfo_${hashStringMd5(id!)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
+        scrapy: true,
+        parse: false,
+      });
+    }
   } catch (err) {
     return err;
   }
@@ -279,7 +323,25 @@ export const animeFlvInfo = async (id: string | undefined) => {
     });
   }
 
-  return episodes;
+  if (episodes.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `animeflvInfo_${hashStringMd5(id!)}`,
+      JSON.stringify(episodes),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `animeflvInfo_${hashStringMd5(id!)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return episodes;
+  } else {
+    return null;
+  }
 };
 
 export const jkanimeInfo = async (id: string | undefined) => {
@@ -290,10 +352,20 @@ export const jkanimeInfo = async (id: string | undefined) => {
   let countEpisodes: string[] = [];
 
   try {
-    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
-      scrapy: true,
-      parse: false,
-    });
+    const resultQueryRedis: any = await redisClient.get(
+      `jkanimeInfo_${hashStringMd5(id!)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+        scrapy: true,
+        parse: false,
+      });
+    }
   } catch (err) {
     return err;
   }
@@ -319,7 +391,25 @@ export const jkanimeInfo = async (id: string | undefined) => {
     });
   }
 
-  return episodesList;
+  if (episodesList.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `jkanimeInfo_${hashStringMd5(id!)}`,
+      JSON.stringify(episodesList),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `jkanimeInfo_${hashStringMd5(id!)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return episodesList;
+  } else {
+    return null;
+  }
 };
 
 export const videoServersJK = async (id: string) => {
@@ -328,10 +418,20 @@ export const videoServersJK = async (id: string) => {
   let script: string | null = '';
 
   try {
-    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
-      scrapy: true,
-      parse: false,
-    });
+    const resultQueryRedis: any = await redisClient.get(
+      `videoServersJK_${hashStringMd5(id)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+        scrapy: true,
+        parse: false,
+      });
+    }
   } catch (err) {
     return err;
   }
@@ -381,14 +481,42 @@ export const videoServersJK = async (id: string) => {
 
   serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
 
-  return serverList;
+  if (serverList.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `videoServersJK_${hashStringMd5(id!)}`,
+      JSON.stringify(serverList),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `videoServersJK_${hashStringMd5(id!)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return serverList;
+  } else {
+    return null;
+  }
 };
 
 async function desuServerUrl(url: string) {
   let $: cheerio.Root;
 
   try {
-    $ = await requestGot(url, { scrapy: true, parse: false });
+    const resultQueryRedis: any = await redisClient.get(
+      `desuServerUrl_${hashStringMd5(url)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(url, { scrapy: true, parse: false });
+    }
   } catch (err) {
     return err;
   }
@@ -410,7 +538,25 @@ async function desuServerUrl(url: string) {
     .toString()
     .split("'")[1];
 
-  return result;
+  if (result.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `desuServerUrl_${hashStringMd5(url)}`,
+      JSON.stringify(result),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `desuServerUrl_${hashStringMd5(url)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return result;
+  } else {
+    return null;
+  }
 }
 
 export const structureThemes = async (body: any, indv: boolean) => {
