@@ -116,16 +116,16 @@ routes.get('/api/v4/platforms/:id?', utilsController.getPlatforms);
 routes.get('/api/v4/generateWaifu/', utilsController.getWaifuRandom);
 
 /* Routes to handling the v3 deprecated */
-// routes.get('/api/v3/*', (req: Request, res: Response, next: NextFunction) => {
-//   res.status(302).redirect('/api/v2');
-// });
+routes.get('/api/v3/*', (req: Request, res: Response, next: NextFunction) => {
+  res.status(302).redirect('/api/v2');
+});
 
-// routes.get('/api/v3', (req: Request, res: Response, next: NextFunction) => {
-//   res.status(200).json({
-//     message:
-//       'Sorry, version v3 is not avaiable, if you want to see content go to v4',
-//   });
-// });
+routes.get('/api/v3', (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).json({
+    message:
+      'Sorry, version v3 is not avaiable, if you want to see content go to v4',
+  });
+});
 
 /* Routes to handling the v2 deprecated */
 routes.get('/api/v2/*', (req: Request, res: Response, next: NextFunction) => {

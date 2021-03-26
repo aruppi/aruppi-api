@@ -111,10 +111,20 @@ export default class DirectoryController {
     let data: any;
 
     try {
-      data = await requestGot(`${urls.BASE_JIKAN}season/${year}/${type}`, {
-        scrapy: false,
-        parse: true,
-      });
+      const resultQueryRedis: any = await redisClient.get(
+        `season_${hashStringMd5(`${year}:${type}`)}`,
+      );
+
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return res.status(200).json(resultRedis);
+      } else {
+        data = await requestGot(`${urls.BASE_JIKAN}season/${year}/${type}`, {
+          scrapy: false,
+          parse: true,
+        });
+      }
     } catch (err) {
       return next(err);
     }
@@ -128,6 +138,20 @@ export default class DirectoryController {
     });
 
     if (season.length > 0) {
+      /* Set the key in the redis cache. */
+
+      redisClient.set(
+        `season_${hashStringMd5(`${year}:${type}`)}`,
+        JSON.stringify({ season }),
+      );
+
+      /* After 24hrs expire the key. */
+
+      redisClient.expireat(
+        `season_${hashStringMd5(`${year}:${type}`)}`,
+        new Date().getTime() + 86400000,
+      );
+
       res.status(200).json({
         season,
       });
@@ -140,10 +164,20 @@ export default class DirectoryController {
     let data: any;
 
     try {
-      data = await requestGot(`${urls.BASE_JIKAN}season/archive`, {
-        parse: true,
-        scrapy: false,
-      });
+      const resultQueryRedis: any = await redisClient.get(
+        `allSeasons_${hashStringMd5('allSeasons')}`,
+      );
+
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return res.status(200).json(resultRedis);
+      } else {
+        data = await requestGot(`${urls.BASE_JIKAN}season/archive`, {
+          parse: true,
+          scrapy: false,
+        });
+      }
     } catch (err) {
       return next(err);
     }
@@ -156,6 +190,20 @@ export default class DirectoryController {
     });
 
     if (archive.length > 0) {
+      /* Set the key in the redis cache. */
+
+      redisClient.set(
+        `allSeasons_${hashStringMd5('allSeasons')}`,
+        JSON.stringify({ archive }),
+      );
+
+      /* After 24hrs expire the key. */
+
+      redisClient.expireat(
+        `allSeasons_${hashStringMd5('allSeasons')}`,
+        new Date().getTime() + 86400000,
+      );
+
       res.status(200).json({ archive });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
@@ -166,10 +214,20 @@ export default class DirectoryController {
     let data: any;
 
     try {
-      data = await requestGot(`${urls.BASE_JIKAN}season/later`, {
-        parse: true,
-        scrapy: false,
-      });
+      const resultQueryRedis: any = await redisClient.get(
+        `laterSeasons_${hashStringMd5('laterSeasons')}`,
+      );
+
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return res.status(200).json(resultRedis);
+      } else {
+        data = await requestGot(`${urls.BASE_JIKAN}season/later`, {
+          parse: true,
+          scrapy: false,
+        });
+      }
     } catch (err) {
       return next(err);
     }
@@ -183,6 +241,20 @@ export default class DirectoryController {
     });
 
     if (future.length > 0) {
+      /* Set the key in the redis cache. */
+
+      redisClient.set(
+        `laterSeasons_${hashStringMd5('laterSeasons')}`,
+        JSON.stringify({ future }),
+      );
+
+      /* After 24hrs expire the key. */
+
+      redisClient.expireat(
+        `laterSeasons_${hashStringMd5('laterSeasons')}`,
+        new Date().getTime() + 86400000,
+      );
+
       res.status(200).json({ future });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
