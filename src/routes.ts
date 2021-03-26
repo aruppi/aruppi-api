@@ -73,7 +73,10 @@ routes.get('/api/v4/schedule/:day', animeController.schedule);
 routes.get('/api/v4/top/:type/:subtype?/:page', animeController.top);
 routes.get('/api/v4/allAnimes', animeController.getAllAnimes);
 routes.get('/api/v4/lastEpisodes', animeController.getLastEpisodes);
-routes.get('/api/v4/:url/:type/:page', animeController.getContent);
+routes.get('/api/v4/movies/:type/:page', animeController.getContentMovie);
+routes.get('/api/v4/ova/:type/:page', animeController.getContentOva);
+routes.get('/api/v4/special/:type/:page', animeController.getContentSpecial);
+routes.get('/api/v4/tv/:type/:page', animeController.getContentTv);
 routes.get('/api/v4/getEpisodes/:title', animeController.getEpisodes);
 routes.get(
   '/api/v4/getAnimeServers/:id([^/]+/[^/]+)',

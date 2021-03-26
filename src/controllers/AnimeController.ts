@@ -200,50 +200,179 @@ export default class AnimeController {
     }
   }
 
-  async getContent(req: Request, res: Response, next: NextFunction) {
-    const { type, page, url } = req.params;
+  async getContentTv(req: Request, res: Response, next: NextFunction) {
+    const { type, page } = req.params;
+    const url = 'tv';
     let data: any;
 
-    if (['movies', 'ova', 'tv', 'special'].indexOf(url) > -1) {
-      try {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}${
-            url.charAt(0).toUpperCase() + url.slice(1)
-          }/${type}/${page}`,
-          {
-            parse: true,
-            scrapy: false,
-          },
-        );
-      } catch (err) {
-        return next(err);
-      }
+    try {
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
+    } catch (err) {
+      return next(err);
+    }
 
-      const animes: Movie[] = data[url.toLowerCase()].map((item: any) => {
-        return {
-          id: item.id,
-          title: item.title,
-          type: url.toLowerCase(),
-          page: page,
-          banner: item.banner,
-          image: item.poster,
-          synopsis: item.synopsis,
-          status: item.debut,
-          rate: item.rating,
-          genres: item.genres.map((genre: any) => genre),
-          episodes: item.episodes.map((episode: any) => episode),
-        };
+    const animes: Movie[] = data[url].map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title,
+        type: url,
+        page: page,
+        banner: item.banner,
+        image: item.poster,
+        synopsis: item.synopsis,
+        status: item.debut,
+        rate: item.rating,
+        genres: item.genres.map((genre: any) => genre),
+        episodes: item.episodes.map((episode: any) => episode),
+      };
+    });
+
+    if (animes.length > 0) {
+      res.status(200).json({
+        animes,
       });
-
-      if (animes.length > 0) {
-        res.status(200).json({
-          animes,
-        });
-      } else {
-        res.status(500).json({ message: 'Aruppi lost in the shell' });
-      }
     } else {
-      next();
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getContentSpecial(req: Request, res: Response, next: NextFunction) {
+    const { type, page } = req.params;
+    const url = 'special';
+    let data: any;
+
+    try {
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const animes: Movie[] = data[url].map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title,
+        type: url,
+        page: page,
+        banner: item.banner,
+        image: item.poster,
+        synopsis: item.synopsis,
+        status: item.debut,
+        rate: item.rating,
+        genres: item.genres.map((genre: any) => genre),
+        episodes: item.episodes.map((episode: any) => episode),
+      };
+    });
+
+    if (animes.length > 0) {
+      res.status(200).json({
+        animes,
+      });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getContentOva(req: Request, res: Response, next: NextFunction) {
+    const { type, page } = req.params;
+    const url = 'ova';
+    let data: any;
+
+    try {
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const animes: Movie[] = data[url].map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title,
+        type: url,
+        page: page,
+        banner: item.banner,
+        image: item.poster,
+        synopsis: item.synopsis,
+        status: item.debut,
+        rate: item.rating,
+        genres: item.genres.map((genre: any) => genre),
+        episodes: item.episodes.map((episode: any) => episode),
+      };
+    });
+
+    if (animes.length > 0) {
+      res.status(200).json({
+        animes,
+      });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
+  async getContentMovie(req: Request, res: Response, next: NextFunction) {
+    const { type, page } = req.params;
+    const url = 'movies';
+    let data: any;
+
+    try {
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const animes: Movie[] = data[url].map((item: any) => {
+      return {
+        id: item.id,
+        title: item.title,
+        type: url,
+        page: page,
+        banner: item.banner,
+        image: item.poster,
+        synopsis: item.synopsis,
+        status: item.debut,
+        rate: item.rating,
+        genres: item.genres.map((genre: any) => genre),
+        episodes: item.episodes.map((episode: any) => episode),
+      };
+    });
+
+    if (animes.length > 0) {
+      res.status(200).json({
+        animes,
+      });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
     }
   }
 

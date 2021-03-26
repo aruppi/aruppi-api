@@ -84,7 +84,7 @@ export default class UtilsController {
       'Diciembre',
     ];
 
-    feed.items.forEach(item => {
+    feed.items.forEach((item: any) => {
       const date: Date = new Date(item.pubDate!);
 
       const formattedObject: Podcast = {
@@ -131,7 +131,7 @@ export default class UtilsController {
       for (const rssPage of pagesRss) {
         const feed = await parser.parseURL(rssPage.url);
 
-        feed.items.forEach(item => {
+        feed.items.forEach((item: any) => {
           const formattedObject: News = {
             title: item.title,
             url: item.link,
