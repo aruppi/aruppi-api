@@ -280,7 +280,7 @@ export default class DirectoryController {
           $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
         });
 
-        if (resultQuery?.jkanime) {
+        if (!resultQuery?.jkanime) {
           resultAnime = {
             title: resultQuery?.title,
             poster: resultQuery?.poster,
@@ -303,7 +303,7 @@ export default class DirectoryController {
             type: resultQuery?.type,
             rating: resultQuery?.score,
             genres: resultQuery?.genres,
-            moreInfo: await animeExtraInfo(resultQuery!.mal_id),
+            moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
             promo: await getAnimeVideoPromo(resultQuery!.mal_id),
             characters: await getAnimeCharacters(resultQuery!.mal_id),
             related: await getRelatedAnimesMAL(resultQuery!.mal_id),
