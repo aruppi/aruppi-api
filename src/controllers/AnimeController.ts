@@ -643,7 +643,10 @@ export default class AnimeController {
         if (data) {
           /* Set the key in the redis cache. */
 
-          redisClient.set(`servers_${hashStringMd5(id)}`, JSON.stringify(data));
+          redisClient.set(
+            `servers_${hashStringMd5(id)}`,
+            JSON.stringify({ servers: data }),
+          );
 
           /* After 24hrs expire the key. */
 

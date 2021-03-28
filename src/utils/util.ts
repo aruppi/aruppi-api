@@ -56,12 +56,22 @@ export const animeExtraInfo = async (mal_id: number) => {
   };
 
   try {
-    data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
-      parse: true,
-      scrapy: false,
-    });
+    const resultQueryRedis: any = await redisClient.get(
+      `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+    );
 
-    broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
+        parse: true,
+        scrapy: false,
+      });
+
+      broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+    }
   } catch (err) {
     return err;
   }
@@ -90,34 +100,90 @@ export const animeExtraInfo = async (mal_id: number) => {
     endingThemes: data.ending_themes || null,
   };
 
-  return formattedObject;
+  if (formattedObject) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+      JSON.stringify(formattedObject),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return formattedObject;
+  } else {
+    return null;
+  }
 };
 
 export const getAnimeVideoPromo = async (mal_id: number) => {
   let data: any;
 
   try {
-    data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
-      parse: true,
-      scrapy: false,
-    });
+    const resultQueryRedis: any = await redisClient.get(
+      `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
+        parse: true,
+        scrapy: false,
+      });
+    }
   } catch (err) {
     return err;
   }
 
   const promo: Promo[] = data.promo.map((item: Promo) => item);
 
-  return promo;
+  if (promo.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+      JSON.stringify(promo),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return promo;
+  } else {
+    return null;
+  }
 };
 
 export const getAnimeCharacters = async (mal_id: number) => {
   let data: any;
 
   try {
-    data = await requestGot(
-      `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
-      { parse: true, scrapy: false },
+    const resultQueryRedis: any = await redisClient.get(
+      `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
     );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      data = await requestGot(
+        `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
+        { parse: true, scrapy: false },
+      );
+    }
   } catch (err) {
     return err;
   }
@@ -131,7 +197,25 @@ export const getAnimeCharacters = async (mal_id: number) => {
     };
   });
 
-  return characters;
+  if (characters.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+      JSON.stringify(characters),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+      new Date().getTime() + 86400000,
+    );
+
+    return characters;
+  } else {
+    return null;
+  }
 };
 
 const getPosterAndType = async (
@@ -158,35 +242,63 @@ const getPosterAndType = async (
 };
 
 export const getRelatedAnimesFLV = async (id: string) => {
-  const $: cheerio.Root = await requestGot(
-    `${urls.BASE_ANIMEFLV}/anime/${id}`,
-    {
-      parse: false,
-      scrapy: true,
-    },
-  );
+  let $: cheerio.Root;
+
+  try {
+    const resultQueryRedis: any = await redisClient.get(
+      `relatedFLV_${hashStringMd5(id)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
+        parse: false,
+        scrapy: true,
+      });
+    }
+  } catch (err) {
+    return err;
+  }
+
   let listRelated: any = {};
   let relatedAnimes: RelatedAnime[] = [];
 
-  if ($('ul.ListAnmRel').length) {
-    $('ul.ListAnmRel li a').each((index: number, element: any) => {
-      listRelated[$(element).text()] = $(element).attr('href');
-    });
+  $('ul.ListAnmRel li a').each((index: number, element: any) => {
+    listRelated[$(element).text()] = $(element).attr('href');
+  });
 
-    for (const related in listRelated) {
-      let posterUrl: any = await getPosterAndType(
-        listRelated[related].split('/')[2],
-        undefined,
-      );
+  for (const related in listRelated) {
+    let posterUrl: any = await getPosterAndType(
+      listRelated[related].split('/')[2],
+      undefined,
+    );
 
-      if (posterUrl !== '') {
-        relatedAnimes.push({
-          title: related,
-          type: posterUrl[1],
-          poster: posterUrl[0],
-        });
-      }
+    if (posterUrl !== '') {
+      relatedAnimes.push({
+        title: related,
+        type: posterUrl[1],
+        poster: posterUrl[0],
+      });
     }
+  }
+
+  if (relatedAnimes.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `relatedFLV_${hashStringMd5(id)}`,
+      JSON.stringify(relatedAnimes),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `relatedFLV_${hashStringMd5(id)}`,
+      new Date().getTime() + 86400000,
+    );
 
     return relatedAnimes;
   } else {
