@@ -201,7 +201,7 @@ export default class UtilsController {
 
       redisClient.expireat(
         `news_${hashStringMd5('news')}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 72000,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ news });
