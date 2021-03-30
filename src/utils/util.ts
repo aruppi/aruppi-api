@@ -112,7 +112,7 @@ export const animeExtraInfo = async (mal_id: number) => {
 
     redisClient.expireat(
       `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return formattedObject;
@@ -157,7 +157,7 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
 
     redisClient.expireat(
       `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return promo;
@@ -209,7 +209,7 @@ export const getAnimeCharacters = async (mal_id: number) => {
 
     redisClient.expireat(
       `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return characters;
@@ -297,7 +297,7 @@ export const getRelatedAnimesFLV = async (id: string) => {
 
     redisClient.expireat(
       `relatedFLV_${hashStringMd5(id)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return relatedAnimes;
@@ -370,7 +370,7 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
 
       redisClient.expireat(
         `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       return relatedAnimes;
@@ -447,7 +447,7 @@ export const animeFlvInfo = async (id: string | undefined) => {
 
     redisClient.expireat(
       `animeflvInfo_${hashStringMd5(id!)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return episodes;
@@ -515,7 +515,7 @@ export const jkanimeInfo = async (id: string | undefined) => {
 
     redisClient.expireat(
       `jkanimeInfo_${hashStringMd5(id!)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return episodesList;
@@ -605,7 +605,7 @@ export const videoServersJK = async (id: string) => {
 
     redisClient.expireat(
       `videoServersJK_${hashStringMd5(id!)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return serverList;
@@ -662,7 +662,7 @@ async function desuServerUrl(url: string) {
 
     redisClient.expireat(
       `desuServerUrl_${hashStringMd5(url)}`,
-      new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
     );
 
     return result;

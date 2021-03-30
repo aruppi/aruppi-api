@@ -113,7 +113,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `schedule_${hashStringMd5(day)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({
@@ -192,12 +192,12 @@ export default class AnimeController {
       if (subtype) {
         redisClient.expireat(
           `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
-          new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
         );
       } else {
         redisClient.expireat(
           `top_${hashStringMd5(`${type}:${page}`)}`,
-          new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
         );
       }
 
@@ -284,7 +284,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 1800,
+        parseInt(`${+new Date() / 1000}`, 10) + 1800,
       );
 
       res.status(200).json({
@@ -352,7 +352,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `contentTv_${hashStringMd5(`${type}:${page}`)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({
@@ -420,7 +420,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({
@@ -488,7 +488,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `contentOva_${hashStringMd5(`${type}:${page}`)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({
@@ -556,7 +556,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({
@@ -606,7 +606,7 @@ export default class AnimeController {
 
       redisClient.expireat(
         `episodes_${hashStringMd5(title)}`,
-        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ episodes });
@@ -652,7 +652,7 @@ export default class AnimeController {
 
           redisClient.expireat(
             `servers_${hashStringMd5(id)}`,
-            new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            parseInt(`${+new Date() / 1000}`, 10) + 7200,
           );
 
           res.status(200).json({ servers: data });
