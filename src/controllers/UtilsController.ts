@@ -127,7 +127,7 @@ export default class UtilsController {
 
       redisClient.expireat(
         `anitakume_${hashStringMd5('anitakume')}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ podcast });
@@ -201,7 +201,7 @@ export default class UtilsController {
 
       redisClient.expireat(
         `news_${hashStringMd5('news')}`,
-        new Date().getTime() + 7200000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 72000,
       );
 
       res.status(200).json({ news });
@@ -253,7 +253,7 @@ export default class UtilsController {
 
       redisClient.expireat(
         `images_${hashStringMd5(title)}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ images: results });
@@ -307,7 +307,7 @@ export default class UtilsController {
 
       redisClient.expireat(
         `videos_${hashStringMd5(channelId)}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ videos: results });
@@ -474,7 +474,7 @@ export default class UtilsController {
 
       redisClient.expireat(
         `oped_${hashStringMd5(title)}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ themes });
@@ -534,12 +534,12 @@ export default class UtilsController {
       if (year) {
         redisClient.expireat(
           `themesyear_${hashStringMd5(year)}`,
-          new Date().getTime() + 86400000,
+          new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
         );
       } else {
         redisClient.expireat(
           `themesyear_${hashStringMd5('allYear')}`,
-          new Date().getTime() + 86400000,
+          new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
         );
       }
 

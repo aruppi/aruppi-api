@@ -149,7 +149,7 @@ export default class DirectoryController {
 
       redisClient.expireat(
         `season_${hashStringMd5(`${year}:${type}`)}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({
@@ -201,7 +201,7 @@ export default class DirectoryController {
 
       redisClient.expireat(
         `allSeasons_${hashStringMd5('allSeasons')}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ archive });
@@ -252,7 +252,7 @@ export default class DirectoryController {
 
       redisClient.expireat(
         `laterSeasons_${hashStringMd5('laterSeasons')}`,
-        new Date().getTime() + 86400000,
+        new Date().getTime() + parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json({ future });
@@ -322,11 +322,13 @@ export default class DirectoryController {
         JSON.stringify(resultAnime),
       );
 
+      console.log(`moreInfo_${hashStringMd5(title)}`);
+
       /* After 24hrs expire the key. */
 
       redisClient.expireat(
         `moreInfo_${hashStringMd5(title)}`,
-        new Date().getTime() + 86400000,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
 
       res.status(200).json(resultAnime);
