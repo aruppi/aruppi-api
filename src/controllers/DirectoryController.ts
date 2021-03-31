@@ -311,6 +311,21 @@ export default class DirectoryController {
               related: await getRelatedAnimesMAL(resultQuery!.mal_id),
             };
             break;
+          case 'monoschinos':
+            resultAnime = {
+              title: resultQuery?.title,
+              poster: resultQuery?.poster,
+              synopsis: resultQuery?.description,
+              status: resultQuery?.state,
+              type: resultQuery?.type,
+              rating: resultQuery?.score,
+              genres: resultQuery?.genres,
+              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+              promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+              characters: await getAnimeCharacters(resultQuery!.mal_id),
+              related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+            };
+            break;
           default:
             resultAnime = undefined;
             break;
@@ -327,8 +342,6 @@ export default class DirectoryController {
         `moreInfo_${hashStringMd5(title)}`,
         JSON.stringify(resultAnime),
       );
-
-      console.log(`moreInfo_${hashStringMd5(title)}`);
 
       /* After 24hrs expire the key. */
 

@@ -582,7 +582,9 @@ export default class AnimeController {
 
         return res.status(200).json(resultRedis);
       } else {
-        searchAnime = await AnimeModel.findOne({ title: { $eq: title } });
+        searchAnime = await AnimeModel.findOne({
+          $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
+        });
       }
     } catch (err) {
       return next(err);
