@@ -14,7 +14,7 @@ export interface Anime extends Document {
   genres: Types.Array<string>;
   state: string;
   score: string;
-  jkanime: boolean;
+  source: string;
   description: string;
 }
 
@@ -28,7 +28,7 @@ const AnimeSchema: Schema = new Schema({
   genres: [{ type: String }],
   state: { type: String },
   score: { type: String },
-  jkanime: { type: Boolean },
+  source: { type: String },
   description: { type: String },
 });
 

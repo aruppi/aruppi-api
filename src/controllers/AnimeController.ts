@@ -588,10 +588,16 @@ export default class AnimeController {
       return next(err);
     }
 
-    if (!searchAnime?.jkanime) {
-      episodes = await animeFlvInfo(searchAnime?.id);
-    } else {
-      episodes = await jkanimeInfo(searchAnime?.id);
+    switch (searchAnime?.source) {
+      case 'animeflv':
+        episodes = await animeFlvInfo(searchAnime?.id);
+        break;
+      case 'jkanime':
+        episodes = await jkanimeInfo(searchAnime?.id);
+        break;
+      default:
+        episodes = undefined;
+        break;
     }
 
     if (episodes) {
@@ -675,34 +681,40 @@ export default class AnimeController {
       return next(err);
     }
 
-    if (!animeQuery[0].jkanime) {
-      animeResult = {
-        title: animeQuery[0].title || null,
-        poster: animeQuery[0].poster || null,
-        synopsis: animeQuery[0].description || null,
-        status: animeQuery[0].state || null,
-        type: animeQuery[0].type || null,
-        rating: animeQuery[0].score || null,
-        genres: animeQuery[0].genres || null,
-        moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
-        promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
-        characters: await getAnimeCharacters(animeQuery[0].mal_id),
-        related: await getRelatedAnimesFLV(animeQuery[0].id),
-      };
-    } else {
-      animeResult = {
-        title: animeQuery[0].title || null,
-        poster: animeQuery[0].poster || null,
-        synopsis: animeQuery[0].description || null,
-        status: animeQuery[0].state || null,
-        type: animeQuery[0].type || null,
-        rating: animeQuery[0].score || null,
-        genres: animeQuery[0].genres || null,
-        moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
-        promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
-        characters: await getAnimeCharacters(animeQuery[0].mal_id),
-        related: await getRelatedAnimesMAL(animeQuery[0].mal_id),
-      };
+    switch (animeQuery[0].source) {
+      case 'animeflv':
+        animeResult = {
+          title: animeQuery[0].title || null,
+          poster: animeQuery[0].poster || null,
+          synopsis: animeQuery[0].description || null,
+          status: animeQuery[0].state || null,
+          type: animeQuery[0].type || null,
+          rating: animeQuery[0].score || null,
+          genres: animeQuery[0].genres || null,
+          moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
+          promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
+          characters: await getAnimeCharacters(animeQuery[0].mal_id),
+          related: await getRelatedAnimesFLV(animeQuery[0].id),
+        };
+        break;
+      case 'jkanime':
+        animeResult = {
+          title: animeQuery[0].title || null,
+          poster: animeQuery[0].poster || null,
+          synopsis: animeQuery[0].description || null,
+          status: animeQuery[0].state || null,
+          type: animeQuery[0].type || null,
+          rating: animeQuery[0].score || null,
+          genres: animeQuery[0].genres || null,
+          moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
+          promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
+          characters: await getAnimeCharacters(animeQuery[0].mal_id),
+          related: await getRelatedAnimesMAL(animeQuery[0].mal_id),
+        };
+        break;
+      default:
+        animeResult = undefined;
+        break;
     }
 
     if (animeResult) {

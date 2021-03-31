@@ -63,7 +63,7 @@ export default class DirectoryController {
                 genres: item.genres,
                 state: item.state,
                 score: item.score,
-                jkanime: item.jkanime,
+                source: item.source,
                 description: item.description,
               });
             }
@@ -89,7 +89,7 @@ export default class DirectoryController {
               genres: item.genres,
               state: item.state,
               score: item.score,
-              jkanime: item.jkanime,
+              source: item.source,
               description: item.description,
             });
           }
@@ -280,34 +280,40 @@ export default class DirectoryController {
           $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
         });
 
-        if (!resultQuery?.jkanime) {
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: resultQuery?.state,
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesFLV(resultQuery!.id),
-          };
-        } else {
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: resultQuery?.state,
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-          };
+        switch (resultQuery?.source) {
+          case 'animeflv':
+            resultAnime = {
+              title: resultQuery?.title,
+              poster: resultQuery?.poster,
+              synopsis: resultQuery?.description,
+              status: resultQuery?.state,
+              type: resultQuery?.type,
+              rating: resultQuery?.score,
+              genres: resultQuery?.genres,
+              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+              promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+              characters: await getAnimeCharacters(resultQuery!.mal_id),
+              related: await getRelatedAnimesFLV(resultQuery!.id),
+            };
+            break;
+          case 'jkanime':
+            resultAnime = {
+              title: resultQuery?.title,
+              poster: resultQuery?.poster,
+              synopsis: resultQuery?.description,
+              status: resultQuery?.state,
+              type: resultQuery?.type,
+              rating: resultQuery?.score,
+              genres: resultQuery?.genres,
+              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+              promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+              characters: await getAnimeCharacters(resultQuery!.mal_id),
+              related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+            };
+            break;
+          default:
+            resultAnime = undefined;
+            break;
         }
       }
     } catch (err) {
