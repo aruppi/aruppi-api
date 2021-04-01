@@ -524,6 +524,125 @@ export const jkanimeInfo = async (id: string | undefined) => {
   }
 };
 
+export const monoschinosInfo = async (id: string | undefined) => {
+  let $: cheerio.Root;
+  let episodeList: any[] = [];
+
+  try {
+    const resultQueryRedis: any = await redisClient.get(
+      `monoschinosInfo_${hashStringMd5(id!)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`${urls.BASE_MONOSCHINOS}anime/${id}`, {
+        scrapy: true,
+        parse: false,
+      });
+    }
+  } catch (err) {
+    return err;
+  }
+
+  $('.SerieCaps a').each((index: number, element: cheerio.Element) => {
+    episodeList.push({
+      episode: parseInt($(element).attr('href')?.split('-')[3]!),
+      id: `${$(element).attr('href')?.split('/')[3]}/${
+        $(element).attr('href')?.split('/')[4]
+      }`,
+    });
+  });
+
+  if (episodeList.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `monoschinosInfo_${hashStringMd5(id!)}`,
+      JSON.stringify(episodeList),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `monoschinosInfo_${hashStringMd5(id!)}`,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
+    );
+
+    return episodeList;
+  } else {
+    return null;
+  }
+};
+
+export const videoServersMonosChinos = async (id: string) => {
+  let $: cheerio.Root;
+  let videoServers: any[] = [];
+  let nameServers: any[] = [];
+
+  try {
+    const resultQueryRedis: any = await redisClient.get(
+      `videoServersMonosChinos_${hashStringMd5(id)}`,
+    );
+
+    if (resultQueryRedis) {
+      const resultRedis: any = JSON.parse(resultQueryRedis);
+
+      return resultRedis;
+    } else {
+      $ = await requestGot(`${urls.BASE_MONOSCHINOS}${id}`, {
+        scrapy: true,
+        parse: false,
+      });
+    }
+  } catch (err) {
+    return err;
+  }
+
+  let videosContainer = $('.TPlayerTb').text();
+  let counter: number = 1;
+
+  $(videosContainer).each((index: number, element: cheerio.Element) => {
+    let video = $(element).attr('src');
+
+    if (video) {
+      video = video.split('url=')[1];
+      video = decodeURIComponent(video);
+      video = video.split('&id')[0];
+    }
+
+    if (video) {
+      videoServers.push({
+        id: `Op${counter++}`,
+        url: video,
+        direct: false,
+      });
+    }
+  });
+
+  if (videoServers.length > 0) {
+    /* Set the key in the redis cache. */
+
+    redisClient.set(
+      `videoServersMonosChinos_${hashStringMd5(id)}`,
+      JSON.stringify(videoServers),
+    );
+
+    /* After 24hrs expire the key. */
+
+    redisClient.expireat(
+      `videoServersMonosChinos_${hashStringMd5(id)}`,
+      parseInt(`${+new Date() / 1000}`, 10) + 7200,
+    );
+
+    return videoServers;
+  } else {
+    return null;
+  }
+};
+
 export const videoServersJK = async (id: string) => {
   let $: cheerio.Root;
   let servers: any = {};

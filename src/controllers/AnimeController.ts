@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
-import { animeFlvInfo, jkanimeInfo, videoServersJK } from '../utils/util';
+import {
+  animeFlvInfo,
+  jkanimeInfo,
+  monoschinosInfo,
+  videoServersJK,
+  videoServersMonosChinos,
+} from '../utils/util';
 import { transformUrlServer } from '../utils/transformerUrl';
 import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
 import util from 'util';
@@ -597,6 +603,9 @@ export default class AnimeController {
       case 'jkanime':
         episodes = await jkanimeInfo(searchAnime?.id);
         break;
+      case 'monoschinos':
+        episodes = await monoschinosInfo(searchAnime?.id);
+        break;
       default:
         episodes = undefined;
         break;
@@ -637,8 +646,13 @@ export default class AnimeController {
 
         return res.status(200).json(resultRedis);
       } else {
+        console.log(id);
         if (isNaN(parseInt(id.split('/')[0]))) {
-          data = await videoServersJK(id);
+          if (id.split('/')[0] === 'ver') {
+            data = await videoServersMonosChinos(id);
+          } else {
+            data = await videoServersJK(id);
+          }
         } else {
           data = await requestGot(
             `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
