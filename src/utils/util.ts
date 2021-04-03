@@ -16,8 +16,8 @@ redisClient.get = util.promisify(redisClient.get);
 
 interface Promo {
   title: string;
-  previewImage: string;
-  videoUrl: string;
+  image_url: string;
+  video_url: string;
 }
 
 interface Character {
@@ -143,7 +143,13 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
     return err;
   }
 
-  const promo: Promo[] = data.promo.map((item: Promo) => item);
+  const promo: Promo[] = data.promo.map((item: Promo) => {
+    return {
+      title: item.title,
+      previewImage: item.image_url,
+      videoURL: item.video_url,
+    };
+  });
 
   if (promo.length > 0) {
     /* Set the key in the redis cache. */
