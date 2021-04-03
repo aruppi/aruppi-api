@@ -601,11 +601,24 @@ export const videoServersMonosChinos = async (id: string) => {
     return err;
   }
 
-  let videosContainer = $('.TPlayerTb').text();
-  let counter: number = 1;
+  let videoNames: string[] = $('.TPlayerNv li')
+    .map((index: number, element: cheerio.Element) => {
+      return $(element).attr('title');
+    })
+    .get();
 
-  $(videosContainer).each((index: number, element: cheerio.Element) => {
-    let video = $(element).attr('src');
+  videoServers.push({
+    id: videoNames[0],
+    url: decodeURIComponent(
+      $('.TPlayer div iframe').attr('src')?.split('url=')[1]!,
+    ).split('&id')[0],
+    direct: false,
+  });
+
+  const videoContainer: any = $('.TPlayer div').text();
+
+  $(videoContainer).each((index: number, element: cheerio.Element) => {
+    let video: any = $(element).attr('src');
 
     if (video) {
       video = video.split('url=')[1];
@@ -614,10 +627,14 @@ export const videoServersMonosChinos = async (id: string) => {
     }
 
     if (video) {
-      videoServers.push({
-        id: `Op${counter++}`,
-        url: video,
-        direct: false,
+      videoNames.forEach((value: string) => {
+        if (video.includes(value.toLowerCase())) {
+          videoServers.push({
+            id: value.toLowerCase(),
+            url: video,
+            direct: false,
+          });
+        }
       });
     }
   });

@@ -117,7 +117,7 @@ routes.get('/api/v4/generateWaifu/', utilsController.getWaifuRandom);
 
 /* Routes to handling the v3 deprecated */
 routes.get('/api/v3/*', (req: Request, res: Response, next: NextFunction) => {
-  res.status(302).redirect('/api/v2');
+  res.status(302).redirect('/api/v3');
 });
 
 routes.get('/api/v3', (req: Request, res: Response, next: NextFunction) => {
