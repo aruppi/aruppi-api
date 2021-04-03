@@ -548,8 +548,19 @@ export const monoschinosInfo = async (id: string | undefined) => {
   }
 
   $('.SerieCaps a').each((index: number, element: cheerio.Element) => {
+    let episode: number;
+
+    $(element)
+      .attr('href')
+      ?.split('-')
+      .forEach((item: any) => {
+        if (!isNaN(item)) {
+          episode = parseInt(item);
+        }
+      });
+
     episodeList.push({
-      episode: parseInt($(element).attr('href')?.split('-')[3]!),
+      episode: episode!,
       id: `${$(element).attr('href')?.split('/')[3]}/${
         $(element).attr('href')?.split('/')[4]
       }`,
