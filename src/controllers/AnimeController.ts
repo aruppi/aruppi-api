@@ -646,7 +646,6 @@ export default class AnimeController {
 
         return res.status(200).json(resultRedis);
       } else {
-        console.log(id);
         if (isNaN(parseInt(id.split('/')[0]))) {
           if (id.split('/')[0] === 'ver') {
             data = await videoServersMonosChinos(id);

@@ -488,7 +488,7 @@ export const jkanimeInfo = async (id: string | undefined) => {
     return err;
   }
 
-  countEpisodes = $('div.navigation a')
+  countEpisodes = $('div.anime__pagination a')
     .map((index: number, element: cheerio.Element) => {
       return $(element).text();
     })
@@ -701,11 +701,13 @@ export const videoServersJK = async (id: string) => {
     return err;
   }
 
-  const serverNames: string[] = $('div#reproductor-box li')
+  const serverNames: string[] = $('div.bg-servers a')
     .map((index: number, element: cheerio.Element) => {
-      return $(element).find('a').text();
+      return $(element).text();
     })
     .get();
+
+  console.log(serverNames);
 
   $('script').each((index: number, element: cheerio.Element) => {
     if ($(element).html()!.includes('var video = [];')) {
