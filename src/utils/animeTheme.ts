@@ -268,9 +268,9 @@ export default class ThemeParser {
           link,
           desc: linkDesc,
           type: name.startsWith('OP')
-            ? 'Opening'
+            ? `OP${name[2]}`
             : name.startsWith('ED')
-            ? 'Ending'
+            ? `ED${name[2]}`
             : 'OP/ED',
           episodes,
           notes,
