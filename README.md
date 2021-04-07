@@ -16,6 +16,18 @@
 
 <img src="./assets/img/logo.png" width="100%" alt="">
 
+&nbsp;
+&nbsp;
+&nbsp;
+
+&nbsp;
+&nbsp;
+&nbsp;
+
+Aruppi API has been developed to bring together all the information about Japanese culture, from anime and manga to the most secret places in Japan, its gastronomy and even its festivities.
+
+We are in continuous development to implement more features and improvements in the functioning of it, to later implement it in the mobile application.
+
 ## **:wrench: Developer usage**
 
 ### **Set up project**
