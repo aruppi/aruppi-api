@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
 import {
   animeFlvInfo,
+  imageUrlToBase64,
   jkanimeInfo,
   monoschinosInfo,
   videoServersJK,
@@ -241,8 +242,10 @@ export default class AnimeController {
   }
 
   async getLastEpisodes(req: Request, res: Response, next: NextFunction) {
-    let data: any;
+    // let data: any;
+    let $: cheerio.Root;
     let episodes: Episode[] = [];
+    let animeList: any[] = [];
 
     try {
       const resultQueryRedis: any = await redisClient.get(
@@ -254,28 +257,75 @@ export default class AnimeController {
 
         return res.status(200).json(resultRedis);
       } else {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}LatestEpisodesAdded`,
-          {
-            parse: true,
-            scrapy: false,
-          },
-        );
+        // @ANIMEFLV
+        // data = await requestGot(
+        //   `${urls.BASE_ANIMEFLV_JELU}LatestEpisodesAdded`,
+        //   {
+        //     parse: true,
+        //     scrapy: false,
+        //   },
+        // );
+
+        $ = await requestGot(`${urls.BASE_MONOSCHINOS}`, {
+          scrapy: true,
+          parse: false,
+        });
       }
     } catch (err) {
       return next(err);
     }
+    // @ANIMEFLV
+    // for (const episode of data.episodes) {
+    //   const formattedEpisode: Episode = {
+    //     id: '12345/' + episode.id,
+    //     title: episode.title,
+    //     image: episode.poster,
+    //     episode: episode.episode,
+    //     servers: await transformUrlServer(episode.servers),
+    //   };
 
-    for (const episode of data.episodes) {
-      const formattedEpisode: Episode = {
-        id: '12345/' + episode.id,
-        title: episode.title,
-        image: episode.poster,
-        episode: episode.episode,
-        servers: await transformUrlServer(episode.servers),
-      };
+    //   episodes.push(formattedEpisode);
+    // }
 
-      episodes.push(formattedEpisode);
+    let getLastest: any = $('.container .caps .container')[0];
+
+    $(getLastest)
+      .find('.row article')
+      .each((index: number, element: cheerio.Element) => {
+        let el: cheerio.Cheerio = $(element);
+        let title: string | undefined = el
+          .find('.Title')
+          .html()
+          ?.split('\t')[0];
+        let img: any = el.find('.Image img').attr('src');
+        let type: any = el.find('.Image figure span').text();
+        type = type.substring(1, type.length);
+        let nEpisode: any = el.find('.dataEpi .episode').text();
+        nEpisode = parseInt(nEpisode.split('\n')[1]);
+        let id: any = el.find('a').attr('href');
+        id = id.split('/')[4];
+        id = id.split('-');
+        id.splice(id.length - 2, 2);
+        id = `${id.join('-')}-episodio-${nEpisode}`;
+
+        let anime = {
+          id: `ver/${id}`,
+          title,
+          image: img,
+          episode: nEpisode,
+        };
+
+        animeList.push(anime);
+      });
+
+    for (const anime of animeList) {
+      episodes.push({
+        id: anime.id,
+        title: anime.title,
+        image: await imageUrlToBase64(anime.image),
+        episode: anime.episode,
+        servers: await videoServersMonosChinos(anime.id),
+      });
     }
 
     if (episodes.length > 0) {

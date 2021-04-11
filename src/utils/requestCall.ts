@@ -11,7 +11,7 @@ interface Options {
 
 export const requestGot = async (
   url: string,
-  options: Options,
+  options?: Options,
 ): Promise<any> => {
   if (options !== undefined) {
     if (options.scrapy) {

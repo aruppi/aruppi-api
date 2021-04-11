@@ -14,7 +14,7 @@
 
 #
 
-<img src="./assets/img/logo.png" width="100%" alt="">
+<img src="./assets/img/cover.png" width="100%" alt="">
 
 &nbsp;
 &nbsp;
