@@ -141,11 +141,6 @@ export default class UtilsController {
     const pagesRss: rssPage[] = [
       { url: urls.BASE_KUDASAI, author: 'Kudasai', content: 'content_encoded' },
       {
-        url: urls.BASE_PALOMITRON,
-        author: 'Palomitron',
-        content: 'description',
-      },
-      {
         url: urls.BASE_RAMENPARADOS,
         author: 'Ramen para dos',
         content: 'content',
