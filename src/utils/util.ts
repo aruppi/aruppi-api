@@ -624,7 +624,7 @@ export const videoServersMonosChinos = async (id: string) => {
     .get();
 
   videoServers.push({
-    id: videoNames[0],
+    id: videoNames[0].toLowerCase(),
     url: decodeURIComponent(
       $('.TPlayer div iframe').attr('src')?.split('url=')[1]!,
     ).split('&id')[0],
