@@ -9,7 +9,6 @@ export default {
   BASE_IVOOX:
     'https://www.ivoox.com/podcast-anitakume_fg_f1660716_filtro_1.xml',
   BASE_KUDASAI: 'https://somoskudasai.com/feed/',
-  BASE_PALOMITRON: 'https://elpalomitron.com/category/animemanga/feed/',
   BASE_RAMENPARADOS: 'https://ramenparados.com/category/noticias/anime/feed/',
   BASE_CRUNCHYROLL: 'https://www.crunchyroll.com/newsrss?lang=esES',
   JKANIME_SEARCH: 'https://jkanime.net/buscar/',

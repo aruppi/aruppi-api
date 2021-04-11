@@ -597,7 +597,6 @@ export const monoschinosInfo = async (id: string | undefined) => {
 export const videoServersMonosChinos = async (id: string) => {
   let $: cheerio.Root;
   let videoServers: any[] = [];
-  let nameServers: any[] = [];
 
   try {
     const resultQueryRedis: any = await redisClient.get(
@@ -871,6 +870,11 @@ export function getThemes(themes: any[]) {
     link: item.mirror.mirrorURL,
   }));
 }
+
+export const imageUrlToBase64 = async (url: string) => {
+  let img: any = await requestGot(url);
+  return img.rawBody.toString('base64');
+};
 
 export function hashStringMd5(string: string) {
   return crypto.createHash('md5').update(string).digest('hex');
