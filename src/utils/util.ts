@@ -530,18 +530,25 @@ export const jkanimeInfo = async (id: string | undefined) => {
   }
 };
 
-export const monoschinosInfo = async (id: string | undefined) => {
+export const monoschinosInfo = async (
+  id: string | undefined,
+  mal_id: number,
+) => {
   let $: cheerio.Root;
   let episodeList: any[] = [];
+  let extraInfo: any;
 
   try {
+    /* Extra info of the anime */
+    extraInfo = await animeExtraInfo(mal_id);
+
     const resultQueryRedis: any = await redisClient.get(
       `monoschinosInfo_${hashStringMd5(id!)}`,
     );
 
     if (resultQueryRedis) {
       const resultRedis: any = JSON.parse(resultQueryRedis);
-
+      console.log(extraInfo);
       return resultRedis;
     } else {
       $ = await requestGot(`${urls.BASE_MONOSCHINOS}anime/${id}`, {
@@ -551,6 +558,40 @@ export const monoschinosInfo = async (id: string | undefined) => {
     }
   } catch (err) {
     return err;
+  }
+
+  let broadCastDate = new Date();
+  let dd: number, mm: number, yyyy: number;
+
+  const airDay: any = {
+    Lunes: 1,
+    Martes: 2,
+    Miércoles: 3,
+    Jueves: 4,
+    Viernes: 5,
+    Sábados: 6,
+    Domingos: 7,
+    'Sin emisión': 'default',
+  };
+
+  if (!extraInfo.aired.to) {
+    if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+      for (
+        let i = broadCastDate.getDay();
+        i < airDay[extraInfo.broadcast];
+        i++
+      ) {
+        broadCastDate.setDate(broadCastDate.getDate() + 1);
+      }
+
+      dd = broadCastDate.getDate();
+      mm = broadCastDate.getMonth();
+      yyyy = broadCastDate.getFullYear();
+
+      episodeList.push({
+        nextEpisodeDate: `${dd}/${mm + 1}/${yyyy}`,
+      });
+    }
   }
 
   $('.SerieCaps a').each((index: number, element: cheerio.Element) => {
