@@ -280,17 +280,19 @@ export default class DirectoryController {
           $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
         });
 
+        const extraInfo: any = await animeExtraInfo(resultQuery!.mal_id);
+
         switch (resultQuery?.source) {
           case 'animeflv':
             resultAnime = {
               title: resultQuery?.title,
               poster: resultQuery?.poster,
               synopsis: resultQuery?.description,
-              status: resultQuery?.state,
+              status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
               type: resultQuery?.type,
               rating: resultQuery?.score,
               genres: resultQuery?.genres,
-              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+              moreInfo: [extraInfo],
               promo: await getAnimeVideoPromo(resultQuery!.mal_id),
               characters: await getAnimeCharacters(resultQuery!.mal_id),
               related: await getRelatedAnimesFLV(resultQuery!.id),
@@ -301,11 +303,11 @@ export default class DirectoryController {
               title: resultQuery?.title,
               poster: resultQuery?.poster,
               synopsis: resultQuery?.description,
-              status: resultQuery?.state,
+              status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
               type: resultQuery?.type,
               rating: resultQuery?.score,
               genres: resultQuery?.genres,
-              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+              moreInfo: [extraInfo],
               promo: await getAnimeVideoPromo(resultQuery!.mal_id),
               characters: await getAnimeCharacters(resultQuery!.mal_id),
               related: await getRelatedAnimesMAL(resultQuery!.mal_id),
@@ -316,11 +318,11 @@ export default class DirectoryController {
               title: resultQuery?.title,
               poster: resultQuery?.poster,
               synopsis: resultQuery?.description,
-              status: resultQuery?.state,
+              status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
               type: resultQuery?.type,
               rating: resultQuery?.score,
               genres: resultQuery?.genres,
-              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
+              moreInfo: [extraInfo],
               promo: await getAnimeVideoPromo(resultQuery!.mal_id),
               characters: await getAnimeCharacters(resultQuery!.mal_id),
               related: await getRelatedAnimesMAL(resultQuery!.mal_id),

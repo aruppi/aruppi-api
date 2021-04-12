@@ -654,7 +654,7 @@ export default class AnimeController {
         episodes = await jkanimeInfo(searchAnime?.id);
         break;
       case 'monoschinos':
-        episodes = await monoschinosInfo(searchAnime?.id);
+        episodes = await monoschinosInfo(searchAnime?.id, searchAnime?.mal_id);
         break;
       default:
         episodes = undefined;
