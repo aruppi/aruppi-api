@@ -1,4 +1,4 @@
-# **Aruppi API** (v4.0.2)
+# **Aruppi API** (v4.0.4)
 
 > This API has everything about Japan, from anime, music, radio, images, videos ... to japanese culture
 >
@@ -59,10 +59,10 @@ In order to install the project and all dependencies, enter in the project folde
 
 ### Start the project
 
-
 ```bash
 npm start
 ```
+
 ```bash
 yarn start
 ```
@@ -72,6 +72,7 @@ yarn start
 ```bash
 npm build
 ```
+
 ```bash
 yarn build
 ```

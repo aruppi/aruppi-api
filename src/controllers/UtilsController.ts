@@ -69,17 +69,19 @@ export default class UtilsController {
     let feed: CustomFeed & Parser.Output<CustomItem>;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `anitakume_${hashStringMd5('anitakume')}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `anitakume_${hashStringMd5('anitakume')}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        feed = await parser.parseURL(urls.BASE_IVOOX);
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      feed = await parser.parseURL(urls.BASE_IVOOX);
     } catch (err) {
       return next(err);
     }
@@ -116,19 +118,21 @@ export default class UtilsController {
     });
 
     if (podcast.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `anitakume_${hashStringMd5('anitakume')}`,
-        JSON.stringify({ podcast }),
-      );
+        redisClient.set(
+          `anitakume_${hashStringMd5('anitakume')}`,
+          JSON.stringify({ podcast }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `anitakume_${hashStringMd5('anitakume')}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `anitakume_${hashStringMd5('anitakume')}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ podcast });
     } else {
@@ -153,51 +157,55 @@ export default class UtilsController {
     ];
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `news_${hashStringMd5('news')}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `news_${hashStringMd5('news')}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        for (const rssPage of pagesRss) {
-          const feed = await parser.parseURL(rssPage.url);
-
-          feed.items.forEach((item: any) => {
-            const formattedObject: News = {
-              title: item.title,
-              url: item.link,
-              author: feed.title?.includes('Crunchyroll')
-                ? 'Crunchyroll'
-                : feed.title,
-              thumbnail: obtainPreviewNews(item['content:encoded']),
-              content: item['content:encoded'],
-            };
-
-            news.push(formattedObject);
-          });
+          return res.status(200).json(resultRedis);
         }
+      }
+
+      for (const rssPage of pagesRss) {
+        const feed = await parser.parseURL(rssPage.url);
+
+        feed.items.forEach((item: any) => {
+          const formattedObject: News = {
+            title: item.title,
+            url: item.link,
+            author: feed.title?.includes('Crunchyroll')
+              ? 'Crunchyroll'
+              : feed.title,
+            thumbnail: obtainPreviewNews(item['content:encoded']),
+            content: item['content:encoded'],
+          };
+
+          news.push(formattedObject);
+        });
       }
     } catch (err) {
       return next(err);
     }
 
     if (news.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `news_${hashStringMd5('news')}`,
-        JSON.stringify({ news }),
-      );
+        redisClient.set(
+          `news_${hashStringMd5('news')}`,
+          JSON.stringify({ news }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `news_${hashStringMd5('news')}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `news_${hashStringMd5('news')}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ news });
     } else {
@@ -210,20 +218,22 @@ export default class UtilsController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `images_${hashStringMd5(title)}`,
-      );
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(
-          `${urls.BASE_QWANT}count=51&q=${title}&t=images&safesearch=1&locale=es_ES&uiv=4`,
-          { scrapy: false, parse: true },
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `images_${hashStringMd5(title)}`,
         );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(
+        `${urls.BASE_QWANT}count=51&q=${title}&t=images&safesearch=1&locale=es_ES&uiv=4`,
+        { scrapy: false, parse: true },
+      );
     } catch (err) {
       return next(err);
     }
@@ -237,19 +247,21 @@ export default class UtilsController {
     });
 
     if (results.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `images_${hashStringMd5(title)}`,
-        JSON.stringify({ images: results }),
-      );
+        redisClient.set(
+          `images_${hashStringMd5(title)}`,
+          JSON.stringify({ images: results }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `images_${hashStringMd5(title)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `images_${hashStringMd5(title)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ images: results });
     } else {
@@ -262,20 +274,22 @@ export default class UtilsController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `videos_${hashStringMd5(channelId)}`,
-      );
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(
-          `${urls.BASE_YOUTUBE}${channelId}&part=snippet,id&order=date&maxResults=50`,
-          { scrapy: false, parse: true },
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `videos_${hashStringMd5(channelId)}`,
         );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(
+        `${urls.BASE_YOUTUBE}${channelId}&part=snippet,id&order=date&maxResults=50`,
+        { scrapy: false, parse: true },
+      );
     } catch (err) {
       return next(err);
     }
@@ -291,19 +305,21 @@ export default class UtilsController {
     });
 
     if (results.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `videos_${hashStringMd5(channelId)}`,
-        JSON.stringify({ videos: results }),
-      );
+        redisClient.set(
+          `videos_${hashStringMd5(channelId)}`,
+          JSON.stringify({ videos: results }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `videos_${hashStringMd5(channelId)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `videos_${hashStringMd5(channelId)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ videos: results });
     } else {
@@ -442,35 +458,39 @@ export default class UtilsController {
     let themes: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `oped_${hashStringMd5(title)}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `oped_${hashStringMd5(title)}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        themes = await structureThemes(await themeParser.serie(title), true);
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      themes = await structureThemes(await themeParser.serie(title), true);
     } catch (err) {
       return next(err);
     }
 
     if (themes) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `oped_${hashStringMd5(title)}`,
-        JSON.stringify({ themes }),
-      );
+        redisClient.set(
+          `oped_${hashStringMd5(title)}`,
+          JSON.stringify({ themes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `oped_${hashStringMd5(title)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `oped_${hashStringMd5(title)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ themes });
     } else {
@@ -484,58 +504,62 @@ export default class UtilsController {
     let resultQueryRedis: any;
 
     try {
-      if (year) {
-        resultQueryRedis = await redisClient.get(
-          `themesyear_${hashStringMd5(year)}`,
-        );
-      } else {
-        resultQueryRedis = await redisClient.get(
-          `themesyear_${hashStringMd5('allYear')}`,
-        );
+      if (redisClient.connected) {
+        if (year) {
+          resultQueryRedis = await redisClient.get(
+            `themesyear_${hashStringMd5(year)}`,
+          );
+        } else {
+          resultQueryRedis = await redisClient.get(
+            `themesyear_${hashStringMd5('allYear')}`,
+          );
+        }
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
+      if (year === undefined) {
+        themes = await themeParser.allYears();
       } else {
-        if (year === undefined) {
-          themes = await themeParser.allYears();
-        } else {
-          themes = await structureThemes(await themeParser.year(year), false);
-        }
+        themes = await structureThemes(await themeParser.year(year), false);
       }
     } catch (err) {
       return next(err);
     }
 
     if (themes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      if (year) {
-        redisClient.set(
-          `themesyear_${hashStringMd5(year)}`,
-          JSON.stringify({ themes }),
-        );
-      } else {
-        redisClient.set(
-          `themesyear_${hashStringMd5('allYear')}`,
-          JSON.stringify({ themes }),
-        );
-      }
+        if (year) {
+          redisClient.set(
+            `themesyear_${hashStringMd5(year)}`,
+            JSON.stringify({ themes }),
+          );
+        } else {
+          redisClient.set(
+            `themesyear_${hashStringMd5('allYear')}`,
+            JSON.stringify({ themes }),
+          );
+        }
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      if (year) {
-        redisClient.expireat(
-          `themesyear_${hashStringMd5(year)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
-      } else {
-        redisClient.expireat(
-          `themesyear_${hashStringMd5('allYear')}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
+        if (year) {
+          redisClient.expireat(
+            `themesyear_${hashStringMd5(year)}`,
+            parseInt(`${+new Date() / 1000}`, 10) + 7200,
+          );
+        } else {
+          redisClient.expireat(
+            `themesyear_${hashStringMd5('allYear')}`,
+            parseInt(`${+new Date() / 1000}`, 10) + 7200,
+          );
+        }
       }
 
       res.status(200).json({ themes });

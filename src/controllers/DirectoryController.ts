@@ -61,7 +61,6 @@ export default class DirectoryController {
                 poster: item.poster,
                 type: item.type,
                 genres: item.genres,
-                state: item.state,
                 score: item.score,
                 source: item.source,
                 description: item.description,
@@ -87,7 +86,6 @@ export default class DirectoryController {
               poster: item.poster,
               type: item.type,
               genres: item.genres,
-              state: item.state,
               score: item.score,
               source: item.source,
               description: item.description,
@@ -111,20 +109,22 @@ export default class DirectoryController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `season_${hashStringMd5(`${year}:${type}`)}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `season_${hashStringMd5(`${year}:${type}`)}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(`${urls.BASE_JIKAN}season/${year}/${type}`, {
-          scrapy: false,
-          parse: true,
-        });
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(`${urls.BASE_JIKAN}season/${year}/${type}`, {
+        scrapy: false,
+        parse: true,
+      });
     } catch (err) {
       return next(err);
     }
@@ -138,19 +138,21 @@ export default class DirectoryController {
     });
 
     if (season.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `season_${hashStringMd5(`${year}:${type}`)}`,
-        JSON.stringify({ season }),
-      );
+        redisClient.set(
+          `season_${hashStringMd5(`${year}:${type}`)}`,
+          JSON.stringify({ season }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `season_${hashStringMd5(`${year}:${type}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `season_${hashStringMd5(`${year}:${type}`)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({
         season,
@@ -164,20 +166,22 @@ export default class DirectoryController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `allSeasons_${hashStringMd5('allSeasons')}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `allSeasons_${hashStringMd5('allSeasons')}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(`${urls.BASE_JIKAN}season/archive`, {
-          parse: true,
-          scrapy: false,
-        });
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(`${urls.BASE_JIKAN}season/archive`, {
+        parse: true,
+        scrapy: false,
+      });
     } catch (err) {
       return next(err);
     }
@@ -190,19 +194,21 @@ export default class DirectoryController {
     });
 
     if (archive.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `allSeasons_${hashStringMd5('allSeasons')}`,
-        JSON.stringify({ archive }),
-      );
+        redisClient.set(
+          `allSeasons_${hashStringMd5('allSeasons')}`,
+          JSON.stringify({ archive }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `allSeasons_${hashStringMd5('allSeasons')}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `allSeasons_${hashStringMd5('allSeasons')}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ archive });
     } else {
@@ -214,20 +220,22 @@ export default class DirectoryController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `laterSeasons_${hashStringMd5('laterSeasons')}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `laterSeasons_${hashStringMd5('laterSeasons')}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(`${urls.BASE_JIKAN}season/later`, {
-          parse: true,
-          scrapy: false,
-        });
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(`${urls.BASE_JIKAN}season/later`, {
+        parse: true,
+        scrapy: false,
+      });
     } catch (err) {
       return next(err);
     }
@@ -241,19 +249,21 @@ export default class DirectoryController {
     });
 
     if (future.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `laterSeasons_${hashStringMd5('laterSeasons')}`,
-        JSON.stringify({ future }),
-      );
+        redisClient.set(
+          `laterSeasons_${hashStringMd5('laterSeasons')}`,
+          JSON.stringify({ future }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `laterSeasons_${hashStringMd5('laterSeasons')}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `laterSeasons_${hashStringMd5('laterSeasons')}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ future });
     } else {
@@ -267,88 +277,94 @@ export default class DirectoryController {
     let resultAnime: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `moreInfo_${hashStringMd5(title)}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `moreInfo_${hashStringMd5(title)}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        resultQuery = await AnimeModel.findOne({
-          $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
-        });
-
-        switch (resultQuery?.source) {
-          case 'animeflv':
-            resultAnime = {
-              title: resultQuery?.title,
-              poster: resultQuery?.poster,
-              synopsis: resultQuery?.description,
-              status: resultQuery?.state,
-              type: resultQuery?.type,
-              rating: resultQuery?.score,
-              genres: resultQuery?.genres,
-              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
-              promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-              characters: await getAnimeCharacters(resultQuery!.mal_id),
-              related: await getRelatedAnimesFLV(resultQuery!.id),
-            };
-            break;
-          case 'jkanime':
-            resultAnime = {
-              title: resultQuery?.title,
-              poster: resultQuery?.poster,
-              synopsis: resultQuery?.description,
-              status: resultQuery?.state,
-              type: resultQuery?.type,
-              rating: resultQuery?.score,
-              genres: resultQuery?.genres,
-              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
-              promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-              characters: await getAnimeCharacters(resultQuery!.mal_id),
-              related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-            };
-            break;
-          case 'monoschinos':
-            resultAnime = {
-              title: resultQuery?.title,
-              poster: resultQuery?.poster,
-              synopsis: resultQuery?.description,
-              status: resultQuery?.state,
-              type: resultQuery?.type,
-              rating: resultQuery?.score,
-              genres: resultQuery?.genres,
-              moreInfo: [await animeExtraInfo(resultQuery!.mal_id)],
-              promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-              characters: await getAnimeCharacters(resultQuery!.mal_id),
-              related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-            };
-            break;
-          default:
-            resultAnime = undefined;
-            break;
+          return res.status(200).json(resultRedis);
         }
+      }
+
+      resultQuery = await AnimeModel.findOne({
+        $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
+      });
+
+      const extraInfo: any = await animeExtraInfo(resultQuery!.mal_id);
+
+      switch (resultQuery?.source) {
+        case 'animeflv':
+          resultAnime = {
+            title: resultQuery?.title,
+            poster: resultQuery?.poster,
+            synopsis: resultQuery?.description,
+            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
+            type: resultQuery?.type,
+            rating: resultQuery?.score,
+            genres: resultQuery?.genres,
+            moreInfo: [extraInfo],
+            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+            characters: await getAnimeCharacters(resultQuery!.mal_id),
+            related: await getRelatedAnimesFLV(resultQuery!.id),
+          };
+          break;
+        case 'jkanime':
+          resultAnime = {
+            title: resultQuery?.title,
+            poster: resultQuery?.poster,
+            synopsis: resultQuery?.description,
+            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
+            type: resultQuery?.type,
+            rating: resultQuery?.score,
+            genres: resultQuery?.genres,
+            moreInfo: [extraInfo],
+            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+            characters: await getAnimeCharacters(resultQuery!.mal_id),
+            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+          };
+          break;
+        case 'monoschinos':
+          resultAnime = {
+            title: resultQuery?.title,
+            poster: resultQuery?.poster,
+            synopsis: resultQuery?.description,
+            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
+            type: resultQuery?.type,
+            rating: resultQuery?.score,
+            genres: resultQuery?.genres,
+            moreInfo: [extraInfo],
+            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+            characters: await getAnimeCharacters(resultQuery!.mal_id),
+            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+          };
+          break;
+        default:
+          resultAnime = undefined;
+          break;
       }
     } catch (err) {
       return next(err);
     }
 
     if (resultAnime) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `moreInfo_${hashStringMd5(title)}`,
-        JSON.stringify(resultAnime),
-      );
+        redisClient.set(
+          `moreInfo_${hashStringMd5(title)}`,
+          JSON.stringify(resultAnime),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `moreInfo_${hashStringMd5(title)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `moreInfo_${hashStringMd5(title)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json(resultAnime);
     } else {

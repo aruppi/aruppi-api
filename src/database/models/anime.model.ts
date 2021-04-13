@@ -12,7 +12,6 @@ export interface Anime extends Document {
   poster: string;
   type: string;
   genres: Types.Array<string>;
-  state: string;
   score: string;
   source: string;
   description: string;
@@ -26,7 +25,6 @@ const AnimeSchema: Schema = new Schema({
   poster: { type: String },
   type: { type: String },
   genres: [{ type: String }],
-  state: { type: String },
   score: { type: String },
   source: { type: String },
   description: { type: String },

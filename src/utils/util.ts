@@ -56,22 +56,24 @@ export const animeExtraInfo = async (mal_id: number) => {
   };
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
-        parse: true,
-        scrapy: false,
-      });
-
-      broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+        return resultRedis;
+      }
     }
+
+    data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
+      parse: true,
+      scrapy: false,
+    });
+
+    broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
   } catch (err) {
     return err;
   }
@@ -101,19 +103,21 @@ export const animeExtraInfo = async (mal_id: number) => {
   };
 
   if (formattedObject) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-      JSON.stringify(formattedObject),
-    );
+      redisClient.set(
+        `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+        JSON.stringify(formattedObject),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return formattedObject;
   } else {
@@ -125,20 +129,22 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
   let data: any;
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
-        parse: true,
-        scrapy: false,
-      });
+        return resultRedis;
+      }
     }
+
+    data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
+      parse: true,
+      scrapy: false,
+    });
   } catch (err) {
     return err;
   }
@@ -152,19 +158,21 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
   });
 
   if (promo.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-      JSON.stringify(promo),
-    );
+      redisClient.set(
+        `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+        JSON.stringify(promo),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return promo;
   } else {
@@ -176,20 +184,22 @@ export const getAnimeCharacters = async (mal_id: number) => {
   let data: any;
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-    );
-
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
-
-      return resultRedis;
-    } else {
-      data = await requestGot(
-        `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
-        { parse: true, scrapy: false },
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
       );
+
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return resultRedis;
+      }
     }
+
+    data = await requestGot(
+      `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
+      { parse: true, scrapy: false },
+    );
   } catch (err) {
     return err;
   }
@@ -204,19 +214,21 @@ export const getAnimeCharacters = async (mal_id: number) => {
   });
 
   if (characters.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-      JSON.stringify(characters),
-    );
+      redisClient.set(
+        `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+        JSON.stringify(characters),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return characters;
   } else {
@@ -251,20 +263,22 @@ export const getRelatedAnimesFLV = async (id: string) => {
   let $: cheerio.Root;
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `relatedFLV_${hashStringMd5(id)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `relatedFLV_${hashStringMd5(id)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
-        parse: false,
-        scrapy: true,
-      });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
+      parse: false,
+      scrapy: true,
+    });
   } catch (err) {
     return err;
   }
@@ -292,19 +306,21 @@ export const getRelatedAnimesFLV = async (id: string) => {
   }
 
   if (relatedAnimes.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `relatedFLV_${hashStringMd5(id)}`,
-      JSON.stringify(relatedAnimes),
-    );
+      redisClient.set(
+        `relatedFLV_${hashStringMd5(id)}`,
+        JSON.stringify(relatedAnimes),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `relatedFLV_${hashStringMd5(id)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `relatedFLV_${hashStringMd5(id)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return relatedAnimes;
   } else {
@@ -316,20 +332,22 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
   let $: cheerio.Root;
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
-        parse: false,
-        scrapy: true,
-      });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
+      parse: false,
+      scrapy: true,
+    });
   } catch (err) {
     return err;
   }
@@ -365,19 +383,21 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
     }
 
     if (relatedAnimes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-        JSON.stringify(relatedAnimes),
-      );
+        redisClient.set(
+          `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+          JSON.stringify(relatedAnimes),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       return relatedAnimes;
     }
@@ -394,20 +414,22 @@ export const animeFlvInfo = async (id: string | undefined) => {
   let episodes: any[] = [];
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `animeflvInfo_${hashStringMd5(id!)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `animeflvInfo_${hashStringMd5(id!)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
-        scrapy: true,
-        parse: false,
-      });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`${urls.BASE_ANIMEFLV}/anime/${id}`, {
+      scrapy: true,
+      parse: false,
+    });
   } catch (err) {
     return err;
   }
@@ -442,19 +464,21 @@ export const animeFlvInfo = async (id: string | undefined) => {
   }
 
   if (episodes.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `animeflvInfo_${hashStringMd5(id!)}`,
-      JSON.stringify(episodes),
-    );
+      redisClient.set(
+        `animeflvInfo_${hashStringMd5(id!)}`,
+        JSON.stringify(episodes),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `animeflvInfo_${hashStringMd5(id!)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `animeflvInfo_${hashStringMd5(id!)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return episodes;
   } else {
@@ -470,20 +494,22 @@ export const jkanimeInfo = async (id: string | undefined) => {
   let countEpisodes: string[] = [];
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `jkanimeInfo_${hashStringMd5(id!)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `jkanimeInfo_${hashStringMd5(id!)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
-        scrapy: true,
-        parse: false,
-      });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+      scrapy: true,
+      parse: false,
+    });
   } catch (err) {
     return err;
   }
@@ -510,19 +536,21 @@ export const jkanimeInfo = async (id: string | undefined) => {
   }
 
   if (episodesList.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `jkanimeInfo_${hashStringMd5(id!)}`,
-      JSON.stringify(episodesList),
-    );
+      redisClient.set(
+        `jkanimeInfo_${hashStringMd5(id!)}`,
+        JSON.stringify(episodesList),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `jkanimeInfo_${hashStringMd5(id!)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `jkanimeInfo_${hashStringMd5(id!)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return episodesList;
   } else {
@@ -530,27 +558,88 @@ export const jkanimeInfo = async (id: string | undefined) => {
   }
 };
 
-export const monoschinosInfo = async (id: string | undefined) => {
+export const monoschinosInfo = async (
+  id: string | undefined,
+  mal_id: number,
+) => {
   let $: cheerio.Root;
   let episodeList: any[] = [];
+  let extraInfo: any;
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `monoschinosInfo_${hashStringMd5(id!)}`,
-    );
+    /* Extra info of the anime */
+    extraInfo = await animeExtraInfo(mal_id);
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `monoschinosInfo_${hashStringMd5(id!)}`,
+      );
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`${urls.BASE_MONOSCHINOS}anime/${id}`, {
-        scrapy: true,
-        parse: false,
-      });
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
+
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`${urls.BASE_MONOSCHINOS}anime/${id}`, {
+      scrapy: true,
+      parse: false,
+    });
   } catch (err) {
     return err;
+  }
+
+  let broadCastDate = new Date();
+  let dd: number, mm: string | number, yyyy: number;
+
+  const airDay: any = {
+    Lunes: 1,
+    Martes: 2,
+    Miércoles: 3,
+    Jueves: 4,
+    Viernes: 5,
+    Sábados: 6,
+    Domingos: 7,
+    'Sin emisión': 'default',
+  };
+
+  if (!extraInfo.aired.to) {
+    if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+      if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+        for (
+          let i = broadCastDate.getDay();
+          i < airDay[extraInfo.broadcast];
+          i++
+        ) {
+          broadCastDate.setDate(broadCastDate.getDate() + 1);
+        }
+      } else {
+        let counter = broadCastDate.getDay() + 1;
+
+        /* Adding one because of the day */
+        broadCastDate.setDate(broadCastDate.getDate() + 1);
+
+        while (counter !== airDay[extraInfo.broadcast]) {
+          if (counter === 7) {
+            counter = 0;
+          }
+          broadCastDate.setDate(broadCastDate.getDate() + 1);
+          counter++;
+        }
+      }
+
+      dd = broadCastDate.getDate();
+      mm =
+        broadCastDate.getMonth() + 1 < 10
+          ? `0${broadCastDate.getMonth() + 1}`
+          : broadCastDate.getMonth() + 1;
+      yyyy = broadCastDate.getFullYear();
+
+      episodeList.push({
+        nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+      });
+    }
   }
 
   $('.SerieCaps a').each((index: number, element: cheerio.Element) => {
@@ -574,19 +663,21 @@ export const monoschinosInfo = async (id: string | undefined) => {
   });
 
   if (episodeList.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `monoschinosInfo_${hashStringMd5(id!)}`,
-      JSON.stringify(episodeList),
-    );
+      redisClient.set(
+        `monoschinosInfo_${hashStringMd5(id!)}`,
+        JSON.stringify(episodeList),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `monoschinosInfo_${hashStringMd5(id!)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `monoschinosInfo_${hashStringMd5(id!)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return episodeList;
   } else {
@@ -599,20 +690,22 @@ export const videoServersMonosChinos = async (id: string) => {
   let videoServers: any[] = [];
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `videoServersMonosChinos_${hashStringMd5(id)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `videoServersMonosChinos_${hashStringMd5(id)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`${urls.BASE_MONOSCHINOS}${id}`, {
-        scrapy: true,
-        parse: false,
-      });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`${urls.BASE_MONOSCHINOS}${id}`, {
+      scrapy: true,
+      parse: false,
+    });
   } catch (err) {
     return err;
   }
@@ -656,19 +749,21 @@ export const videoServersMonosChinos = async (id: string) => {
   });
 
   if (videoServers.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `videoServersMonosChinos_${hashStringMd5(id)}`,
-      JSON.stringify(videoServers),
-    );
+      redisClient.set(
+        `videoServersMonosChinos_${hashStringMd5(id)}`,
+        JSON.stringify(videoServers),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `videoServersMonosChinos_${hashStringMd5(id)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `videoServersMonosChinos_${hashStringMd5(id)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return videoServers;
   } else {
@@ -682,20 +777,22 @@ export const videoServersJK = async (id: string) => {
   let script: string | null = '';
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `videoServersJK_${hashStringMd5(id)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `videoServersJK_${hashStringMd5(id)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
-        scrapy: true,
-        parse: false,
-      });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+      scrapy: true,
+      parse: false,
+    });
   } catch (err) {
     return err;
   }
@@ -748,19 +845,21 @@ export const videoServersJK = async (id: string) => {
   serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
 
   if (serverList.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `videoServersJK_${hashStringMd5(id!)}`,
-      JSON.stringify(serverList),
-    );
+      redisClient.set(
+        `videoServersJK_${hashStringMd5(id!)}`,
+        JSON.stringify(serverList),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `videoServersJK_${hashStringMd5(id!)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `videoServersJK_${hashStringMd5(id!)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return serverList;
   } else {
@@ -772,17 +871,19 @@ async function desuServerUrl(url: string) {
   let $: cheerio.Root;
 
   try {
-    const resultQueryRedis: any = await redisClient.get(
-      `desuServerUrl_${hashStringMd5(url)}`,
-    );
+    if (redisClient.connected) {
+      const resultQueryRedis: any = await redisClient.get(
+        `desuServerUrl_${hashStringMd5(url)}`,
+      );
 
-    if (resultQueryRedis) {
-      const resultRedis: any = JSON.parse(resultQueryRedis);
+      if (resultQueryRedis) {
+        const resultRedis: any = JSON.parse(resultQueryRedis);
 
-      return resultRedis;
-    } else {
-      $ = await requestGot(url, { scrapy: true, parse: false });
+        return resultRedis;
+      }
     }
+
+    $ = await requestGot(url, { scrapy: true, parse: false });
   } catch (err) {
     return err;
   }
@@ -805,19 +906,21 @@ async function desuServerUrl(url: string) {
     .split("'")[1];
 
   if (result.length > 0) {
-    /* Set the key in the redis cache. */
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
 
-    redisClient.set(
-      `desuServerUrl_${hashStringMd5(url)}`,
-      JSON.stringify(result),
-    );
+      redisClient.set(
+        `desuServerUrl_${hashStringMd5(url)}`,
+        JSON.stringify(result),
+      );
 
-    /* After 24hrs expire the key. */
+      /* After 24hrs expire the key. */
 
-    redisClient.expireat(
-      `desuServerUrl_${hashStringMd5(url)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
+      redisClient.expireat(
+        `desuServerUrl_${hashStringMd5(url)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
+      );
+    }
 
     return result;
   } else {
