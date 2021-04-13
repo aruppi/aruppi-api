@@ -561,7 +561,7 @@ export const monoschinosInfo = async (
   }
 
   let broadCastDate = new Date();
-  let dd: number, mm: number, yyyy: number;
+  let dd: number, mm: string | number, yyyy: number;
 
   const airDay: any = {
     Lunes: 1,
@@ -585,11 +585,14 @@ export const monoschinosInfo = async (
       }
 
       dd = broadCastDate.getDate();
-      mm = broadCastDate.getMonth();
+      mm =
+        broadCastDate.getMonth() + 1 < 10
+          ? `0${broadCastDate.getMonth() + 1}`
+          : broadCastDate.getMonth() + 1;
       yyyy = broadCastDate.getFullYear();
 
       episodeList.push({
-        nextEpisodeDate: `${dd}/${mm + 1}/${yyyy}`,
+        nextEpisodeDate: `${yyyy}/${mm}/${dd}/`,
       });
     }
   }
