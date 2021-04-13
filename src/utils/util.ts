@@ -576,7 +576,6 @@ export const monoschinosInfo = async (
 
   if (!extraInfo.aired.to) {
     if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-      console.log(broadCastDate.getDay(), airDay[extraInfo.broadcast]);
       if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
         for (
           let i = broadCastDate.getDay();
