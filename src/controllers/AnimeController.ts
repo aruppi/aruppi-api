@@ -84,20 +84,22 @@ export default class AnimeController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `schedule_${hashStringMd5(day)}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `schedule_${hashStringMd5(day)}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(`${urls.BASE_JIKAN}schedule/${day}`, {
-          parse: true,
-          scrapy: false,
-        });
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(`${urls.BASE_JIKAN}schedule/${day}`, {
+        parse: true,
+        scrapy: false,
+      });
     } catch (err) {
       return next(err);
     }
@@ -109,19 +111,21 @@ export default class AnimeController {
     }));
 
     if (animeList.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `schedule_${hashStringMd5(day)}`,
-        JSON.stringify({ day: animeList }),
-      );
+        redisClient.set(
+          `schedule_${hashStringMd5(day)}`,
+          JSON.stringify({ day: animeList }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `schedule_${hashStringMd5(day)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `schedule_${hashStringMd5(day)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({
         day: animeList,
@@ -136,34 +140,36 @@ export default class AnimeController {
     let data: any;
 
     try {
-      let resultQueryRedis: any;
+      if (redisClient.connected) {
+        let resultQueryRedis: any;
 
-      if (subtype) {
-        resultQueryRedis = await redisClient.get(
-          `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
-        );
-      } else {
-        resultQueryRedis = await redisClient.get(
-          `top_${hashStringMd5(`${type}:${page}`)}`,
-        );
-      }
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        if (subtype !== undefined) {
-          data = await requestGot(
-            `${urls.BASE_JIKAN}top/${type}/${page}/${subtype}`,
-            { parse: true, scrapy: false },
+        if (subtype) {
+          resultQueryRedis = await redisClient.get(
+            `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
           );
         } else {
-          data = await requestGot(`${urls.BASE_JIKAN}top/${type}/${page}`, {
-            parse: true,
-            scrapy: false,
-          });
+          resultQueryRedis = await redisClient.get(
+            `top_${hashStringMd5(`${type}:${page}`)}`,
+          );
         }
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
+      }
+
+      if (subtype !== undefined) {
+        data = await requestGot(
+          `${urls.BASE_JIKAN}top/${type}/${page}/${subtype}`,
+          { parse: true, scrapy: false },
+        );
+      } else {
+        data = await requestGot(`${urls.BASE_JIKAN}top/${type}/${page}`, {
+          parse: true,
+          scrapy: false,
+        });
       }
     } catch (err) {
       return next(err);
@@ -181,31 +187,33 @@ export default class AnimeController {
     }));
 
     if (top.length > 0) {
-      /* Set the key in the redis cache. */
-      if (subtype) {
-        redisClient.set(
-          `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
-          JSON.stringify({ top }),
-        );
-      } else {
-        redisClient.set(
-          `top_${hashStringMd5(`${type}:${page}`)}`,
-          JSON.stringify({ top }),
-        );
-      }
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
+        if (subtype) {
+          redisClient.set(
+            `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
+            JSON.stringify({ top }),
+          );
+        } else {
+          redisClient.set(
+            `top_${hashStringMd5(`${type}:${page}`)}`,
+            JSON.stringify({ top }),
+          );
+        }
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      if (subtype) {
-        redisClient.expireat(
-          `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
-      } else {
-        redisClient.expireat(
-          `top_${hashStringMd5(`${type}:${page}`)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
+        if (subtype) {
+          redisClient.expireat(
+            `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
+            parseInt(`${+new Date() / 1000}`, 10) + 7200,
+          );
+        } else {
+          redisClient.expireat(
+            `top_${hashStringMd5(`${type}:${page}`)}`,
+            parseInt(`${+new Date() / 1000}`, 10) + 7200,
+          );
+        }
       }
 
       return res.status(200).json({ top });
@@ -248,29 +256,31 @@ export default class AnimeController {
     let animeList: any[] = [];
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        // @ANIMEFLV
-        // data = await requestGot(
-        //   `${urls.BASE_ANIMEFLV_JELU}LatestEpisodesAdded`,
-        //   {
-        //     parse: true,
-        //     scrapy: false,
-        //   },
-        // );
-
-        $ = await requestGot(`${urls.BASE_MONOSCHINOS}`, {
-          scrapy: true,
-          parse: false,
-        });
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      // @ANIMEFLV
+      // data = await requestGot(
+      //   `${urls.BASE_ANIMEFLV_JELU}LatestEpisodesAdded`,
+      //   {
+      //     parse: true,
+      //     scrapy: false,
+      //   },
+      // );
+
+      $ = await requestGot(`${urls.BASE_MONOSCHINOS}`, {
+        scrapy: true,
+        parse: false,
+      });
     } catch (err) {
       return next(err);
     }
@@ -329,19 +339,21 @@ export default class AnimeController {
     }
 
     if (episodes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
-        JSON.stringify({ episodes }),
-      );
+        redisClient.set(
+          `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
+          JSON.stringify({ episodes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 1800,
-      );
+        redisClient.expireat(
+          `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 1800,
+        );
+      }
 
       res.status(200).json({
         episodes,
@@ -357,25 +369,27 @@ export default class AnimeController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `contentTv_${hashStringMd5(`${type}:${page}`)}`,
-      );
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}${
-            url.charAt(0).toUpperCase() + url.slice(1)
-          }/${type}/${page}`,
-          {
-            parse: true,
-            scrapy: false,
-          },
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `contentTv_${hashStringMd5(`${type}:${page}`)}`,
         );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
     } catch (err) {
       return next(err);
     }
@@ -397,19 +411,21 @@ export default class AnimeController {
     });
 
     if (animes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `contentTv_${hashStringMd5(`${type}:${page}`)}`,
-        JSON.stringify({ animes }),
-      );
+        redisClient.set(
+          `contentTv_${hashStringMd5(`${type}:${page}`)}`,
+          JSON.stringify({ animes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `contentTv_${hashStringMd5(`${type}:${page}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `contentTv_${hashStringMd5(`${type}:${page}`)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({
         animes,
@@ -425,25 +441,27 @@ export default class AnimeController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
-      );
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}${
-            url.charAt(0).toUpperCase() + url.slice(1)
-          }/${type}/${page}`,
-          {
-            parse: true,
-            scrapy: false,
-          },
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
         );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
     } catch (err) {
       return next(err);
     }
@@ -465,19 +483,21 @@ export default class AnimeController {
     });
 
     if (animes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
-        JSON.stringify({ animes }),
-      );
+        redisClient.set(
+          `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
+          JSON.stringify({ animes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({
         animes,
@@ -493,25 +513,27 @@ export default class AnimeController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `contentOva_${hashStringMd5(`${type}:${page}`)}`,
-      );
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}${
-            url.charAt(0).toUpperCase() + url.slice(1)
-          }/${type}/${page}`,
-          {
-            parse: true,
-            scrapy: false,
-          },
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `contentOva_${hashStringMd5(`${type}:${page}`)}`,
         );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
     } catch (err) {
       return next(err);
     }
@@ -533,19 +555,21 @@ export default class AnimeController {
     });
 
     if (animes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `contentOva_${hashStringMd5(`${type}:${page}`)}`,
-        JSON.stringify({ animes }),
-      );
+        redisClient.set(
+          `contentOva_${hashStringMd5(`${type}:${page}`)}`,
+          JSON.stringify({ animes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `contentOva_${hashStringMd5(`${type}:${page}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `contentOva_${hashStringMd5(`${type}:${page}`)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({
         animes,
@@ -561,25 +585,27 @@ export default class AnimeController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
-      );
-
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
-
-        return res.status(200).json(resultRedis);
-      } else {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}${
-            url.charAt(0).toUpperCase() + url.slice(1)
-          }/${type}/${page}`,
-          {
-            parse: true,
-            scrapy: false,
-          },
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
         );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      data = await requestGot(
+        `${urls.BASE_ANIMEFLV_JELU}${
+          url.charAt(0).toUpperCase() + url.slice(1)
+        }/${type}/${page}`,
+        {
+          parse: true,
+          scrapy: false,
+        },
+      );
     } catch (err) {
       return next(err);
     }
@@ -601,19 +627,21 @@ export default class AnimeController {
     });
 
     if (animes.length > 0) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
-        JSON.stringify({ animes }),
-      );
+        redisClient.set(
+          `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
+          JSON.stringify({ animes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({
         animes,
@@ -629,19 +657,21 @@ export default class AnimeController {
     let episodes: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `episodes_${hashStringMd5(title)}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `episodes_${hashStringMd5(title)}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        searchAnime = await AnimeModel.findOne({
-          $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
-        });
+          return res.status(200).json(resultRedis);
+        }
       }
+
+      searchAnime = await AnimeModel.findOne({
+        $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
+      });
     } catch (err) {
       return next(err);
     }
@@ -662,19 +692,21 @@ export default class AnimeController {
     }
 
     if (episodes) {
-      /* Set the key in the redis cache. */
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `episodes_${hashStringMd5(title)}`,
-        JSON.stringify({ episodes }),
-      );
+        redisClient.set(
+          `episodes_${hashStringMd5(title)}`,
+          JSON.stringify({ episodes }),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `episodes_${hashStringMd5(title)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `episodes_${hashStringMd5(title)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
 
       res.status(200).json({ episodes });
     } else {
@@ -687,31 +719,35 @@ export default class AnimeController {
     let data: any;
 
     try {
-      const resultQueryRedis: any = await redisClient.get(
-        `servers_${hashStringMd5(id)}`,
-      );
+      if (redisClient.connected) {
+        const resultQueryRedis: any = await redisClient.get(
+          `servers_${hashStringMd5(id)}`,
+        );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return res.status(200).json(resultRedis);
-      } else {
-        if (isNaN(parseInt(id.split('/')[0]))) {
-          if (id.split('/')[0] === 'ver') {
-            data = await videoServersMonosChinos(id);
-          } else {
-            data = await videoServersJK(id);
-          }
-        } else {
-          data = await requestGot(
-            `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
-            { parse: true, scrapy: false },
-          );
-
-          data = await transformUrlServer(data.servers);
+          return res.status(200).json(resultRedis);
         }
+      }
 
-        if (data) {
+      if (isNaN(parseInt(id.split('/')[0]))) {
+        if (id.split('/')[0] === 'ver') {
+          data = await videoServersMonosChinos(id);
+        } else {
+          data = await videoServersJK(id);
+        }
+      } else {
+        data = await requestGot(
+          `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
+          { parse: true, scrapy: false },
+        );
+
+        data = await transformUrlServer(data.servers);
+      }
+
+      if (data) {
+        if (redisClient.connected) {
           /* Set the key in the redis cache. */
 
           redisClient.set(
@@ -725,11 +761,11 @@ export default class AnimeController {
             `servers_${hashStringMd5(id)}`,
             parseInt(`${+new Date() / 1000}`, 10) + 7200,
           );
-
-          res.status(200).json({ servers: data });
-        } else {
-          res.status(500).json({ message: 'Aruppi lost in the shell' });
         }
+
+        res.status(200).json({ servers: data });
+      } else {
+        res.status(500).json({ message: 'Aruppi lost in the shell' });
       }
     } catch (err) {
       return next(err);
@@ -752,7 +788,6 @@ export default class AnimeController {
           title: animeQuery[0].title || null,
           poster: animeQuery[0].poster || null,
           synopsis: animeQuery[0].description || null,
-          status: animeQuery[0].state || null,
           type: animeQuery[0].type || null,
           rating: animeQuery[0].score || null,
           genres: animeQuery[0].genres || null,
@@ -767,7 +802,6 @@ export default class AnimeController {
           title: animeQuery[0].title || null,
           poster: animeQuery[0].poster || null,
           synopsis: animeQuery[0].description || null,
-          status: animeQuery[0].state || null,
           type: animeQuery[0].type || null,
           rating: animeQuery[0].score || null,
           genres: animeQuery[0].genres || null,
