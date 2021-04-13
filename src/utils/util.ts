@@ -576,12 +576,28 @@ export const monoschinosInfo = async (
 
   if (!extraInfo.aired.to) {
     if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-      for (
-        let i = broadCastDate.getDay();
-        i < airDay[extraInfo.broadcast];
-        i++
-      ) {
+      console.log(broadCastDate.getDay(), airDay[extraInfo.broadcast]);
+      if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+        for (
+          let i = broadCastDate.getDay();
+          i < airDay[extraInfo.broadcast];
+          i++
+        ) {
+          broadCastDate.setDate(broadCastDate.getDate() + 1);
+        }
+      } else {
+        let counter = broadCastDate.getDay() + 1;
+
+        /* Adding one because of the day */
         broadCastDate.setDate(broadCastDate.getDate() + 1);
+
+        while (counter !== airDay[extraInfo.broadcast]) {
+          if (counter === 7) {
+            counter = 0;
+          }
+          broadCastDate.setDate(broadCastDate.getDate() + 1);
+          counter++;
+        }
       }
 
       dd = broadCastDate.getDate();
