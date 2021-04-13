@@ -637,7 +637,7 @@ export const monoschinosInfo = async (
       yyyy = broadCastDate.getFullYear();
 
       episodeList.push({
-        nextEpisodeDate: `${yyyy}/${mm}/${dd}`,
+        nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
       });
     }
   }
