@@ -453,11 +453,35 @@ export default class DirectoryController {
       } else {
         if (genres.hasOwnProperty(genre)) {
           if (page !== undefined && parseInt(page) > 1) {
-            result = await AnimeModel.find({ genres: genres[genre] })
-              .limit(25)
-              .skip(25 * parseInt(page));
+            if (order === 'asc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .skip(25 * parseInt(page))
+                .sort({ title: 'ascending' });
+            } else if (order === 'desc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .skip(25 * parseInt(page))
+                .sort({ title: 'descending' });
+            } else {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .skip(25 * parseInt(page));
+            }
           } else {
-            result = await AnimeModel.find({ genres: genres[genre] }).limit(25);
+            if (order === 'asc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .sort({ title: 'ascending' });
+            } else if (order === 'desc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .sort({ title: 'descending' });
+            } else {
+              result = await AnimeModel.find({ genres: genres[genre] }).limit(
+                25,
+              );
+            }
           }
         } else {
           return res.status(500).json({ message: 'Aruppi lost in the shell' });
