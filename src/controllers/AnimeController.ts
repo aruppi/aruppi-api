@@ -688,10 +688,10 @@ export default class AnimeController {
 
     switch (searchAnime?.source) {
       case 'animeflv':
-        episodes = await animeFlvInfo(searchAnime?.id);
+        episodes = await animeFlvInfo(searchAnime?.id, searchAnime?.mal_id);
         break;
       case 'jkanime':
-        episodes = await jkanimeInfo(searchAnime?.id);
+        episodes = await jkanimeInfo(searchAnime?.id, searchAnime?.mal_id);
         break;
       case 'monoschinos':
         episodes = await monoschinosInfo(searchAnime?.id, searchAnime?.mal_id);
