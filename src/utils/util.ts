@@ -680,7 +680,7 @@ export const tioanimeInfo = async (id: string | undefined, mal_id: number) => {
 
   for (const episode of anime_eps) {
     episodesList.push({
-      episode: episode[0],
+      episode: episode,
       id: `ver/${id}-${episode}`,
     });
   }
