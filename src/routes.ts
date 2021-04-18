@@ -26,7 +26,7 @@ routes.get('/api/v4/', (req: Request, res: Response) => {
   res.json({
     message: 'Aruppi /api - 🎏',
     author: 'Jéluchu',
-    version: '4.0.4',
+    version: '4.0.6',
     credits: 'The bitch loves /apis that offers data to Aruppi App',
     entries: [
       {
@@ -72,7 +72,7 @@ routes.get('/api/v4/', (req: Request, res: Response) => {
 routes.get('/api/v4/schedule/:day', animeController.schedule);
 routes.get('/api/v4/top/:type/:subtype?/:page', animeController.top);
 routes.get('/api/v4/allAnimes', animeController.getAllAnimes);
-routes.get('/api/v4/lastEpisodes', animeController.getLastEpisodes);
+routes.get('/api/v4/lastEpisodes/:options?', animeController.getLastEpisodes);
 routes.get('/api/v4/movies/:type/:page', animeController.getContentMovie);
 routes.get('/api/v4/ova/:type/:page', animeController.getContentOva);
 routes.get('/api/v4/special/:type/:page', animeController.getContentSpecial);

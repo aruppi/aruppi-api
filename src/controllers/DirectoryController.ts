@@ -8,7 +8,6 @@ import {
   animeExtraInfo,
   getAnimeVideoPromo,
   getAnimeCharacters,
-  getRelatedAnimesFLV,
   getRelatedAnimesMAL,
 } from '../utils/util';
 import urls from '../utils/urls';
@@ -295,56 +294,19 @@ export default class DirectoryController {
 
       const extraInfo: any = await animeExtraInfo(resultQuery!.mal_id);
 
-      switch (resultQuery?.source) {
-        case 'animeflv':
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [extraInfo],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesFLV(resultQuery!.id),
-          };
-          break;
-        case 'jkanime':
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [extraInfo],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-          };
-          break;
-        case 'monoschinos':
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [extraInfo],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-          };
-          break;
-        default:
-          resultAnime = undefined;
-          break;
-      }
+      resultAnime = {
+        title: resultQuery?.title,
+        poster: resultQuery?.poster,
+        synopsis: resultQuery?.description,
+        status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
+        type: resultQuery?.type,
+        rating: resultQuery?.score,
+        genres: resultQuery?.genres,
+        moreInfo: [extraInfo],
+        promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+        characters: await getAnimeCharacters(resultQuery!.mal_id),
+        related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+      };
     } catch (err) {
       return next(err);
     }
@@ -402,30 +364,96 @@ export default class DirectoryController {
 
   async getAnimeGenres(req: Request, res: Response, next: NextFunction) {
     const { genre, order, page } = req.params;
-    let data: Genre[];
-    let resultReq: any;
+    let result: any;
+
+    const genres: any = {
+      accion: 'Acción',
+      'artes-marciales': 'Artes Marciales',
+      aventura: 'Aventuras',
+      carreras: 'Carreras',
+      'ciencia-ficcion': 'Ciencia Ficción',
+      comedia: 'Comedia',
+      demencia: 'Demencia',
+      demonios: 'Demonios',
+      deportes: 'Deportes',
+      drama: 'Drama',
+      ecchi: 'Ecchi',
+      escolares: 'Escolares',
+      espacial: 'Espacial',
+      fantasia: 'Fantasía',
+      harem: 'Harem',
+      historico: 'Historico',
+      infantil: 'Infantil',
+      josei: 'Josei',
+      juegos: 'Juegos',
+      magia: 'Magia',
+      mecha: 'Mecha',
+      militar: 'Militar',
+      misterio: 'Misterio',
+      musica: 'Música',
+      parodia: 'Parodia',
+      policia: 'Policía',
+      psicologico: 'Psicológico',
+      'recuentos-de-la-vida': 'Recuentos de la vida',
+      romance: 'Romance',
+      samurai: 'Samurai',
+      seinen: 'Seinen',
+      shoujo: 'Shoujo',
+      shounen: 'Shounen',
+      sobrenatural: 'Sobrenatural',
+      superpoderes: 'Superpoderes',
+      suspenso: 'Suspenso',
+      terror: 'Terror',
+      vampiros: 'Vampiros',
+      yaoi: 'Yaoi',
+      yuri: 'Yuri',
+    };
 
     try {
       if (genre === undefined && order === undefined && page === undefined) {
-        data = await GenreModel.find();
+        result = await AnimeModel.aggregate([{ $sample: { size: 25 } }]);
       } else {
-        if (page !== undefined) {
-          resultReq = await requestGot(
-            `${urls.BASE_ANIMEFLV_JELU}Genres/${genre}/${order}/${page}`,
-            { parse: true, scrapy: false },
-          );
+        if (genres.hasOwnProperty(genre)) {
+          if (page !== undefined && parseInt(page) > 1) {
+            if (order === 'asc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .skip(25 * parseInt(page))
+                .sort({ title: 'ascending' });
+            } else if (order === 'desc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .skip(25 * parseInt(page))
+                .sort({ title: 'descending' });
+            } else {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .skip(25 * parseInt(page));
+            }
+          } else {
+            if (order === 'asc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .sort({ title: 'ascending' });
+            } else if (order === 'desc') {
+              result = await AnimeModel.find({ genres: genres[genre] })
+                .limit(25)
+                .sort({ title: 'descending' });
+            } else {
+              result = await AnimeModel.find({ genres: genres[genre] }).limit(
+                25,
+              );
+            }
+          }
         } else {
-          resultReq = await requestGot(
-            `${urls.BASE_ANIMEFLV_JELU}Genres/${genre}/${order}/1`,
-            { parse: true, scrapy: false },
-          );
+          return res.status(500).json({ message: 'Aruppi lost in the shell' });
         }
       }
     } catch (err) {
       return next(err);
     }
 
-    const animes: any[] = resultReq.animes.map((item: any) => {
+    const animes: any[] = result.map((item: any) => {
       return {
         id: item.id,
         title: item.title.trim(),
