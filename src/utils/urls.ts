@@ -2,6 +2,7 @@ export default {
   BASE_ARUPPI: 'https://aruppi.jeluchu.xyz/',
   BASE_ANIMEFLV: 'https://www3.animeflv.net/',
   BASE_MONOSCHINOS: 'https://monoschinos2.com/',
+  BASE_TIOANIME: 'https://tioanime.com/',
   BASE_JKANIME: 'https://jkanime.net/',
   BASE_ANIMEFLV_JELU: 'https://aruppi.jeluchu.xyz/apis/animeflv/v1/',
   BASE_YOUTUBE: 'https://aruppi.jeluchu.xyz/api/Youtube/?channelId=',

@@ -1,12 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
 import {
-  animeFlvInfo,
   imageUrlToBase64,
   jkanimeInfo,
   monoschinosInfo,
+  tioanimeInfo,
   videoServersJK,
   videoServersMonosChinos,
+  videoServersTioAnime,
 } from '../utils/util';
 import { transformUrlServer } from '../utils/transformerUrl';
 import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
@@ -16,7 +17,6 @@ import {
   animeExtraInfo,
   getAnimeVideoPromo,
   getAnimeCharacters,
-  getRelatedAnimesFLV,
   getRelatedAnimesMAL,
 } from '../utils/util';
 import urls from '../utils/urls';
@@ -687,14 +687,14 @@ export default class AnimeController {
     }
 
     switch (searchAnime?.source) {
-      case 'animeflv':
-        episodes = await animeFlvInfo(searchAnime?.id, searchAnime?.mal_id);
-        break;
       case 'jkanime':
         episodes = await jkanimeInfo(searchAnime?.id, searchAnime?.mal_id);
         break;
       case 'monoschinos':
         episodes = await monoschinosInfo(searchAnime?.id, searchAnime?.mal_id);
+        break;
+      case 'tioanime':
+        episodes = await tioanimeInfo(searchAnime?.id, searchAnime?.mal_id);
         break;
       default:
         episodes = undefined;
@@ -741,19 +741,18 @@ export default class AnimeController {
         }
       }
 
-      if (isNaN(parseInt(id.split('/')[0]))) {
-        if (id.split('/')[0] === 'ver') {
-          data = await videoServersMonosChinos(id);
-        } else {
-          data = await videoServersJK(id);
-        }
+      if (
+        id.split('/')[0] === 'ver' &&
+        id.split('-').indexOf('espanol') !== -1
+      ) {
+        data = await videoServersMonosChinos(id);
+      } else if (id.split('/')[0] === 'ver') {
+        data = await videoServersTioAnime(id);
       } else {
-        data = await requestGot(
-          `${urls.BASE_ANIMEFLV_JELU}GetAnimeServers/${id}`,
-          { parse: true, scrapy: false },
-        );
+        data = await videoServersJK(id);
+      }
 
-        data = await transformUrlServer(data.servers);
+      switch (id) {
       }
 
       if (data) {
@@ -792,39 +791,18 @@ export default class AnimeController {
       return next(err);
     }
 
-    switch (animeQuery[0].source) {
-      case 'animeflv':
-        animeResult = {
-          title: animeQuery[0].title || null,
-          poster: animeQuery[0].poster || null,
-          synopsis: animeQuery[0].description || null,
-          type: animeQuery[0].type || null,
-          rating: animeQuery[0].score || null,
-          genres: animeQuery[0].genres || null,
-          moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
-          promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
-          characters: await getAnimeCharacters(animeQuery[0].mal_id),
-          related: await getRelatedAnimesFLV(animeQuery[0].id),
-        };
-        break;
-      case 'jkanime':
-        animeResult = {
-          title: animeQuery[0].title || null,
-          poster: animeQuery[0].poster || null,
-          synopsis: animeQuery[0].description || null,
-          type: animeQuery[0].type || null,
-          rating: animeQuery[0].score || null,
-          genres: animeQuery[0].genres || null,
-          moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
-          promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
-          characters: await getAnimeCharacters(animeQuery[0].mal_id),
-          related: await getRelatedAnimesMAL(animeQuery[0].mal_id),
-        };
-        break;
-      default:
-        animeResult = undefined;
-        break;
-    }
+    animeResult = {
+      title: animeQuery[0].title || null,
+      poster: animeQuery[0].poster || null,
+      synopsis: animeQuery[0].description || null,
+      type: animeQuery[0].type || null,
+      rating: animeQuery[0].score || null,
+      genres: animeQuery[0].genres || null,
+      moreInfo: [await animeExtraInfo(animeQuery[0].mal_id)],
+      promo: await getAnimeVideoPromo(animeQuery[0].mal_id),
+      characters: await getAnimeCharacters(animeQuery[0].mal_id),
+      related: await getRelatedAnimesMAL(animeQuery[0].mal_id),
+    };
 
     if (animeResult) {
       res.set('Cache-Control', 'no-store');

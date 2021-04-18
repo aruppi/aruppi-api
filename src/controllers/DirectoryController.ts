@@ -8,7 +8,6 @@ import {
   animeExtraInfo,
   getAnimeVideoPromo,
   getAnimeCharacters,
-  getRelatedAnimesFLV,
   getRelatedAnimesMAL,
 } from '../utils/util';
 import urls from '../utils/urls';
@@ -295,56 +294,19 @@ export default class DirectoryController {
 
       const extraInfo: any = await animeExtraInfo(resultQuery!.mal_id);
 
-      switch (resultQuery?.source) {
-        case 'animeflv':
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [extraInfo],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesFLV(resultQuery!.id),
-          };
-          break;
-        case 'jkanime':
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [extraInfo],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-          };
-          break;
-        case 'monoschinos':
-          resultAnime = {
-            title: resultQuery?.title,
-            poster: resultQuery?.poster,
-            synopsis: resultQuery?.description,
-            status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
-            type: resultQuery?.type,
-            rating: resultQuery?.score,
-            genres: resultQuery?.genres,
-            moreInfo: [extraInfo],
-            promo: await getAnimeVideoPromo(resultQuery!.mal_id),
-            characters: await getAnimeCharacters(resultQuery!.mal_id),
-            related: await getRelatedAnimesMAL(resultQuery!.mal_id),
-          };
-          break;
-        default:
-          resultAnime = undefined;
-          break;
-      }
+      resultAnime = {
+        title: resultQuery?.title,
+        poster: resultQuery?.poster,
+        synopsis: resultQuery?.description,
+        status: !extraInfo.aired.to ? 'En emisión' : 'Finalizado',
+        type: resultQuery?.type,
+        rating: resultQuery?.score,
+        genres: resultQuery?.genres,
+        moreInfo: [extraInfo],
+        promo: await getAnimeVideoPromo(resultQuery!.mal_id),
+        characters: await getAnimeCharacters(resultQuery!.mal_id),
+        related: await getRelatedAnimesMAL(resultQuery!.mal_id),
+      };
     } catch (err) {
       return next(err);
     }
