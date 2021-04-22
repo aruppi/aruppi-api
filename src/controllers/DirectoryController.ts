@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { requestGot } from '../utils/requestCall';
 import AnimeModel, { Anime } from '../database/models/anime.model';
-import GenreModel, { Genre } from '../database/models/genre.model';
 import util from 'util';
 import { hashStringMd5 } from '../utils/util';
 import {
@@ -413,6 +412,7 @@ export default class DirectoryController {
       if (genre === undefined && order === undefined && page === undefined) {
         result = await AnimeModel.aggregate([{ $sample: { size: 25 } }]);
       } else {
+        // eslint-disable-next-line no-prototype-builtins
         if (genres.hasOwnProperty(genre)) {
           if (page !== undefined && parseInt(page) > 1) {
             if (order === 'asc') {
