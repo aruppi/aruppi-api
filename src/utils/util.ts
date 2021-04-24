@@ -367,97 +367,101 @@ export const jkanimeInfo = async (id: string | undefined, mal_id: number) => {
     console.log(err);
   }
 
-  countEpisodes = $('div.anime__pagination a')
-    .map((index: number, element: cheerio.Element) => {
-      return $(element).text();
-    })
-    .get();
+  if ($!) {
+    countEpisodes = $!('div.anime__pagination a')
+      .map((index: number, element: cheerio.Element) => {
+        return $!(element).text();
+      })
+      .get();
 
-  const episodesCount: string = countEpisodes[countEpisodes.length - 1].split(
-    '-',
-  )[1];
+    const episodesCount: string = countEpisodes[countEpisodes.length - 1].split(
+      '-',
+    )[1];
 
-  if (extraInfo) {
-    let broadCastDate = new Date();
-    let dd: number, mm: string | number, yyyy: number;
+    if (extraInfo) {
+      let broadCastDate = new Date();
+      let dd: number, mm: string | number, yyyy: number;
 
-    const airDay: any = {
-      Lunes: 1,
-      Martes: 2,
-      Miércoles: 3,
-      Jueves: 4,
-      Viernes: 5,
-      Sábados: 6,
-      Domingos: 7,
-      'Sin emisión': 'default',
-    };
+      const airDay: any = {
+        Lunes: 1,
+        Martes: 2,
+        Miércoles: 3,
+        Jueves: 4,
+        Viernes: 5,
+        Sábados: 6,
+        Domingos: 7,
+        'Sin emisión': 'default',
+      };
 
-    if (!extraInfo.aired.to) {
-      if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-        if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
-          for (
-            let i = broadCastDate.getDay();
-            i < airDay[extraInfo.broadcast];
-            i++
-          ) {
-            broadCastDate.setDate(broadCastDate.getDate() + 1);
-          }
-        } else {
-          let counter = broadCastDate.getDay() + 1;
-
-          /* Adding one because of the day */
-          broadCastDate.setDate(broadCastDate.getDate() + 1);
-
-          while (counter !== airDay[extraInfo.broadcast]) {
-            if (counter === 7) {
-              counter = 0;
+      if (!extraInfo.aired.to) {
+        if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+          if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+            for (
+              let i = broadCastDate.getDay();
+              i < airDay[extraInfo.broadcast];
+              i++
+            ) {
+              broadCastDate.setDate(broadCastDate.getDate() + 1);
             }
+          } else {
+            let counter = broadCastDate.getDay() + 1;
+
+            /* Adding one because of the day */
             broadCastDate.setDate(broadCastDate.getDate() + 1);
-            counter++;
+
+            while (counter !== airDay[extraInfo.broadcast]) {
+              if (counter === 7) {
+                counter = 0;
+              }
+              broadCastDate.setDate(broadCastDate.getDate() + 1);
+              counter++;
+            }
           }
+
+          dd = broadCastDate.getDate();
+          mm =
+            broadCastDate.getMonth() + 1 < 10
+              ? `0${broadCastDate.getMonth() + 1}`
+              : broadCastDate.getMonth() + 1;
+          yyyy = broadCastDate.getFullYear();
+
+          episodesList.push({
+            nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+          });
         }
-
-        dd = broadCastDate.getDate();
-        mm =
-          broadCastDate.getMonth() + 1 < 10
-            ? `0${broadCastDate.getMonth() + 1}`
-            : broadCastDate.getMonth() + 1;
-        yyyy = broadCastDate.getFullYear();
-
-        episodesList.push({
-          nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
-        });
       }
     }
-  }
 
-  for (let i = 1; i <= parseInt(episodesCount); i++) {
-    episodesList.push({
-      episode: i,
-      id: `${id}/${i}`,
-    });
-  }
-
-  if (episodesList.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `jkanimeInfo_${hashStringMd5(id!)}`,
-        JSON.stringify(episodesList),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `jkanimeInfo_${hashStringMd5(id!)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+    for (let i = 1; i <= parseInt(episodesCount); i++) {
+      episodesList.push({
+        episode: i,
+        id: `${id}/${i}`,
+      });
     }
 
-    return episodesList;
+    if (episodesList.length > 0) {
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
+
+        redisClient.set(
+          `jkanimeInfo_${hashStringMd5(id!)}`,
+          JSON.stringify(episodesList),
+        );
+
+        /* After 24hrs expire the key. */
+
+        redisClient.expireat(
+          `jkanimeInfo_${hashStringMd5(id!)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
+
+      return episodesList;
+    } else {
+      return undefined;
+    }
   } else {
-    return null;
+    return undefined;
   }
 };
 
@@ -493,100 +497,104 @@ export const monoschinosInfo = async (
     console.log(err);
   }
 
-  if (extraInfo) {
-    let broadCastDate = new Date();
-    let dd: number, mm: string | number, yyyy: number;
+  if ($!) {
+    if (extraInfo) {
+      let broadCastDate = new Date();
+      let dd: number, mm: string | number, yyyy: number;
 
-    const airDay: any = {
-      Lunes: 1,
-      Martes: 2,
-      Miércoles: 3,
-      Jueves: 4,
-      Viernes: 5,
-      Sábados: 6,
-      Domingos: 7,
-      'Sin emisión': 'default',
-    };
+      const airDay: any = {
+        Lunes: 1,
+        Martes: 2,
+        Miércoles: 3,
+        Jueves: 4,
+        Viernes: 5,
+        Sábados: 6,
+        Domingos: 7,
+        'Sin emisión': 'default',
+      };
 
-    if (!extraInfo.aired.to) {
-      if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-        if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
-          for (
-            let i = broadCastDate.getDay();
-            i < airDay[extraInfo.broadcast];
-            i++
-          ) {
-            broadCastDate.setDate(broadCastDate.getDate() + 1);
-          }
-        } else {
-          let counter = broadCastDate.getDay() + 1;
-
-          /* Adding one because of the day */
-          broadCastDate.setDate(broadCastDate.getDate() + 1);
-
-          while (counter !== airDay[extraInfo.broadcast]) {
-            if (counter === 7) {
-              counter = 0;
+      if (!extraInfo.aired.to) {
+        if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+          if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+            for (
+              let i = broadCastDate.getDay();
+              i < airDay[extraInfo.broadcast];
+              i++
+            ) {
+              broadCastDate.setDate(broadCastDate.getDate() + 1);
             }
+          } else {
+            let counter = broadCastDate.getDay() + 1;
+
+            /* Adding one because of the day */
             broadCastDate.setDate(broadCastDate.getDate() + 1);
-            counter++;
+
+            while (counter !== airDay[extraInfo.broadcast]) {
+              if (counter === 7) {
+                counter = 0;
+              }
+              broadCastDate.setDate(broadCastDate.getDate() + 1);
+              counter++;
+            }
           }
+
+          dd = broadCastDate.getDate();
+          mm =
+            broadCastDate.getMonth() + 1 < 10
+              ? `0${broadCastDate.getMonth() + 1}`
+              : broadCastDate.getMonth() + 1;
+          yyyy = broadCastDate.getFullYear();
+
+          episodeList.push({
+            nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+          });
         }
-
-        dd = broadCastDate.getDate();
-        mm =
-          broadCastDate.getMonth() + 1 < 10
-            ? `0${broadCastDate.getMonth() + 1}`
-            : broadCastDate.getMonth() + 1;
-        yyyy = broadCastDate.getFullYear();
-
-        episodeList.push({
-          nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
-        });
       }
     }
-  }
 
-  $('.SerieCaps a').each((index: number, element: cheerio.Element) => {
-    let episode: number;
+    $!('.SerieCaps a').each((index: number, element: cheerio.Element) => {
+      let episode: number;
 
-    $(element)
-      .attr('href')
-      ?.split('-')
-      .forEach((item: any) => {
-        if (!isNaN(item)) {
-          episode = parseInt(item);
-        }
+      $(element)
+        .attr('href')
+        ?.split('-')
+        .forEach((item: any) => {
+          if (!isNaN(item)) {
+            episode = parseInt(item);
+          }
+        });
+
+      episodeList.push({
+        episode: episode!,
+        id: `${$(element).attr('href')?.split('/')[3]}/${
+          $(element).attr('href')?.split('/')[4]
+        }`,
       });
-
-    episodeList.push({
-      episode: episode!,
-      id: `${$(element).attr('href')?.split('/')[3]}/${
-        $(element).attr('href')?.split('/')[4]
-      }`,
     });
-  });
 
-  if (episodeList.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
+    if (episodeList.length > 0) {
+      if (redisClient.connected) {
+        /* Set the key in the redis cache. */
 
-      redisClient.set(
-        `monoschinosInfo_${hashStringMd5(id!)}`,
-        JSON.stringify(episodeList),
-      );
+        redisClient.set(
+          `monoschinosInfo_${hashStringMd5(id!)}`,
+          JSON.stringify(episodeList),
+        );
 
-      /* After 24hrs expire the key. */
+        /* After 24hrs expire the key. */
 
-      redisClient.expireat(
-        `monoschinosInfo_${hashStringMd5(id!)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        redisClient.expireat(
+          `monoschinosInfo_${hashStringMd5(id!)}`,
+          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
+
+      return episodeList;
+    } else {
+      return undefined;
     }
-
-    return episodeList;
   } else {
-    return null;
+    return undefined;
   }
 };
 
@@ -620,94 +628,98 @@ export const tioanimeInfo = async (id: string | undefined, mal_id: number) => {
     console.log(err);
   }
 
-  if (extraInfo) {
-    let broadCastDate = new Date();
-    let dd: number, mm: string | number, yyyy: number;
+  if ($!) {
+    if (extraInfo) {
+      let broadCastDate = new Date();
+      let dd: number, mm: string | number, yyyy: number;
 
-    const airDay: any = {
-      Lunes: 1,
-      Martes: 2,
-      Miércoles: 3,
-      Jueves: 4,
-      Viernes: 5,
-      Sábados: 6,
-      Domingos: 7,
-      'Sin emisión': 'default',
-    };
+      const airDay: any = {
+        Lunes: 1,
+        Martes: 2,
+        Miércoles: 3,
+        Jueves: 4,
+        Viernes: 5,
+        Sábados: 6,
+        Domingos: 7,
+        'Sin emisión': 'default',
+      };
 
-    if (!extraInfo.aired.to) {
-      if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-        if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
-          for (
-            let i = broadCastDate.getDay();
-            i < airDay[extraInfo.broadcast];
-            i++
-          ) {
-            broadCastDate.setDate(broadCastDate.getDate() + 1);
-          }
-        } else {
-          let counter = broadCastDate.getDay() + 1;
-
-          /* Adding one because of the day */
-          broadCastDate.setDate(broadCastDate.getDate() + 1);
-
-          while (counter !== airDay[extraInfo.broadcast]) {
-            if (counter === 7) {
-              counter = 0;
+      if (!extraInfo.aired.to) {
+        if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+          if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+            for (
+              let i = broadCastDate.getDay();
+              i < airDay[extraInfo.broadcast];
+              i++
+            ) {
+              broadCastDate.setDate(broadCastDate.getDate() + 1);
             }
+          } else {
+            let counter = broadCastDate.getDay() + 1;
+
+            /* Adding one because of the day */
             broadCastDate.setDate(broadCastDate.getDate() + 1);
-            counter++;
+
+            while (counter !== airDay[extraInfo.broadcast]) {
+              if (counter === 7) {
+                counter = 0;
+              }
+              broadCastDate.setDate(broadCastDate.getDate() + 1);
+              counter++;
+            }
           }
+
+          dd = broadCastDate.getDate();
+          mm =
+            broadCastDate.getMonth() + 1 < 10
+              ? `0${broadCastDate.getMonth() + 1}`
+              : broadCastDate.getMonth() + 1;
+          yyyy = broadCastDate.getFullYear();
+
+          episodesList.push({
+            nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+          });
         }
-
-        dd = broadCastDate.getDate();
-        mm =
-          broadCastDate.getMonth() + 1 < 10
-            ? `0${broadCastDate.getMonth() + 1}`
-            : broadCastDate.getMonth() + 1;
-        yyyy = broadCastDate.getFullYear();
-
-        episodesList.push({
-          nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
-        });
       }
     }
-  }
 
-  const scripts: cheerio.Element[] = $('script').toArray();
+    const scripts: cheerio.Element[] = $!('script').toArray();
 
-  for (const script of scripts) {
-    if ($(script).html()!.includes('anime_info')) {
-      anime_eps = JSON.parse(
-        $(script).html()!.split('var episodes = ')[1].split(';')[0],
+    for (const script of scripts) {
+      if ($!(script).html()!.includes('anime_info')) {
+        anime_eps = JSON.parse(
+          $!(script).html()!.split('var episodes = ')[1].split(';')[0],
+        );
+      }
+    }
+
+    for (const episode of anime_eps) {
+      episodesList.push({
+        episode: episode,
+        id: `ver/${id}-${episode}`,
+      });
+    }
+
+    if (redisClient.connected) {
+      /* Set the key in the redis cache. */
+
+      redisClient.set(
+        `tioanimeInfo_${hashStringMd5(id!)}`,
+        JSON.stringify(episodesList),
+      );
+
+      /* After 24hrs expire the key. */
+
+      redisClient.expireat(
+        `tioanimeInfo_${hashStringMd5(id!)}`,
+        parseInt(`${+new Date() / 1000}`, 10) + 7200,
       );
     }
+
+    return episodesList;
+  } else {
+    return undefined;
   }
-
-  for (const episode of anime_eps) {
-    episodesList.push({
-      episode: episode,
-      id: `ver/${id}-${episode}`,
-    });
-  }
-
-  if (redisClient.connected) {
-    /* Set the key in the redis cache. */
-
-    redisClient.set(
-      `tioanimeInfo_${hashStringMd5(id!)}`,
-      JSON.stringify(episodesList),
-    );
-
-    /* After 24hrs expire the key. */
-
-    redisClient.expireat(
-      `tioanimeInfo_${hashStringMd5(id!)}`,
-      parseInt(`${+new Date() / 1000}`, 10) + 7200,
-    );
-  }
-
-  return episodesList;
 };
 
 export const videoServersMonosChinos = async (id: string) => {

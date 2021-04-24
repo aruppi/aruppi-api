@@ -752,9 +752,6 @@ export default class AnimeController {
         data = await videoServersJK(id);
       }
 
-      switch (id) {
-      }
-
       if (data) {
         if (redisClient.connected) {
           /* Set the key in the redis cache. */
