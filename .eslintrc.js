@@ -19,6 +19,7 @@ module.exports = {
     'class-methods-use-this': 'off',
     camelcase: 'off',
     'no-unused-vars': 'warn',
+    'no-undef': 'warn',
   },
   settings: {
     'import/resolver': {
