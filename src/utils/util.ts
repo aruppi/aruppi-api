@@ -73,7 +73,9 @@ export const animeExtraInfo = async (mal_id: number) => {
       scrapy: false,
     });
 
-    broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+    if (data.broadcast) {
+      broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+    }
   } catch (err) {
     return err;
   }
