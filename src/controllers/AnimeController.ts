@@ -250,7 +250,7 @@ export default class AnimeController {
   }
 
   async getLastEpisodes(req: Request, res: Response, next: NextFunction) {
-    const { options } = req.params;
+    const options = 'monoschinos';
     let data: any;
     let $: cheerio.Root;
     let episodes: Episode[] = [];
