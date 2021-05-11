@@ -7,7 +7,6 @@ import {
   createConnectionMongo,
 } from './database/connection';
 import routes from './routes';
-import { Server } from 'node:http';
 
 const app: Application = express();
 
@@ -30,7 +29,7 @@ app.use(errorHandler);
   is going to listen in the server.
   ex: PORT=3000.
 */
-const server: Server = app.listen(process.env.PORT_LISTEN || 3000);
+const server = app.listen(process.env.PORT_LISTEN || 3000);
 
 function shutdown(): void {
   server.close();
