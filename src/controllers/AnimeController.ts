@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { requestGot } from '../utils/requestCall';
+import {NextFunction, Request, Response} from 'express';
+import {requestGot} from '../utils/requestCall';
 import {
   imageUrlToBase64,
   jkanimeInfo,
@@ -9,10 +9,10 @@ import {
   videoServersMonosChinos,
   videoServersTioAnime,
 } from '../utils/util';
-import { transformUrlServer } from '../utils/transformerUrl';
-import AnimeModel, { Anime as ModelA } from '../database/models/anime.model';
+import {transformUrlServer} from '../utils/transformerUrl';
+import AnimeModel, {Anime as ModelA} from '../database/models/anime.model';
 import util from 'util';
-import { hashStringMd5 } from '../utils/util';
+import {hashStringMd5} from '../utils/util';
 import {
   animeExtraInfo,
   getAnimeVideoPromo,
@@ -20,7 +20,7 @@ import {
   getRelatedAnimesMAL,
 } from '../utils/util';
 import urls from '../utils/urls';
-import { redisClient } from '../database/connection';
+import {redisClient} from '../database/connection';
 
 // @ts-ignore
 redisClient.get = util.promisify(redisClient.get);
@@ -80,7 +80,7 @@ interface Movie {
 
 export default class AnimeController {
   async schedule(req: Request, res: Response, next: NextFunction) {
-    const { day } = req.params;
+    const {day} = req.params;
     let data: any;
 
     try {
@@ -116,7 +116,7 @@ export default class AnimeController {
 
         redisClient.set(
           `schedule_${hashStringMd5(day)}`,
-          JSON.stringify({ day: animeList }),
+          JSON.stringify({day: animeList}),
         );
 
         /* After 24hrs expire the key. */
@@ -131,12 +131,12 @@ export default class AnimeController {
         day: animeList,
       });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async top(req: Request, res: Response, next: NextFunction) {
-    const { type, subtype, page } = req.params;
+    const {type, subtype, page} = req.params;
     let data: any;
 
     try {
@@ -163,7 +163,7 @@ export default class AnimeController {
       if (subtype !== undefined) {
         data = await requestGot(
           `${urls.BASE_JIKAN}top/${type}/${page}/${subtype}`,
-          { parse: true, scrapy: false },
+          {parse: true, scrapy: false},
         );
       } else {
         data = await requestGot(`${urls.BASE_JIKAN}top/${type}/${page}`, {
@@ -192,12 +192,12 @@ export default class AnimeController {
         if (subtype) {
           redisClient.set(
             `top_${hashStringMd5(`${type}:${subtype}:${page}`)}`,
-            JSON.stringify({ top }),
+            JSON.stringify({top}),
           );
         } else {
           redisClient.set(
             `top_${hashStringMd5(`${type}:${page}`)}`,
-            JSON.stringify({ top }),
+            JSON.stringify({top}),
           );
         }
 
@@ -216,9 +216,9 @@ export default class AnimeController {
         }
       }
 
-      return res.status(200).json({ top });
+      return res.status(200).json({top});
     } else {
-      return res.status(400).json({ message: 'Aruppi lost in the shell' });
+      return res.status(400).json({message: 'Aruppi lost in the shell'});
     }
   }
 
@@ -243,15 +243,13 @@ export default class AnimeController {
     }));
 
     if (animes.length > 0) {
-      res.status(200).send({ animes });
+      res.status(200).send({animes});
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getLastEpisodes(req: Request, res: Response, next: NextFunction) {
-    const options = 'monoschinos';
-    let data: any;
     let $: cheerio.Root;
     let episodes: Episode[] = [];
     let animeList: any[] = [];
@@ -269,83 +267,54 @@ export default class AnimeController {
         }
       }
 
-      switch (options) {
-        case 'monoschinos':
-          $ = await requestGot(`${urls.BASE_MONOSCHINOS}`, {
-            scrapy: true,
-            parse: false,
-          });
-          break;
-        default:
-          data = await requestGot(
-            `${urls.BASE_ANIMEFLV_JELU}LatestEpisodesAdded`,
-            {
-              parse: true,
-              scrapy: false,
-            },
-          );
-          break;
-      }
+      $ = await requestGot(`${urls.BASE_MONOSCHINOS}`, {
+        scrapy: true,
+        parse: false,
+      });
+
     } catch (err) {
       return next(err);
     }
 
-    switch (options) {
-      case 'monoschinos':
-        let getLastest: any = $!('.container .caps .container')[0];
+    let getLastest: any = $!('.container .caps .container')[0];
 
-        $!(getLastest)
-          .find('.row article')
-          .each((index: number, element: cheerio.Element) => {
-            let el: cheerio.Cheerio = $(element);
-            let title: string | undefined = el
-              .find('.Title')
-              .html()
-              ?.split('\t')[0];
-            let img: any = el.find('.Image img').attr('src');
-            let type: any = el.find('.Image figure span').text();
-            type = type.substring(1, type.length);
-            let nEpisode: any = el.find('.dataEpi .episode').text();
-            nEpisode = parseInt(nEpisode.split('\n')[1]);
-            let id: any = el.find('a').attr('href');
-            id = id.split('/')[4];
-            id = id.split('-');
-            id.splice(id.length - 2, 2);
-            id = `${id.join('-')}-episodio-${nEpisode}`;
+    $!(getLastest)
+      .find('.row article')
+      .each((index: number, element: cheerio.Element) => {
+        let el: cheerio.Cheerio = $(element);
+        let title: string | undefined = el
+          .find('.Title')
+          .html()
+          ?.split('\t')[0];
+        let img: any = el.find('.Image img').attr('src');
+        let type: any = el.find('.Image figure span').text();
+        type = type.substring(1, type.length);
+        let nEpisode: any = el.find('.dataEpi .episode').text();
+        nEpisode = parseInt(nEpisode.split('\n')[1]);
+        let id: any = el.find('a').attr('href');
+        id = id.split('/')[4];
+        id = id.split('-');
+        id.splice(id.length - 2, 2);
+        id = `${id.join('-')}-episodio-${nEpisode}`;
 
-            let anime = {
-              id: `ver/${id}`,
-              title,
-              image: img,
-              episode: nEpisode,
-            };
+        let anime = {
+          id: `ver/${id}`,
+          title,
+          image: img,
+          episode: nEpisode,
+        };
 
-            animeList.push(anime);
-          });
+        animeList.push(anime);
+      });
 
-        for (const anime of animeList) {
-          episodes.push({
-            id: anime.id,
-            title: anime.title,
-            image: await imageUrlToBase64(anime.image),
-            episode: anime.episode,
-            servers: await videoServersMonosChinos(anime.id),
-          });
-        }
-        break;
-      default:
-        for (const episode of data.episodes) {
-          const formattedEpisode: Episode = {
-            id: '12345/' + episode.id,
-            title: episode.title,
-            image: episode.poster,
-            episode: episode.episode,
-            servers: await transformUrlServer(episode.servers),
-          };
-
-          episodes.push(formattedEpisode);
-        }
-        break;
+    for (const anime of animeList) {
+      episodes.push({
+        id: anime.id,
+        title: anime.title,
+        image: await imageUrlToBase64(anime.image),
+        episode: anime.episode,
+        servers: await videoServersMonosChinos(anime.id),
+      });
     }
 
     if (episodes.length > 0) {
@@ -354,7 +323,7 @@ export default class AnimeController {
 
         redisClient.set(
           `lastEpisodes_${hashStringMd5('lastEpisodes')}`,
-          JSON.stringify({ episodes }),
+          JSON.stringify({episodes}),
         );
 
         /* After 24hrs expire the key. */
@@ -369,12 +338,12 @@ export default class AnimeController {
         episodes,
       });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getContentTv(req: Request, res: Response, next: NextFunction) {
-    const { type, page } = req.params;
+    const {type, page} = req.params;
     const url = 'tv';
     let data: any;
 
@@ -426,7 +395,7 @@ export default class AnimeController {
 
         redisClient.set(
           `contentTv_${hashStringMd5(`${type}:${page}`)}`,
-          JSON.stringify({ animes }),
+          JSON.stringify({animes}),
         );
 
         /* After 24hrs expire the key. */
@@ -441,12 +410,12 @@ export default class AnimeController {
         animes,
       });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getContentSpecial(req: Request, res: Response, next: NextFunction) {
-    const { type, page } = req.params;
+    const {type, page} = req.params;
     const url = 'special';
     let data: any;
 
@@ -498,7 +467,7 @@ export default class AnimeController {
 
         redisClient.set(
           `contentSpecial_${hashStringMd5(`${type}:${page}`)}`,
-          JSON.stringify({ animes }),
+          JSON.stringify({animes}),
         );
 
         /* After 24hrs expire the key. */
@@ -513,12 +482,12 @@ export default class AnimeController {
         animes,
       });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getContentOva(req: Request, res: Response, next: NextFunction) {
-    const { type, page } = req.params;
+    const {type, page} = req.params;
     const url = 'ova';
     let data: any;
 
@@ -570,7 +539,7 @@ export default class AnimeController {
 
         redisClient.set(
           `contentOva_${hashStringMd5(`${type}:${page}`)}`,
-          JSON.stringify({ animes }),
+          JSON.stringify({animes}),
         );
 
         /* After 24hrs expire the key. */
@@ -585,12 +554,12 @@ export default class AnimeController {
         animes,
       });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getContentMovie(req: Request, res: Response, next: NextFunction) {
-    const { type, page } = req.params;
+    const {type, page} = req.params;
     const url = 'movies';
     let data: any;
 
@@ -642,7 +611,7 @@ export default class AnimeController {
 
         redisClient.set(
           `contentMovie_${hashStringMd5(`${type}:${page}`)}`,
-          JSON.stringify({ animes }),
+          JSON.stringify({animes}),
         );
 
         /* After 24hrs expire the key. */
@@ -657,12 +626,12 @@ export default class AnimeController {
         animes,
       });
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getEpisodes(req: Request, res: Response, next: NextFunction) {
-    const { title } = req.params;
+    const {title} = req.params;
     let searchAnime: ModelA | null;
     let episodes: any;
 
@@ -680,7 +649,7 @@ export default class AnimeController {
       }
 
       searchAnime = await AnimeModel.findOne({
-        $or: [{ title: { $eq: title } }, { title: { $eq: `${title} (TV)` } }],
+        $or: [{title: {$eq: title}}, {title: {$eq: `${title} (TV)`}}],
       });
     } catch (err) {
       return next(err);
@@ -707,7 +676,7 @@ export default class AnimeController {
 
         redisClient.set(
           `episodes_${hashStringMd5(title)}`,
-          JSON.stringify({ episodes }),
+          JSON.stringify({episodes}),
         );
 
         /* After 24hrs expire the key. */
@@ -718,14 +687,14 @@ export default class AnimeController {
         );
       }
 
-      res.status(200).json({ episodes });
+      res.status(200).json({episodes});
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 
   async getServers(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
+    const {id} = req.params;
     let data: any;
 
     try {
@@ -758,7 +727,7 @@ export default class AnimeController {
 
           redisClient.set(
             `servers_${hashStringMd5(id)}`,
-            JSON.stringify({ servers: data }),
+            JSON.stringify({servers: data}),
           );
 
           /* After 24hrs expire the key. */
@@ -769,9 +738,9 @@ export default class AnimeController {
           );
         }
 
-        res.status(200).json({ servers: data });
+        res.status(200).json({servers: data});
       } else {
-        res.status(500).json({ message: 'Aruppi lost in the shell' });
+        res.status(500).json({message: 'Aruppi lost in the shell'});
       }
     } catch (err) {
       return next(err);
@@ -783,7 +752,7 @@ export default class AnimeController {
     let animeResult: any;
 
     try {
-      animeQuery = await AnimeModel.aggregate([{ $sample: { size: 1 } }]);
+      animeQuery = await AnimeModel.aggregate([{$sample: {size: 1}}]);
     } catch (err) {
       return next(err);
     }
@@ -805,7 +774,7 @@ export default class AnimeController {
       res.set('Cache-Control', 'no-store');
       res.status(200).json(animeResult);
     } else {
-      res.status(500).json({ message: 'Aruppi lost in the shell' });
+      res.status(500).json({message: 'Aruppi lost in the shell'});
     }
   }
 }
