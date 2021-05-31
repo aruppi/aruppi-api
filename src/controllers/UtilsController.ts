@@ -263,6 +263,7 @@ export default class UtilsController {
         );
       }
 
+      res.set('Cache-Control', 'max-age=604800');
       res.status(200).json({ images: results });
     } else {
       res.status(500).json({ message: 'Aruppi lost in the shell' });
