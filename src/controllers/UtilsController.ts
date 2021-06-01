@@ -217,6 +217,9 @@ export default class UtilsController {
     const { title } = req.params;
     let data: any;
 
+    console.log(
+      `${urls.BASE_QWANT}t=images&q=${title}&count=51&locale=es_ES&safesearch=1`,
+    );
     try {
       if (redisClient.connected) {
         const resultQueryRedis: any = await redisClient.get(
@@ -231,9 +234,7 @@ export default class UtilsController {
       }
 
       data = await requestGot(
-        encodeURI(
-          `{urls.BASE_QWANT}t=images&q=${title}&count=51&locale=es_ES&safesearch=1`,
-        ),
+        `${urls.BASE_QWANT}t=images&q=${title}&count=51&locale=es_ES&safesearch=1`,
         { scrapy: false, parse: true },
       );
     } catch (err) {
