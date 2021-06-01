@@ -231,7 +231,9 @@ export default class UtilsController {
       }
 
       data = await requestGot(
-        `${urls.BASE_QWANT}count=51&q=${title}&t=images&safesearch=1&locale=es_ES&uiv=4`,
+        encodeURI(
+          `{urls.BASE_QWANT}t=images&q=${title}&count=51&locale=es_ES&safesearch=1`,
+        ),
         { scrapy: false, parse: true },
       );
     } catch (err) {
