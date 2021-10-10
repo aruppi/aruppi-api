@@ -52,6 +52,7 @@ routes.get('/api/v4/', (req: Request, res: Response) => {
         Search: '/api/v4/search/:title',
         Images: '/api/v4/images/:query',
         Videos: '/api/v4/videos/:channelId',
+        Playlist: '/api/v4/playlistVideos/:playlistId',
         'Type Videos': '/api/v4/sectionedVideos/:type',
         Radios: '/api/v4/radio',
         'All Themes': '/api/v4/allThemes',
@@ -104,6 +105,7 @@ routes.get('/api/v4/anitakume', utilsController.getAnitakume);
 routes.get('/api/v4/news', utilsController.getNews);
 routes.get('/api/v4/images/:title', utilsController.getImages);
 routes.get('/api/v4/videos/:channelId', utilsController.getVideos);
+routes.get('/api/v4/playlistVideos/:playlistId', utilsController.getPlaylists);
 routes.get('/api/v4/sectionedVideos/:type', utilsController.getSectionVideos);
 routes.get('/api/v4/radio', utilsController.getRadioStations);
 routes.get('/api/v4/allThemes', utilsController.getAllThemes);

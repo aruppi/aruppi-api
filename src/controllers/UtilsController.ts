@@ -330,6 +330,65 @@ export default class UtilsController {
     }
   }
 
+  async getPlaylists(req: Request, res: Response, next: NextFunction) {
+
+    const { playlistId } = req.params;
+    let data: any;
+
+    try {
+      if (redisClient.connected) {
+
+        const resultQueryRedis: any = redisClient.get(
+            `playlist_videos_${hashStringMd5(playlistId)}`,
+        );
+
+        if (resultQueryRedis) {
+          const resultRedis: any = JSON.parse(resultQueryRedis);
+          return res.status(200).json(resultRedis);
+        }
+      }
+
+      data = await requestGot(
+          `${urls.BASE_YOUTUBE_PLAYLIST}${playlistId}`,
+          { scrapy: false, parse: true },
+      );
+    } catch (err) {
+      return next(err);
+    }
+
+    const results: any[] = data.items.map((item: any) => {
+      return {
+        title: item.snippet.title,
+        videoId: item.id.videoId,
+        thumbDefault: item.snippet.thumbnails.default.url,
+        thumbMedium: item.snippet.thumbnails.medium.url,
+        thumbHigh: item.snippet.thumbnails.high.url,
+      };
+    });
+
+    if (results.length > 0) {
+      if (redisClient.connected) {
+        /!* Set the key in the redis cache. *!/
+
+        redisClient.set(
+            `playlist_videos_${hashStringMd5(playlistId)}`,
+            JSON.stringify({ videos: results }),
+        );
+
+        /!* After 24hrs expire the key. *!/
+
+        redisClient.expireat(
+            `playlist_videos_${hashStringMd5(playlistId)}`,
+            parseInt(`${+new Date() / 1000}`, 10) + 7200,
+        );
+      }
+
+      res.status(200).json({ videos: results });
+    } else {
+      res.status(500).json({ message: 'Aruppi lost in the shell' });
+    }
+  }
+
   async getSectionVideos(req: Request, res: Response, next: NextFunction) {
     const { type } = req.params;
     let y1: any, y2: any, y3: any;
