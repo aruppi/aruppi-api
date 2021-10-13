@@ -339,7 +339,7 @@ export default class UtilsController {
       if (redisClient.connected) {
 
         const resultQueryRedis: any = redisClient.get(
-            `playlist_videos_${hashStringMd5(playlistId)}`,
+            `videos_${hashStringMd5(playlistId)}`,
         );
 
         if (resultQueryRedis) {
@@ -371,14 +371,14 @@ export default class UtilsController {
         /!* Set the key in the redis cache. *!/
 
         redisClient.set(
-            `playlist_videos_${hashStringMd5(playlistId)}`,
+            `videos_${hashStringMd5(playlistId)}`,
             JSON.stringify({ videos: results }),
         );
 
         /!* After 24hrs expire the key. *!/
 
         redisClient.expireat(
-            `playlist_videos_${hashStringMd5(playlistId)}`,
+            `videos_${hashStringMd5(playlistId)}`,
             parseInt(`${+new Date() / 1000}`, 10) + 7200,
         );
       }
