@@ -1,6 +1,6 @@
 {
   "name": "aruppi",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "description": "Aruppi is a custom API to obtain data from the Japanese culture for the mobile app",
   "main": "./src/api/api.ts",
   "scripts": {
@@ -59,6 +59,7 @@
     "helmet": "^4.5.0",
     "mongodb": "^3.6.6",
     "mongoose": "^5.12.5",
+    "node-html-parser": "^5.1.0",
     "redis": "^3.1.2",
     "rss-parser": "^3.12.0",
     "tough-cookie": "^4.0.0",

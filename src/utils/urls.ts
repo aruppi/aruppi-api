@@ -20,4 +20,5 @@ export default {
   BASE_QWANT: 'https://api.qwant.com/search/images?',
   REDDIT_ANIMETHEMES: 'https://reddit.com/r/AnimeThemes/wiki/',
   BASE_THEMEMOE: 'https://themes.moe/api/',
+  BASE_ARUPPI_MONOSCHINOS: 'https://aruppi.jeluchu.xyz/apis/monoschinos/',
 };

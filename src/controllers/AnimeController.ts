@@ -250,7 +250,8 @@ export default class AnimeController {
   }
 
   async getLastEpisodes(req: Request, res: Response, next: NextFunction) {
-    let $: cheerio.Root;
+
+    let lastEpisodes;
     let episodes: Episode[] = [];
     let animeList: any[] = [];
 
@@ -267,44 +268,23 @@ export default class AnimeController {
         }
       }
 
-      $ = await requestGot(`${urls.BASE_MONOSCHINOS}`, {
+      lastEpisodes = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}`, {
         scrapy: true,
         parse: false,
       });
+
     } catch (err) {
       return next(err);
     }
 
-    let getLastest: any = $!('.container .caps .container')[0];
-
-    $!(getLastest)
-      .find('.row article')
-      .each((index: number, element: cheerio.Element) => {
-        let el: cheerio.Cheerio = $(element);
-        let title: string | undefined = el
-          .find('.Title')
-          .html()
-          ?.split('\t')[0];
-        let img: any = el.find('.Image img').attr('src');
-        let type: any = el.find('.Image figure span').text();
-        type = type.substring(1, type.length);
-        let nEpisode: any = el.find('.dataEpi .episode').text();
-        nEpisode = parseInt(nEpisode.split('\n')[1]);
-        let id: any = el.find('a').attr('href');
-        id = id.split('/')[4];
-        id = id.split('-');
-        id.splice(id.length - 2, 2);
-        id = `${id.join('-')}-episodio-${nEpisode}`;
-
-        let anime = {
-          id: `ver/${id}`,
-          title,
-          image: img,
-          episode: nEpisode,
-        };
-
-        animeList.push(anime);
+    for (const anime of lastEpisodes) {
+      animeList.push({
+        id: `ver/${anime.id}`,
+        title: anime.title,
+        image: anime.image,
+        episode: anime.episode,
       });
+    }
 
     for (const anime of animeList) {
       episodes.push({

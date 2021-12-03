@@ -725,7 +725,7 @@ export const tioanimeInfo = async (id: string | undefined, mal_id: number) => {
 };
 
 export const videoServersMonosChinos = async (id: string) => {
-  let $: cheerio.Root;
+  let $;
   let videoServers: any[] = [];
 
   try {
@@ -741,51 +741,21 @@ export const videoServersMonosChinos = async (id: string) => {
       }
     }
 
-    $ = await requestGot(`${urls.BASE_MONOSCHINOS}${id}`, {
-      scrapy: true,
-      parse: false,
+    $ = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}${id}`, {
+      scrapy: false,
+      parse: true,
     });
   } catch (err) {
     return err;
   }
 
-  let videoNames: string[] = $('.TPlayerNv li')
-    .map((index: number, element: cheerio.Element) => {
-      return $(element).attr('title');
-    })
-    .get();
-
-  videoServers.push({
-    id: videoNames[0].toLowerCase(),
-    url: decodeURIComponent(
-      $('.TPlayer div iframe').attr('src')?.split('url=')[1]!,
-    ).split('&id')[0],
-    direct: false,
-  });
-
-  const videoContainer: any = $('.TPlayer div').text();
-
-  $(videoContainer).each((index: number, element: cheerio.Element) => {
-    let video: any = $(element).attr('src');
-
-    if (video) {
-      video = video.split('url=')[1];
-      video = decodeURIComponent(video);
-      video = video.split('&id')[0];
-    }
-
-    if (video) {
-      videoNames.forEach((value: string) => {
-        if (video.includes(value.toLowerCase())) {
-          videoServers.push({
-            id: value.toLowerCase(),
-            url: video,
-            direct: false,
-          });
-        }
-      });
-    }
-  });
+  for (const server of $.videos) {
+    videoServers.push({
+      id: server.title,
+      url: server.url.replace("https://monoschinos2.com/reproductor?url=", ""),
+      direct: false,
+    });
+  }
 
   if (videoServers.length > 0) {
     if (redisClient.connected) {
