@@ -268,9 +268,9 @@ export default class AnimeController {
         }
       }
 
-      lastEpisodes = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}`, {
-        scrapy: true,
-        parse: false,
+      lastEpisodes = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}lastest`, {
+        scrapy: false,
+        parse: true,
       });
 
     } catch (err) {
