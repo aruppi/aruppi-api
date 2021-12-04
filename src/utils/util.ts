@@ -1,9 +1,9 @@
 import urls from './urls';
-import { requestGot } from './requestCall';
-import AnimeModel, { Anime } from '../database/models/anime.model';
+import {requestGot} from './requestCall';
+import AnimeModel, {Anime} from '../database/models/anime.model';
 import crypto from 'crypto';
 import util from 'util';
-import { redisClient } from '../database/connection';
+import {redisClient} from '../database/connection';
 
 // @ts-ignore
 redisClient.get = util.promisify(redisClient.get);
@@ -15,1044 +15,1028 @@ redisClient.get = util.promisify(redisClient.get);
 */
 
 interface Promo {
-  title: string;
-  image_url: string;
-  video_url: string;
+    title: string;
+    image_url: string;
+    video_url: string;
 }
 
 interface Character {
-  id: number;
-  name: string;
-  image: string;
-  role: string;
+    id: number;
+    name: string;
+    image: string;
+    role: string;
 }
 
 interface RelatedAnime {
-  title: string;
-  type: string;
-  poster: string;
+    title: string;
+    type: string;
+    poster: string;
 }
 
 export const animeExtraInfo = async (mal_id: number) => {
-  let data: any;
-  let broadcast: any;
+    let data: any;
+    let broadcast: any;
 
-  const airDay: any = {
-    mondays: 'Lunes',
-    monday: 'Lunes',
-    tuesdays: 'Martes',
-    tuesday: 'Martes',
-    wednesdays: 'Miércoles',
-    wednesday: 'Miércoles',
-    thursdays: 'Jueves',
-    thursday: 'Jueves',
-    fridays: 'Viernes',
-    friday: 'Viernes',
-    saturdays: 'Sábados',
-    saturday: 'Sábados',
-    sundays: 'Domingos',
-    sunday: 'Domingos',
-    default: 'Sin emisión',
-  };
+    const airDay: any = {
+        mondays: 'Lunes',
+        monday: 'Lunes',
+        tuesdays: 'Martes',
+        tuesday: 'Martes',
+        wednesdays: 'Miércoles',
+        wednesday: 'Miércoles',
+        thursdays: 'Jueves',
+        thursday: 'Jueves',
+        fridays: 'Viernes',
+        friday: 'Viernes',
+        saturdays: 'Sábados',
+        saturday: 'Sábados',
+        sundays: 'Domingos',
+        sunday: 'Domingos',
+        default: 'Sin emisión',
+    };
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
+            parse: true,
+            scrapy: false,
+        });
+
+        if (data.broadcast) {
+            broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+        }
+    } catch (err) {
+        return err;
     }
 
-    data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
-      parse: true,
-      scrapy: false,
-    });
-
-    if (data.broadcast) {
-      broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
-    }
-  } catch (err) {
-    return err;
-  }
-
-  if (airDay.hasOwnProperty(broadcast)) {
-    data.broadcast = airDay[broadcast];
-  } else {
-    data.broadcast = null;
-  }
-
-  const formattedObject: any = {
-    titleJapanese: data.title_japanese,
-    source: data.source,
-    totalEpisodes: data.episodes,
-    aired: {
-      from: data.aired.from,
-      to: data.aired.to,
-    },
-    duration: data.duration.split('per')[0],
-    rank: data.rank,
-    broadcast: data.broadcast,
-    producers: data.producers.map((item: any) => item.name) || null,
-    licensors: data.licensors.map((item: any) => item.name) || null,
-    studios: data.studios.map((item: any) => item.name) || null,
-    openingThemes: data.opening_themes || null,
-    endingThemes: data.ending_themes || null,
-  };
-
-  if (formattedObject) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-        JSON.stringify(formattedObject),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `extraInfo_${hashStringMd5(`${mal_id}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+    if (airDay.hasOwnProperty(broadcast)) {
+        data.broadcast = airDay[broadcast];
+    } else {
+        data.broadcast = null;
     }
 
-    return formattedObject;
-  } else {
-    return null;
-  }
+    const formattedObject: any = {
+        titleJapanese: data.title_japanese,
+        source: data.source,
+        totalEpisodes: data.episodes,
+        aired: {
+            from: data.aired.from,
+            to: data.aired.to,
+        },
+        duration: data.duration.split('per')[0],
+        rank: data.rank,
+        broadcast: data.broadcast,
+        producers: data.producers.map((item: any) => item.name) || null,
+        licensors: data.licensors.map((item: any) => item.name) || null,
+        studios: data.studios.map((item: any) => item.name) || null,
+        openingThemes: data.opening_themes || null,
+        endingThemes: data.ending_themes || null,
+    };
+
+    if (formattedObject) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+                JSON.stringify(formattedObject),
+            );
+
+            /* After 24hrs expire the key. */
+
+            redisClient.expireat(
+                `extraInfo_${hashStringMd5(`${mal_id}`)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
+
+        return formattedObject;
+    } else {
+        return null;
+    }
 };
 
 export const getAnimeVideoPromo = async (mal_id: number) => {
-  let data: any;
+    let data: any;
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
+            parse: true,
+            scrapy: false,
+        });
+    } catch (err) {
+        return err;
     }
 
-    data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
-      parse: true,
-      scrapy: false,
+    const promo: Promo[] = data.promo.map((item: Promo) => {
+        return {
+            title: item.title,
+            previewImage: item.image_url,
+            videoURL: item.video_url,
+        };
     });
-  } catch (err) {
-    return err;
-  }
 
-  const promo: Promo[] = data.promo.map((item: Promo) => {
-    return {
-      title: item.title,
-      previewImage: item.image_url,
-      videoURL: item.video_url,
-    };
-  });
+    if (promo.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
 
-  if (promo.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
+            redisClient.set(
+                `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+                JSON.stringify(promo),
+            );
 
-      redisClient.set(
-        `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-        JSON.stringify(promo),
-      );
+            /* After 24hrs expire the key. */
 
-      /* After 24hrs expire the key. */
+            redisClient.expireat(
+                `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
 
-      redisClient.expireat(
-        `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        return promo;
+    } else {
+        return null;
     }
-
-    return promo;
-  } else {
-    return null;
-  }
 };
 
 export const getAnimeCharacters = async (mal_id: number) => {
-  let data: any;
+    let data: any;
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        data = await requestGot(
+            `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
+            {parse: true, scrapy: false},
+        );
+    } catch (err) {
+        return err;
     }
 
-    data = await requestGot(
-      `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
-      { parse: true, scrapy: false },
-    );
-  } catch (err) {
-    return err;
-  }
+    const characters: Character[] = data.characters.map((item: any) => {
+        return {
+            id: item.mal_id,
+            name: item.name,
+            image: item.image_url,
+            role: item.role,
+        };
+    });
 
-  const characters: Character[] = data.characters.map((item: any) => {
-    return {
-      id: item.mal_id,
-      name: item.name,
-      image: item.image_url,
-      role: item.role,
-    };
-  });
+    if (characters.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
 
-  if (characters.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
+            redisClient.set(
+                `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+                JSON.stringify(characters),
+            );
 
-      redisClient.set(
-        `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-        JSON.stringify(characters),
-      );
+            /* After 24hrs expire the key. */
 
-      /* After 24hrs expire the key. */
+            redisClient.expireat(
+                `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
 
-      redisClient.expireat(
-        `charactersInfo_${hashStringMd5(`${mal_id}`)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+        return characters;
+    } else {
+        return null;
     }
-
-    return characters;
-  } else {
-    return null;
-  }
 };
 
 const getPosterAndType = async (
-  id: string | undefined,
-  mal_id: number | undefined,
+    id: string | undefined,
+    mal_id: number | undefined,
 ) => {
-  if (id) {
-    const queryRes: Anime | null = await AnimeModel.findOne({
-      id: { $eq: id },
-    });
+    if (id) {
+        const queryRes: Anime | null = await AnimeModel.findOne({
+            id: {$eq: id},
+        });
 
-    return [queryRes?.poster, queryRes?.type];
-  }
+        return [queryRes?.poster, queryRes?.type];
+    }
 
-  if (mal_id) {
-    const queryRes: Anime | null = await AnimeModel.findOne({
-      mal_id: { $eq: mal_id },
-    });
+    if (mal_id) {
+        const queryRes: Anime | null = await AnimeModel.findOne({
+            mal_id: {$eq: mal_id},
+        });
 
-    return [queryRes?.poster, queryRes?.type];
-  }
+        return [queryRes?.poster, queryRes?.type];
+    }
 
-  return '';
+    return '';
 };
 
 export const getRelatedAnimesMAL = async (mal_id: number) => {
-  let $: cheerio.Root;
+    let $: cheerio.Root;
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
-    }
-
-    $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
-      parse: false,
-      scrapy: true,
-    });
-  } catch (err) {
-    return err;
-  }
-
-  let listRelated: any = {};
-  let relatedAnimes: RelatedAnime[] = [];
-
-  if ($('table.anime_detail_related_anime').length > 0) {
-    $('table.anime_detail_related_anime')
-      .find('tbody tr')
-      .each((index: number, element: any) => {
-        if ($(element).find('td').eq(0).text() !== 'Adaptation:') {
-          listRelated[$(element).find('td').eq(1).text()] = $(element)
-            .find('td')
-            .children('a')
-            .attr('href');
+                return resultRedis;
+            }
         }
-      });
 
-    for (const related in listRelated) {
-      let posterUrl: any = await getPosterAndType(
-        undefined,
-        listRelated[related].split('/')[2],
-      );
-
-      if (posterUrl !== '') {
-        relatedAnimes.push({
-          title: related,
-          type: posterUrl[1],
-          poster: posterUrl[0],
+        $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
+            parse: false,
+            scrapy: true,
         });
-      }
+    } catch (err) {
+        return err;
     }
 
-    if (relatedAnimes.length > 0) {
-      if (redisClient.connected) {
-        /* Set the key in the redis cache. */
+    let listRelated: any = {};
+    let relatedAnimes: RelatedAnime[] = [];
 
-        redisClient.set(
-          `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-          JSON.stringify(relatedAnimes),
-        );
+    if ($('table.anime_detail_related_anime').length > 0) {
+        $('table.anime_detail_related_anime')
+            .find('tbody tr')
+            .each((index: number, element: any) => {
+                if ($(element).find('td').eq(0).text() !== 'Adaptation:') {
+                    listRelated[$(element).find('td').eq(1).text()] = $(element)
+                        .find('td')
+                        .children('a')
+                        .attr('href');
+                }
+            });
 
-        /* After 24hrs expire the key. */
+        for (const related in listRelated) {
+            let posterUrl: any = await getPosterAndType(
+                undefined,
+                listRelated[related].split('/')[2],
+            );
 
-        redisClient.expireat(
-          `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
-      }
+            if (posterUrl !== '') {
+                relatedAnimes.push({
+                    title: related,
+                    type: posterUrl[1],
+                    poster: posterUrl[0],
+                });
+            }
+        }
 
-      return relatedAnimes;
+        if (relatedAnimes.length > 0) {
+            if (redisClient.connected) {
+                /* Set the key in the redis cache. */
+
+                redisClient.set(
+                    `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+                    JSON.stringify(relatedAnimes),
+                );
+
+                /* After 24hrs expire the key. */
+
+                redisClient.expireat(
+                    `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+                    parseInt(`${+new Date() / 1000}`, 10) + 7200,
+                );
+            }
+
+            return relatedAnimes;
+        }
+    } else {
+        return [];
     }
-  } else {
-    return [];
-  }
 };
 
 export const jkanimeInfo = async (id: string | undefined, mal_id: number) => {
-  let $: cheerio.Root;
-  let extraInfo: any;
-  let episodesList: any[] = [];
-  let countEpisodes: string[] = [];
+    let $: cheerio.Root;
+    let extraInfo: any;
+    let episodesList: any[] = [];
+    let countEpisodes: string[] = [];
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `jkanimeInfo_${hashStringMd5(id!)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `jkanimeInfo_${hashStringMd5(id!)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
-    }
-
-    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
-      scrapy: true,
-      parse: false,
-    });
-
-    /* Extra info of the anime */
-    extraInfo = (await animeExtraInfo(mal_id)) || undefined;
-  } catch (err) {
-    console.log(err);
-  }
-
-  if ($!) {
-    countEpisodes = $!('div.anime__pagination a')
-      .map((index: number, element: cheerio.Element) => {
-        return $!(element).text();
-      })
-      .get();
-
-    const episodesCount: string = countEpisodes[countEpisodes.length - 1].split(
-      '-',
-    )[1];
-
-    if (extraInfo) {
-      let broadCastDate = new Date();
-      let dd: number, mm: string | number, yyyy: number;
-
-      const airDay: any = {
-        Lunes: 1,
-        Martes: 2,
-        Miércoles: 3,
-        Jueves: 4,
-        Viernes: 5,
-        Sábados: 6,
-        Domingos: 7,
-        'Sin emisión': 'default',
-      };
-
-      if (!extraInfo.aired.to) {
-        if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-          if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
-            for (
-              let i = broadCastDate.getDay();
-              i < airDay[extraInfo.broadcast];
-              i++
-            ) {
-              broadCastDate.setDate(broadCastDate.getDate() + 1);
+                return resultRedis;
             }
-          } else {
-            let counter = broadCastDate.getDay() + 1;
-
-            /* Adding one because of the day */
-            broadCastDate.setDate(broadCastDate.getDate() + 1);
-
-            while (counter !== airDay[extraInfo.broadcast]) {
-              if (counter === 7) {
-                counter = 0;
-              }
-              broadCastDate.setDate(broadCastDate.getDate() + 1);
-              counter++;
-            }
-          }
-
-          dd = broadCastDate.getDate();
-          mm =
-            broadCastDate.getMonth() + 1 < 10
-              ? `0${broadCastDate.getMonth() + 1}`
-              : broadCastDate.getMonth() + 1;
-          yyyy = broadCastDate.getFullYear();
-
-          episodesList.push({
-            nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
-          });
         }
-      }
+
+        $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+            scrapy: true,
+            parse: false,
+        });
+
+        /* Extra info of the anime */
+        extraInfo = (await animeExtraInfo(mal_id)) || undefined;
+    } catch (err) {
+        console.log(err);
     }
 
-    for (let i = 1; i <= parseInt(episodesCount); i++) {
-      episodesList.push({
-        episode: i,
-        id: `${id}/${i}`,
-      });
-    }
+    if ($!) {
+        countEpisodes = $!('div.anime__pagination a')
+            .map((index: number, element: cheerio.Element) => {
+                return $!(element).text();
+            })
+            .get();
 
-    if (episodesList.length > 0) {
-      if (redisClient.connected) {
-        /* Set the key in the redis cache. */
+        const episodesCount: string = countEpisodes[countEpisodes.length - 1].split(
+            '-',
+        )[1];
 
-        redisClient.set(
-          `jkanimeInfo_${hashStringMd5(id!)}`,
-          JSON.stringify(episodesList),
-        );
+        if (extraInfo) {
+            let broadCastDate = new Date();
+            let dd: number, mm: string | number, yyyy: number;
 
-        /* After 24hrs expire the key. */
+            const airDay: any = {
+                Lunes: 1,
+                Martes: 2,
+                Miércoles: 3,
+                Jueves: 4,
+                Viernes: 5,
+                Sábados: 6,
+                Domingos: 7,
+                'Sin emisión': 'default',
+            };
 
-        redisClient.expireat(
-          `jkanimeInfo_${hashStringMd5(id!)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
-      }
+            if (!extraInfo.aired.to) {
+                if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+                    if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+                        for (
+                            let i = broadCastDate.getDay();
+                            i < airDay[extraInfo.broadcast];
+                            i++
+                        ) {
+                            broadCastDate.setDate(broadCastDate.getDate() + 1);
+                        }
+                    } else {
+                        let counter = broadCastDate.getDay() + 1;
 
-      return episodesList;
+                        /* Adding one because of the day */
+                        broadCastDate.setDate(broadCastDate.getDate() + 1);
+
+                        while (counter !== airDay[extraInfo.broadcast]) {
+                            if (counter === 7) {
+                                counter = 0;
+                            }
+                            broadCastDate.setDate(broadCastDate.getDate() + 1);
+                            counter++;
+                        }
+                    }
+
+                    dd = broadCastDate.getDate();
+                    mm =
+                        broadCastDate.getMonth() + 1 < 10
+                            ? `0${broadCastDate.getMonth() + 1}`
+                            : broadCastDate.getMonth() + 1;
+                    yyyy = broadCastDate.getFullYear();
+
+                    episodesList.push({
+                        nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+                    });
+                }
+            }
+        }
+
+        for (let i = 1; i <= parseInt(episodesCount); i++) {
+            episodesList.push({
+                episode: i,
+                id: `${id}/${i}`,
+            });
+        }
+
+        if (episodesList.length > 0) {
+            if (redisClient.connected) {
+                /* Set the key in the redis cache. */
+
+                redisClient.set(
+                    `jkanimeInfo_${hashStringMd5(id!)}`,
+                    JSON.stringify(episodesList),
+                );
+
+                /* After 24hrs expire the key. */
+
+                redisClient.expireat(
+                    `jkanimeInfo_${hashStringMd5(id!)}`,
+                    parseInt(`${+new Date() / 1000}`, 10) + 7200,
+                );
+            }
+
+            return episodesList;
+        } else {
+            return undefined;
+        }
     } else {
-      return undefined;
+        return undefined;
     }
-  } else {
-    return undefined;
-  }
 };
 
 export const monoschinosInfo = async (
-  id: string | undefined,
-  mal_id: number,
+    id: string | undefined,
+    mal_id: number,
 ) => {
-  let $: cheerio.Root;
-  let episodeList: any[] = [];
-  let extraInfo: any;
+    let info;
+    let episodeList: any[] = [];
+    let extraInfo: any;
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `monoschinosInfo_${hashStringMd5(id!)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `monoschinosInfo_${hashStringMd5(id!)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
-    }
-
-    $ = await requestGot(`${urls.BASE_MONOSCHINOS}anime/${id}`, {
-      scrapy: true,
-      parse: false,
-    });
-
-    /* Extra info of the anime */
-    extraInfo = (await animeExtraInfo(mal_id)) || undefined;
-  } catch (err) {
-    console.log(err);
-  }
-
-  if ($!) {
-    if (extraInfo) {
-      let broadCastDate = new Date();
-      let dd: number, mm: string | number, yyyy: number;
-
-      const airDay: any = {
-        Lunes: 1,
-        Martes: 2,
-        Miércoles: 3,
-        Jueves: 4,
-        Viernes: 5,
-        Sábados: 6,
-        Domingos: 7,
-        'Sin emisión': 'default',
-      };
-
-      if (!extraInfo.aired.to) {
-        if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-          if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
-            for (
-              let i = broadCastDate.getDay();
-              i < airDay[extraInfo.broadcast];
-              i++
-            ) {
-              broadCastDate.setDate(broadCastDate.getDate() + 1);
+                return resultRedis;
             }
-          } else {
-            let counter = broadCastDate.getDay() + 1;
-
-            /* Adding one because of the day */
-            broadCastDate.setDate(broadCastDate.getDate() + 1);
-
-            while (counter !== airDay[extraInfo.broadcast]) {
-              if (counter === 7) {
-                counter = 0;
-              }
-              broadCastDate.setDate(broadCastDate.getDate() + 1);
-              counter++;
-            }
-          }
-
-          dd = broadCastDate.getDate();
-          mm =
-            broadCastDate.getMonth() + 1 < 10
-              ? `0${broadCastDate.getMonth() + 1}`
-              : broadCastDate.getMonth() + 1;
-          yyyy = broadCastDate.getFullYear();
-
-          episodeList.push({
-            nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
-          });
         }
-      }
-    }
 
-    $!('.SerieCaps a').each((index: number, element: cheerio.Element) => {
-      let episode: number;
-
-      $(element)
-        .attr('href')
-        ?.split('-')
-        .forEach((item: any) => {
-          if (!isNaN(item)) {
-            episode = parseInt(item);
-          }
+        info = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}anime/${id}`, {
+            scrapy: false,
+            parse: true,
         });
 
-      episodeList.push({
-        episode: episode!,
-        id: `${$(element).attr('href')?.split('/')[3]}/${
-          $(element).attr('href')?.split('/')[4]
-        }`,
-      });
-    });
+        /* Extra info of the anime */
+        extraInfo = (await animeExtraInfo(mal_id)) || undefined;
+    } catch (err) {
+        console.log(err);
+    }
+
+    if (extraInfo) {
+        let broadCastDate = new Date();
+        let dd: number, mm: string | number, yyyy: number;
+
+        const airDay: any = {
+            Lunes: 1,
+            Martes: 2,
+            Miércoles: 3,
+            Jueves: 4,
+            Viernes: 5,
+            Sábados: 6,
+            Domingos: 7,
+            'Sin emisión': 'default',
+        };
+
+        if (!extraInfo.aired.to) {
+            if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+                if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+                    for (
+                        let i = broadCastDate.getDay();
+                        i < airDay[extraInfo.broadcast];
+                        i++
+                    ) {
+                        broadCastDate.setDate(broadCastDate.getDate() + 1);
+                    }
+                } else {
+                    let counter = broadCastDate.getDay() + 1;
+
+                    /* Adding one because of the day */
+                    broadCastDate.setDate(broadCastDate.getDate() + 1);
+
+                    while (counter !== airDay[extraInfo.broadcast]) {
+                        if (counter === 7) {
+                            counter = 0;
+                        }
+                        broadCastDate.setDate(broadCastDate.getDate() + 1);
+                        counter++;
+                    }
+                }
+
+                dd = broadCastDate.getDate();
+                mm =
+                    broadCastDate.getMonth() + 1 < 10
+                        ? `0${broadCastDate.getMonth() + 1}`
+                        : broadCastDate.getMonth() + 1;
+                yyyy = broadCastDate.getFullYear();
+
+                episodeList.push({
+                    nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+                });
+            }
+        }
+    }
+
+    for (const anime of info.episodes) {
+        episodeList.push({
+            episode: anime.no,
+            id: `ver/${anime.id}`,
+        });
+    }
 
     if (episodeList.length > 0) {
-      if (redisClient.connected) {
-        /* Set the key in the redis cache. */
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
 
-        redisClient.set(
-          `monoschinosInfo_${hashStringMd5(id!)}`,
-          JSON.stringify(episodeList),
-        );
+            redisClient.set(
+                `monoschinosInfo_${hashStringMd5(id!)}`,
+                JSON.stringify(episodeList),
+            );
 
-        /* After 24hrs expire the key. */
+            /* After 24hrs expire the key. */
 
-        redisClient.expireat(
-          `monoschinosInfo_${hashStringMd5(id!)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
-        );
-      }
+            redisClient.expireat(
+                `monoschinosInfo_${hashStringMd5(id!)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
 
-      return episodeList;
+        return episodeList;
     } else {
-      return undefined;
+        return undefined;
     }
-  } else {
-    return undefined;
-  }
+
 };
 
 export const tioanimeInfo = async (id: string | undefined, mal_id: number) => {
-  let $: cheerio.Root;
-  let episodesList: any[] = [];
-  let anime_eps: string[] = [];
-  let extraInfo: any;
+    let $: cheerio.Root;
+    let episodesList: any[] = [];
+    let anime_eps: string[] = [];
+    let extraInfo: any;
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `tioanimeInfo_${hashStringMd5(id!)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `tioanimeInfo_${hashStringMd5(id!)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
-    }
-
-    $ = await requestGot(`${urls.BASE_TIOANIME}anime/${id}`, {
-      scrapy: true,
-      parse: false,
-    });
-
-    /* Extra info of the anime */
-    extraInfo = (await animeExtraInfo(mal_id)) || undefined;
-  } catch (err) {
-    console.log(err);
-  }
-
-  if ($!) {
-    if (extraInfo) {
-      let broadCastDate = new Date();
-      let dd: number, mm: string | number, yyyy: number;
-
-      const airDay: any = {
-        Lunes: 1,
-        Martes: 2,
-        Miércoles: 3,
-        Jueves: 4,
-        Viernes: 5,
-        Sábados: 6,
-        Domingos: 7,
-        'Sin emisión': 'default',
-      };
-
-      if (!extraInfo.aired.to) {
-        if (airDay.hasOwnProperty(extraInfo.broadcast)) {
-          if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
-            for (
-              let i = broadCastDate.getDay();
-              i < airDay[extraInfo.broadcast];
-              i++
-            ) {
-              broadCastDate.setDate(broadCastDate.getDate() + 1);
+                return resultRedis;
             }
-          } else {
-            let counter = broadCastDate.getDay() + 1;
-
-            /* Adding one because of the day */
-            broadCastDate.setDate(broadCastDate.getDate() + 1);
-
-            while (counter !== airDay[extraInfo.broadcast]) {
-              if (counter === 7) {
-                counter = 0;
-              }
-              broadCastDate.setDate(broadCastDate.getDate() + 1);
-              counter++;
-            }
-          }
-
-          dd = broadCastDate.getDate();
-          mm =
-            broadCastDate.getMonth() + 1 < 10
-              ? `0${broadCastDate.getMonth() + 1}`
-              : broadCastDate.getMonth() + 1;
-          yyyy = broadCastDate.getFullYear();
-
-          episodesList.push({
-            nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
-          });
         }
-      }
+
+        $ = await requestGot(`${urls.BASE_TIOANIME}anime/${id}`, {
+            scrapy: true,
+            parse: false,
+        });
+
+        /* Extra info of the anime */
+        extraInfo = (await animeExtraInfo(mal_id)) || undefined;
+    } catch (err) {
+        console.log(err);
     }
 
-    const scripts: cheerio.Element[] = $!('script').toArray();
+    if ($!) {
+        if (extraInfo) {
+            let broadCastDate = new Date();
+            let dd: number, mm: string | number, yyyy: number;
 
-    for (const script of scripts) {
-      if ($!(script).html()!.includes('anime_info')) {
-        anime_eps = JSON.parse(
-          $!(script).html()!.split('var episodes = ')[1].split(';')[0],
-        );
-      }
+            const airDay: any = {
+                Lunes: 1,
+                Martes: 2,
+                Miércoles: 3,
+                Jueves: 4,
+                Viernes: 5,
+                Sábados: 6,
+                Domingos: 7,
+                'Sin emisión': 'default',
+            };
+
+            if (!extraInfo.aired.to) {
+                if (airDay.hasOwnProperty(extraInfo.broadcast)) {
+                    if (broadCastDate.getDay() < airDay[extraInfo.broadcast]) {
+                        for (
+                            let i = broadCastDate.getDay();
+                            i < airDay[extraInfo.broadcast];
+                            i++
+                        ) {
+                            broadCastDate.setDate(broadCastDate.getDate() + 1);
+                        }
+                    } else {
+                        let counter = broadCastDate.getDay() + 1;
+
+                        /* Adding one because of the day */
+                        broadCastDate.setDate(broadCastDate.getDate() + 1);
+
+                        while (counter !== airDay[extraInfo.broadcast]) {
+                            if (counter === 7) {
+                                counter = 0;
+                            }
+                            broadCastDate.setDate(broadCastDate.getDate() + 1);
+                            counter++;
+                        }
+                    }
+
+                    dd = broadCastDate.getDate();
+                    mm =
+                        broadCastDate.getMonth() + 1 < 10
+                            ? `0${broadCastDate.getMonth() + 1}`
+                            : broadCastDate.getMonth() + 1;
+                    yyyy = broadCastDate.getFullYear();
+
+                    episodesList.push({
+                        nextEpisodeDate: `${yyyy}-${mm}-${dd}`,
+                    });
+                }
+            }
+        }
+
+        const scripts: cheerio.Element[] = $!('script').toArray();
+
+        for (const script of scripts) {
+            if ($!(script).html()!.includes('anime_info')) {
+                anime_eps = JSON.parse(
+                    $!(script).html()!.split('var episodes = ')[1].split(';')[0],
+                );
+            }
+        }
+
+        for (const episode of anime_eps) {
+            episodesList.push({
+                episode: episode,
+                id: `ver/${id}-${episode}`,
+            });
+        }
+
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `tioanimeInfo_${hashStringMd5(id!)}`,
+                JSON.stringify(episodesList),
+            );
+
+            /* After 24hrs expire the key. */
+
+            redisClient.expireat(
+                `tioanimeInfo_${hashStringMd5(id!)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
+
+        return episodesList;
+    } else {
+        return undefined;
     }
-
-    for (const episode of anime_eps) {
-      episodesList.push({
-        episode: episode,
-        id: `ver/${id}-${episode}`,
-      });
-    }
-
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `tioanimeInfo_${hashStringMd5(id!)}`,
-        JSON.stringify(episodesList),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `tioanimeInfo_${hashStringMd5(id!)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
-    }
-
-    return episodesList;
-  } else {
-    return undefined;
-  }
 };
 
 export const videoServersMonosChinos = async (id: string) => {
-  let $;
-  let videoServers: any[] = [];
+    let $;
+    let videoServers: any[] = [];
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `videoServersMonosChinos_${hashStringMd5(id)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `videoServersMonosChinos_${hashStringMd5(id)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        $ = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}${id}`, {
+            scrapy: false,
+            parse: true,
+        });
+    } catch (err) {
+        return err;
     }
 
-    $ = await requestGot(`${urls.BASE_ARUPPI_MONOSCHINOS}${id}`, {
-      scrapy: false,
-      parse: true,
-    });
-  } catch (err) {
-    return err;
-  }
-
-  for (const server of $.videos) {
-    videoServers.push({
-      id: server.title,
-      url: server.url.replace("https://monoschinos2.com/reproductor?url=", ""),
-      direct: false,
-    });
-  }
-
-  if (videoServers.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `videoServersMonosChinos_${hashStringMd5(id)}`,
-        JSON.stringify(videoServers),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `videoServersMonosChinos_${hashStringMd5(id)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+    for (const server of $.videos) {
+        videoServers.push({
+            id: server.title,
+            url: server.url.replace("https://monoschinos2.com/reproductor?url=", ""),
+            direct: false,
+        });
     }
 
-    return videoServers;
-  } else {
-    return null;
-  }
+    if (videoServers.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `videoServersMonosChinos_${hashStringMd5(id)}`,
+                JSON.stringify(videoServers),
+            );
+
+            /* After 24hrs expire the key. */
+
+            redisClient.expireat(
+                `videoServersMonosChinos_${hashStringMd5(id)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
+
+        return videoServers;
+    } else {
+        return null;
+    }
 };
 
 export const videoServersTioAnime = async (id: string) => {
-  let $: cheerio.Root;
-  let servers: any;
-  let videoServers: any[] = [];
+    let $: cheerio.Root;
+    let servers: any;
+    let videoServers: any[] = [];
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `videoServersTioAnime_${hashStringMd5(id)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `videoServersTioAnime_${hashStringMd5(id)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        $ = await requestGot(`${urls.BASE_TIOANIME}${id}`, {
+            scrapy: true,
+            parse: false,
+        });
+    } catch (err) {
+        return err;
     }
 
-    $ = await requestGot(`${urls.BASE_TIOANIME}${id}`, {
-      scrapy: true,
-      parse: false,
-    });
-  } catch (err) {
-    return err;
-  }
+    const scripts: cheerio.Element[] = $('script').toArray();
 
-  const scripts: cheerio.Element[] = $('script').toArray();
-
-  for (const script of scripts) {
-    if ($(script).html()!.includes('var videos =')) {
-      servers = JSON.parse(
-        $(script).html()!.split('var videos = ')[1].split(';')[0],
-      );
-    }
-  }
-
-  for (const server of servers) {
-    videoServers.push({
-      id: server[0].toLowerCase(),
-      url: server[1],
-      direct: false,
-    });
-  }
-
-  if (videoServers.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `videoServersTioAnime_${hashStringMd5(id)}`,
-        JSON.stringify(videoServers),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `videoServersTioAnime_${hashStringMd5(id)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
+    for (const script of scripts) {
+        if ($(script).html()!.includes('var videos =')) {
+            servers = JSON.parse(
+                $(script).html()!.split('var videos = ')[1].split(';')[0],
+            );
+        }
     }
 
-    return videoServers;
-  } else {
-    return null;
-  }
+    for (const server of servers) {
+        videoServers.push({
+            id: server[0].toLowerCase(),
+            url: server[1],
+            direct: false,
+        });
+    }
+
+    if (videoServers.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `videoServersTioAnime_${hashStringMd5(id)}`,
+                JSON.stringify(videoServers),
+            );
+
+            /* After 24hrs expire the key. */
+
+            redisClient.expireat(
+                `videoServersTioAnime_${hashStringMd5(id)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
+
+        return videoServers;
+    } else {
+        return null;
+    }
 };
 
 export const videoServersJK = async (id: string) => {
-  let $: cheerio.Root;
-  let servers: any = {};
-  let script: string | null = '';
+    let $: cheerio.Root;
+    let servers: any = {};
+    let script: string | null = '';
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `videoServersJK_${hashStringMd5(id)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `videoServersJK_${hashStringMd5(id)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
+            scrapy: true,
+            parse: false,
+        });
+    } catch (err) {
+        return err;
     }
 
-    $ = await requestGot(`${urls.BASE_JKANIME}${id}`, {
-      scrapy: true,
-      parse: false,
+    const serverNames: string[] = $('div.bg-servers a')
+        .map((index: number, element: cheerio.Element) => {
+            return $(element).text();
+        })
+        .get();
+
+    $('script').each((index: number, element: cheerio.Element) => {
+        if ($(element).html()!.includes('var video = [];')) {
+            script = $(element).html();
+        }
     });
-  } catch (err) {
-    return err;
-  }
 
-  const serverNames: string[] = $('div.bg-servers a')
-    .map((index: number, element: cheerio.Element) => {
-      return $(element).text();
-    })
-    .get();
+    try {
+        let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
 
-  $('script').each((index: number, element: cheerio.Element) => {
-    if ($(element).html()!.includes('var video = [];')) {
-      script = $(element).html();
+        for (let i = 0; i < serverNames.length; i++) {
+            servers[serverNames[i]] = videoUrls![i];
+        }
+    } catch (err) {
+        return null;
     }
-  });
 
-  try {
-    let videoUrls = script.match(/(?<=src=").*?(?=[\*"])/gi);
+    let serverList = [];
 
-    for (let i = 0; i < serverNames.length; i++) {
-      servers[serverNames[i]] = videoUrls![i];
+    for (let server in servers) {
+        if (serverNames[serverNames.indexOf(server)].toLowerCase() === 'desu') {
+            serverList.push({
+                id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+                url:
+                    (await desuServerUrl(servers[server])) !== null
+                        ? await desuServerUrl(servers[server])
+                        : servers[server],
+                direct: false,
+            });
+        } else {
+            serverList.push({
+                id: serverNames[serverNames.indexOf(server)].toLowerCase(),
+                url: servers[server],
+                direct: false,
+            });
+        }
     }
-  } catch (err) {
-    return null;
-  }
 
-  let serverList = [];
+    serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
 
-  for (let server in servers) {
-    if (serverNames[serverNames.indexOf(server)].toLowerCase() === 'desu') {
-      serverList.push({
-        id: serverNames[serverNames.indexOf(server)].toLowerCase(),
-        url:
-          (await desuServerUrl(servers[server])) !== null
-            ? await desuServerUrl(servers[server])
-            : servers[server],
-        direct: false,
-      });
+    if (serverList.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `videoServersJK_${hashStringMd5(id!)}`,
+                JSON.stringify(serverList),
+            );
+
+            /* After 24hrs expire the key. */
+
+            redisClient.expireat(
+                `videoServersJK_${hashStringMd5(id!)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
+
+        return serverList;
     } else {
-      serverList.push({
-        id: serverNames[serverNames.indexOf(server)].toLowerCase(),
-        url: servers[server],
-        direct: false,
-      });
+        return null;
     }
-  }
-
-  serverList = serverList.filter(x => x.id !== 'xtreme s' && x.id !== 'desuka');
-
-  if (serverList.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `videoServersJK_${hashStringMd5(id!)}`,
-        JSON.stringify(serverList),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `videoServersJK_${hashStringMd5(id!)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
-    }
-
-    return serverList;
-  } else {
-    return null;
-  }
 };
 
 async function desuServerUrl(url: string) {
-  let $: cheerio.Root;
+    let $: cheerio.Root;
 
-  try {
-    if (redisClient.connected) {
-      const resultQueryRedis: any = await redisClient.get(
-        `desuServerUrl_${hashStringMd5(url)}`,
-      );
+    try {
+        if (redisClient.connected) {
+            const resultQueryRedis: any = await redisClient.get(
+                `desuServerUrl_${hashStringMd5(url)}`,
+            );
 
-      if (resultQueryRedis) {
-        const resultRedis: any = JSON.parse(resultQueryRedis);
+            if (resultQueryRedis) {
+                const resultRedis: any = JSON.parse(resultQueryRedis);
 
-        return resultRedis;
-      }
+                return resultRedis;
+            }
+        }
+
+        $ = await requestGot(url, {scrapy: true, parse: false});
+    } catch (err) {
+        return err;
     }
 
-    $ = await requestGot(url, { scrapy: true, parse: false });
-  } catch (err) {
-    return err;
-  }
+    let script: string | null = '';
 
-  let script: string | null = '';
+    $('script').each((index: number, element: cheerio.Element) => {
+        if ($(element).html()!.includes('var parts = {')) {
+            if ($(element).html()) {
+                script = $(element).html();
+            } else {
+                return null;
+            }
+        }
+    });
 
-  $('script').each((index: number, element: cheerio.Element) => {
-    if ($(element).html()!.includes('var parts = {')) {
-      if ($(element).html()) {
-        script = $(element).html();
-      } else {
+    let result = script
+        .match(/swarmId: '(https:\/\/\S+)'/gi)!
+        .toString()
+        .split("'")[1];
+
+    if (result.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `desuServerUrl_${hashStringMd5(url)}`,
+                JSON.stringify(result),
+            );
+
+            /* After 24hrs expire the key. */
+
+            redisClient.expireat(
+                `desuServerUrl_${hashStringMd5(url)}`,
+                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            );
+        }
+
+        return result;
+    } else {
         return null;
-      }
     }
-  });
-
-  let result = script
-    .match(/swarmId: '(https:\/\/\S+)'/gi)!
-    .toString()
-    .split("'")[1];
-
-  if (result.length > 0) {
-    if (redisClient.connected) {
-      /* Set the key in the redis cache. */
-
-      redisClient.set(
-        `desuServerUrl_${hashStringMd5(url)}`,
-        JSON.stringify(result),
-      );
-
-      /* After 24hrs expire the key. */
-
-      redisClient.expireat(
-        `desuServerUrl_${hashStringMd5(url)}`,
-        parseInt(`${+new Date() / 1000}`, 10) + 7200,
-      );
-    }
-
-    return result;
-  } else {
-    return null;
-  }
 }
 
 export const structureThemes = async (body: any, indv: boolean) => {
-  let themes: any[] = [];
+    let themes: any[] = [];
 
-  if (indv === true) {
-    return {
-      title: body.title,
-      year: body.year,
-      themes: await getThemesData(body.themes),
-    };
-  } else {
-    for (let i = 0; i <= body.length - 1; i++) {
-      themes.push({
-        title: body[i].title,
-        year: body[i].year,
-        themes: await getThemesData(body[i].themes),
-      });
+    if (indv === true) {
+        return {
+            title: body.title,
+            year: body.year,
+            themes: await getThemesData(body.themes),
+        };
+    } else {
+        for (let i = 0; i <= body.length - 1; i++) {
+            themes.push({
+                title: body[i].title,
+                year: body[i].year,
+                themes: await getThemesData(body[i].themes),
+            });
+        }
+
+        return themes;
     }
-
-    return themes;
-  }
 };
 
 function getThemesData(themes: any[]): any {
-  let items: any[] = [];
+    let items: any[] = [];
 
-  for (let i = 0; i <= themes.length - 1; i++) {
-    items.push({
-      title: themes[i].name.split('"')[1] || 'Remasterización',
-      type: themes[i].type,
-      episodes: themes[i].episodes !== '' ? themes[i].episodes : null,
-      notes: themes[i].notes !== '' ? themes[i].notes : null,
-      video: themes[i].link,
-    });
-  }
+    for (let i = 0; i <= themes.length - 1; i++) {
+        items.push({
+            title: themes[i].name.split('"')[1] || 'Remasterización',
+            type: themes[i].type,
+            episodes: themes[i].episodes !== '' ? themes[i].episodes : null,
+            notes: themes[i].notes !== '' ? themes[i].notes : null,
+            video: themes[i].link,
+        });
+    }
 
-  return items.filter(x => x.title !== 'Remasterización');
+    return items.filter(x => x.title !== 'Remasterización');
 }
 
 export function getThemes(themes: any[]) {
-  return themes.map((item: any) => ({
-    name: item.themeName,
-    title: item.themeType,
-    link: item.mirror.mirrorURL,
-  }));
+    return themes.map((item: any) => ({
+        name: item.themeName,
+        title: item.themeType,
+        link: item.mirror.mirrorURL,
+    }));
 }
 
 export const imageUrlToBase64 = async (url: string) => {
-  let img: any = await requestGot(url);
-  return img.rawBody.toString('base64');
+    let img: any = await requestGot(url);
+    return img.rawBody.toString('base64');
 };
 
 export function hashStringMd5(string: string) {
-  return crypto.createHash('md5').update(string).digest('hex');
+    return crypto.createHash('md5').update(string).digest('hex');
 }
