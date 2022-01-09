@@ -282,7 +282,7 @@ export default class AnimeController {
         id: `ver/${anime.id}`,
         title: anime.title,
         image: anime.image,
-        episode: anime.episode,
+        episode: anime.no,
       });
     }
 
