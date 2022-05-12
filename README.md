@@ -116,7 +116,7 @@ Currently the Aruppi app on Android is already using the v4.x.x API services fro
     </td>
         <td align="center">
       <a href="https://github.com/Fmaldonado6/Akiyama">
-        <img src="https://raw.githubusercontent.com/Fmaldonado6/Akiyama/master/images/logo/web-logo.png" width="75px;" alt="Jeluchu"/><br />
+        <img src="https://raw.githubusercontent.com/Fmaldonado6/Akiyama/master/images/logo/logo.png" width="75px;" alt="Jeluchu"/><br />
           <sub>
             <b>Akiyama</b>
           </sub>
@@ -156,4 +156,4 @@ There are also **people who have made contributions** and therefore it is also i
 - [Jéluchu](https://github.com/Jeluchu) (Multiplatform Developer, designer, and others)
 - [Capitanwesler](https://github.com/capitanwesler) (Backend developer, web developer and others)
 
-Copyright © 2021 [Jéluchu](https://about.jeluchu.com/).
+Copyright © 2022 [Jéluchu](https://about.jeluchu.com/).
