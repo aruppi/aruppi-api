@@ -17,7 +17,7 @@ export default {
   ANIMEFLV_SEARCH: 'https://animeflv.net/browse?',
   SEARCH_DIRECTORY: 'https://animeflv.net/browse?order=title&page=',
   BASE_EPISODE_IMG_URL: 'https://cdn.animeflv.net/screenshots/',
-  BASE_QWANT: 'https://api.qwant.com/search/images?',
+  BASE_QWANT: 'https://api.qwant.com/v3/search/images?',
   REDDIT_ANIMETHEMES: 'https://reddit.com/r/AnimeThemes/wiki/',
   BASE_THEMEMOE: 'https://themes.moe/api/',
   BASE_ARUPPI_MONOSCHINOS: 'https://aruppi.jeluchu.xyz/apis/monoschinos/',
