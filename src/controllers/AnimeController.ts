@@ -229,6 +229,7 @@ export default class AnimeController {
       data = await requestGot(`${urls.BASE_ANIMEFLV}api/animes/list`, {
         parse: true,
         scrapy: false,
+        spoof: true,
       });
     } catch (err) {
       return next(err);

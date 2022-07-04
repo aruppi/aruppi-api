@@ -280,6 +280,7 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
         $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
             parse: false,
             scrapy: true,
+            spoof: true,
         });
     } catch (err) {
         return err;
@@ -606,6 +607,7 @@ export const tioanimeInfo = async (id: string | undefined, mal_id: number) => {
         $ = await requestGot(`${urls.BASE_TIOANIME}anime/${id}`, {
             scrapy: true,
             parse: false,
+            spoof: true,
         });
 
         /* Extra info of the anime */
@@ -785,6 +787,7 @@ export const videoServersTioAnime = async (id: string) => {
         $ = await requestGot(`${urls.BASE_TIOANIME}${id}`, {
             scrapy: true,
             parse: false,
+            spoof: true,
         });
     } catch (err) {
         return err;
@@ -941,7 +944,7 @@ async function desuServerUrl(url: string) {
             }
         }
 
-        $ = await requestGot(url, {scrapy: true, parse: false});
+        $ = await requestGot(url, {scrapy: true, parse: false, spoof: true});
     } catch (err) {
         return err;
     }
@@ -1033,7 +1036,7 @@ export function getThemes(themes: any[]) {
 }
 
 export const imageUrlToBase64 = async (url: string) => {
-    let img: any = await requestGot(url);
+    let img: any = await requestGot(url,{spoof:false});
     return img.rawBody.toString('base64');
 };
 

@@ -234,7 +234,7 @@ export default class UtilsController {
         `${urls.BASE_QWANT}t=images&q=${encodeURIComponent(
           title,
         )}&count=51&locale=es_ES&safesearch=1`,
-        { scrapy: false, parse: true },
+        { scrapy: false, parse: true, spoof: true, },
       );
     } catch (err) {
       return next(err);
@@ -637,6 +637,7 @@ export default class UtilsController {
       data = await requestGot(`${urls.BASE_THEMEMOE}roulette`, {
         parse: true,
         scrapy: false,
+        spoof: true,
       });
     } catch (err) {
       return next(err);

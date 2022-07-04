@@ -285,6 +285,7 @@ async function redditocall(href: string) {
   const resp = await requestGot(urls.REDDIT_ANIMETHEMES + href + '.json', {
     parse: true,
     scrapy: false,
+    spoof: true,
   });
 
   return cheerio.load(getHTML(resp.data.content_html));
