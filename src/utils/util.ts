@@ -315,11 +315,11 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
                 JSON.stringify(relatedAnimes),
             );
 
-            /* After 2hrs expire the key. */
+            /* After 1hr expire the key. */
 
             redisClient.expire(
                 `getRelatedMAL_${mal_id}`,
-                7200,
+                3600,
             );
         }
 
