@@ -104,7 +104,7 @@ export default class DirectoryController {
 
   async getSeason(req: Request, res: Response, next: NextFunction) {
     const { year, type } = req.params;
-    let data: any;
+    let info: any;
 
     try {
       if (redisClient.connected) {
@@ -119,7 +119,7 @@ export default class DirectoryController {
         }
       }
 
-      data = await requestGot(`${urls.BASE_JIKAN}season/${year}/${type}`, {
+      info = await requestGot(`${urls.BASE_JIKAN}seasons/${year}/${type}`, {
         scrapy: false,
         parse: true,
       });
@@ -127,10 +127,10 @@ export default class DirectoryController {
       return next(err);
     }
 
-    const season: TypeAnime[] = data.anime.map((item: any) => {
+    const season: TypeAnime[] = info.data.map((item: any) => {
       return {
-        title: item.title,
-        image: item.image_url,
+        title: item.titles.find((x: { type: string; }) => x.type === "Default").title,
+        image: item.images.jpg.image_url,
         genres: item.genres.map((genre: any) => genre.name),
       };
     });
@@ -161,7 +161,7 @@ export default class DirectoryController {
   }
 
   async allSeasons(req: Request, res: Response, next: NextFunction) {
-    let data: any;
+    let info: any;
 
     try {
       if (redisClient.connected) {
@@ -176,7 +176,7 @@ export default class DirectoryController {
         }
       }
 
-      data = await requestGot(`${urls.BASE_JIKAN}season/archive`, {
+      info = await requestGot(`${urls.BASE_JIKAN}seasons`, {
         parse: true,
         scrapy: false,
       });
@@ -184,7 +184,7 @@ export default class DirectoryController {
       return next(err);
     }
 
-    const archive: Archive[] = data.archive.map((item: any) => {
+    const archive: Archive[] = info.data.map((item: any) => {
       return {
         year: item.year,
         seasons: item.seasons,
@@ -215,7 +215,7 @@ export default class DirectoryController {
   }
 
   async laterSeasons(req: Request, res: Response, next: NextFunction) {
-    let data: any;
+    let info: any;
 
     try {
       if (redisClient.connected) {
@@ -230,7 +230,7 @@ export default class DirectoryController {
         }
       }
 
-      data = await requestGot(`${urls.BASE_JIKAN}season/later`, {
+      info = await requestGot(`${urls.BASE_JIKAN}seasons/upcoming`, {
         parse: true,
         scrapy: false,
       });
@@ -238,10 +238,10 @@ export default class DirectoryController {
       return next(err);
     }
 
-    const future: Season[] = data.anime.map((item: any) => {
+    const future: Season[] = info.data.map((item: any) => {
       return {
-        title: item.title,
-        image: item.image_url,
+        title: item.titles.find((x: { type: string; }) => x.type === "Default").title,
+        image: item.images.jpg.image_url,
         malink: item.url,
       };
     });
@@ -294,6 +294,7 @@ export default class DirectoryController {
       const extraInfo: any = await animeExtraInfo(resultQuery!.mal_id);
 
       resultAnime = {
+        //aruppi_key: hashStringMd5(title),
         title: resultQuery?.title,
         poster: resultQuery?.poster,
         synopsis: resultQuery?.description,

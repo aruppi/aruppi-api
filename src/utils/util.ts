@@ -34,7 +34,7 @@ interface RelatedAnime {
 }
 
 export const animeExtraInfo = async (mal_id: number) => {
-    let data: any;
+    let info: any;
     let broadcast: any;
 
     const airDay: any = {
@@ -68,40 +68,40 @@ export const animeExtraInfo = async (mal_id: number) => {
             }
         }
 
-        data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
+        info = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}`, {
             parse: true,
             scrapy: false,
         });
 
-        if (data.broadcast) {
-            broadcast = data.broadcast.split('at')[0].trim().toLowerCase() || null;
+        if (info.data.airing) {
+            broadcast = info.data.broadcast.string.split('at')[0].trim().toLowerCase() || null;
         }
     } catch (err) {
         return err;
     }
 
     if (airDay.hasOwnProperty(broadcast)) {
-        data.broadcast = airDay[broadcast];
+        info.data.broadcast = airDay[broadcast];
     } else {
-        data.broadcast = null;
+        info.data.broadcast = null;
     }
 
     const formattedObject: any = {
-        titleJapanese: data.title_japanese,
-        source: data.source,
-        totalEpisodes: data.episodes,
+        titleJapanese: info.data.titles.find((x: { type: string; }) => x.type === "Default").title,
+        source: info.data.source,
+        totalEpisodes: info.data.episodes,
         aired: {
-            from: data.aired.from,
-            to: data.aired.to,
+            from: info.data.aired.from,
+            to: info.data.aired.to,
         },
-        duration: data.duration.split('per')[0],
-        rank: data.rank,
-        broadcast: data.broadcast,
-        producers: data.producers.map((item: any) => item.name) || null,
-        licensors: data.licensors.map((item: any) => item.name) || null,
-        studios: data.studios.map((item: any) => item.name) || null,
-        openingThemes: data.opening_themes || null,
-        endingThemes: data.ending_themes || null,
+        duration: info.data.duration.split('per')[0],
+        rank: info.data.rank,
+        broadcast: info.data.broadcast,
+        producers: info.data.producers.map((item: any) => item.name) || null,
+        licensors: info.data.licensors.map((item: any) => item.name) || null,
+        studios: info.data.studios.map((item: any) => item.name) || null,
+        openingThemes: info.data.opening_themes || null,
+        endingThemes: info.data.ending_themes || null,
     };
 
     if (formattedObject) {
@@ -128,7 +128,7 @@ export const animeExtraInfo = async (mal_id: number) => {
 };
 
 export const getAnimeVideoPromo = async (mal_id: number) => {
-    let data: any;
+    let info: any;
 
     try {
         if (redisClient.connected) {
@@ -143,7 +143,7 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
             }
         }
 
-        data = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
+        info = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/videos`, {
             parse: true,
             scrapy: false,
         });
@@ -151,11 +151,11 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
         return err;
     }
 
-    const promo: Promo[] = data.promo.map((item: Promo) => {
+    const promo: Promo[] = info.data.promo.map((item: any) => {
         return {
             title: item.title,
-            previewImage: item.image_url,
-            videoURL: item.video_url,
+            previewImage: item.trailer.images.image_url,
+            videoURL: item.trailer.url,
         };
     });
 
@@ -183,7 +183,7 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
 };
 
 export const getAnimeCharacters = async (mal_id: number) => {
-    let data: any;
+    let info: any;
 
     try {
         if (redisClient.connected) {
@@ -198,19 +198,19 @@ export const getAnimeCharacters = async (mal_id: number) => {
             }
         }
 
-        data = await requestGot(
-            `${urls.BASE_JIKAN}anime/${mal_id}/characters_staff`,
+        info = await requestGot(
+            `${urls.BASE_JIKAN}anime/${mal_id}/characters`,
             {parse: true, scrapy: false},
         );
     } catch (err) {
         return err;
     }
 
-    const characters: Character[] = data.characters.map((item: any) => {
+    const characters: Character[] = info.data.map((item: any) => {
         return {
-            id: item.mal_id,
-            name: item.name,
-            image: item.image_url,
+            id: item.character.mal_id,
+            name: item.character.name,
+            image: item.character.images.jpg.image_url,
             role: item.role,
         };
     });

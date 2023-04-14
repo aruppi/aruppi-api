@@ -81,7 +81,7 @@ interface Movie {
 export default class AnimeController {
   async schedule(req: Request, res: Response, next: NextFunction) {
     const { day } = req.params;
-    let data: any;
+    let info: any;
 
     try {
       if (redisClient.connected) {
@@ -96,7 +96,7 @@ export default class AnimeController {
         }
       }
 
-      data = await requestGot(`${urls.BASE_JIKAN}schedule/${day}`, {
+      info = await requestGot(`${urls.BASE_JIKAN}schedules?filter=${day}`, {
         parse: true,
         scrapy: false,
       });
@@ -104,10 +104,10 @@ export default class AnimeController {
       return next(err);
     }
 
-    const animeList: Schedule[] = data[day].map((item: Schedule) => ({
-      title: item.title,
+    const animeList: Schedule[] = info.data.map((item: any) => ({
+      title: item.titles.find((x: { type: string; }) => x.type === "Default").title,
       malid: item.mal_id,
-      image: item.image_url,
+      image: item.images.jpg.image_url,
     }));
 
     if (animeList.length > 0) {
@@ -137,7 +137,7 @@ export default class AnimeController {
 
   async top(req: Request, res: Response, next: NextFunction) {
     const { type, subtype, page } = req.params;
-    let data: any;
+    let info: any;
 
     try {
       if (redisClient.connected) {
@@ -161,12 +161,12 @@ export default class AnimeController {
       }
 
       if (subtype !== undefined) {
-        data = await requestGot(
-          `${urls.BASE_JIKAN}top/${type}/${page}/${subtype}`,
+        info = await requestGot(
+          `${urls.BASE_JIKAN}top/${type}?filter=${subtype}&page=${page}`,
           { parse: true, scrapy: false },
         );
       } else {
-        data = await requestGot(`${urls.BASE_JIKAN}top/${type}/${page}`, {
+        info = await requestGot(`${urls.BASE_JIKAN}top/${type}?page=${page}`, {
           parse: true,
           scrapy: false,
         });
@@ -175,11 +175,12 @@ export default class AnimeController {
       return next(err);
     }
 
-    const top: Top[] = data.top.map((item: Top) => ({
-      rank: item.rank,
-      title: item.title,
+    const top: Top[] = info.data.map((item: any, index: number) => ({
+      // A little hacky way to fix null ranks
+      rank: item.rank || index + 1 + (info.pagination.current_page-1)*info.pagination.items.per_page,
+      title: item.titles.find((x: { type: string; }) => x.type === "Default").title,
       url: item.url,
-      image_url: item.image_url,
+      image_url: item.images.jpg.image_url,
       type: type,
       subtype: subtype,
       page: page,
