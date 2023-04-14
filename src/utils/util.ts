@@ -4,6 +4,7 @@ import AnimeModel, {Anime} from '../database/models/anime.model';
 import crypto from 'crypto';
 import util from 'util';
 import {redisClient} from '../database/connection';
+import { stderr } from 'process';
 
 // @ts-ignore
 redisClient.get = util.promisify(redisClient.get);
@@ -262,12 +263,12 @@ const getPosterAndType = async (
 };
 
 export const getRelatedAnimesMAL = async (mal_id: number) => {
-    let $: cheerio.Root;
+    let info: any;
 
     try {
         if (redisClient.connected) {
             const resultQueryRedis: any = await redisClient.get(
-                `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
+                `getRelatedMAL_${mal_id}`,
             );
 
             if (resultQueryRedis) {
@@ -277,66 +278,52 @@ export const getRelatedAnimesMAL = async (mal_id: number) => {
             }
         }
 
-        $ = await requestGot(`https://myanimelist.net/anime/${mal_id}`, {
-            parse: false,
-            scrapy: true,
-            spoof: true,
+        info = await requestGot(`${urls.BASE_JIKAN}anime/${mal_id}/relations`, {
+            parse: true,
+            scrapy: false,
         });
     } catch (err) {
+        stderr.write(`Error on getRelatedAnimesMAL http on mal_id: ${mal_id}\n`)
         return err;
     }
 
-    let listRelated: any = {};
-    let relatedAnimes: RelatedAnime[] = [];
-
-    if ($('table.anime_detail_related_anime').length > 0) {
-        $('table.anime_detail_related_anime')
-            .find('tbody tr')
-            .each((index: number, element: any) => {
-                if ($(element).find('td').eq(0).text() !== 'Adaptation:') {
-                    listRelated[$(element).find('td').eq(1).text()] = $(element)
-                        .find('td')
-                        .children('a')
-                        .attr('href');
-                }
+    const relatedAnimes = []
+    for (const relation_entry of info.data) {
+        for (const entry of relation_entry.entry){
+            if (entry.type != "anime")
+                break;
+            const queryRes: Anime | null = await AnimeModel.findOne({
+                mal_id: {$eq: entry.mal_id}
             });
+            if (queryRes == null)
+                break
+            
+            relatedAnimes.push({
+                title:  queryRes!.title,
+                type:   queryRes?.type,
+                poster: queryRes?.poster
+            })
+        }
+    }
 
-        for (const related in listRelated) {
-            let posterUrl: any = await getPosterAndType(
-                undefined,
-                listRelated[related].split('/')[2],
+    if (relatedAnimes.length > 0) {
+        if (redisClient.connected) {
+            /* Set the key in the redis cache. */
+
+            redisClient.set(
+                `getRelatedMAL_${mal_id}`,
+                JSON.stringify(relatedAnimes),
             );
 
-            if (posterUrl !== '') {
-                relatedAnimes.push({
-                    title: related,
-                    type: posterUrl[1],
-                    poster: posterUrl[0],
-                });
-            }
+            /* After 2hrs expire the key. */
+
+            redisClient.expire(
+                `getRelatedMAL_${mal_id}`,
+                7200,
+            );
         }
 
-        if (relatedAnimes.length > 0) {
-            if (redisClient.connected) {
-                /* Set the key in the redis cache. */
-
-                redisClient.set(
-                    `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-                    JSON.stringify(relatedAnimes),
-                );
-
-                /* After 24hrs expire the key. */
-
-                redisClient.expireat(
-                    `getRelatedMAL_${hashStringMd5(`${mal_id}`)}`,
-                    parseInt(`${+new Date() / 1000}`, 10) + 7200,
-                );
-            }
-
-            return relatedAnimes;
-        }
-    } else {
-        return [];
+        return relatedAnimes;
     }
 };
 

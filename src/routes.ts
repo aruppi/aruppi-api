@@ -26,7 +26,7 @@ routes.get('/api/v4/', (req: Request, res: Response) => {
   res.json({
     message: 'Aruppi /api - 🎏',
     author: 'Jéluchu',
-    version: '4.2.1',
+    version: '4.2.2',
     credits: 'The bitch loves /apis that offers data to Aruppi App',
     entries: [
       {
