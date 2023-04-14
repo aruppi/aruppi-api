@@ -119,11 +119,11 @@ export default class AnimeController {
           JSON.stringify({ day: animeList }),
         );
 
-        /* After 24hrs expire the key. */
+        /* After 6hrs expire the key. */
 
-        redisClient.expireat(
+        redisClient.expire(
           `schedule_${hashStringMd5(day)}`,
-          parseInt(`${+new Date() / 1000}`, 10) + 7200,
+           + 21600,
         );
       }
 

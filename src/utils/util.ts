@@ -134,7 +134,7 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
     try {
         if (redisClient.connected) {
             const resultQueryRedis: any = await redisClient.get(
-                `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+                `getMALpromoInfo_${mal_id}`,
             );
 
             if (resultQueryRedis) {
@@ -165,15 +165,15 @@ export const getAnimeVideoPromo = async (mal_id: number) => {
             /* Set the key in the redis cache. */
 
             redisClient.set(
-                `promoInfo_${hashStringMd5(`${mal_id}`)}`,
+                `getMALpromoInfo_${mal_id}`,
                 JSON.stringify(promo),
             );
 
-            /* After 24hrs expire the key. */
+            /* After 2hrs expire the key. */
 
-            redisClient.expireat(
-                `promoInfo_${hashStringMd5(`${mal_id}`)}`,
-                parseInt(`${+new Date() / 1000}`, 10) + 7200,
+            redisClient.expire(
+                `getMALpromoInfo_${mal_id}`,
+                 7200,
             );
         }
 
