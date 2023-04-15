@@ -243,8 +243,8 @@ export default class UtilsController {
     const results: any[] = data.data.result.items.map((item: any) => {
       return {
         type: item.thumb_type,
-        thumbnail: `https:${item.thumbnail}`,
-        fullsize: `https:${item.media_fullsize}`,
+        thumbnail: `${item.thumbnail}`,
+        fullsize: `${item.media_fullsize}`,
       };
     });
 
