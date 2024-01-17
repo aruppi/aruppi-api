@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AruppiDataComparer": {
+      "commandName": "Project",
+      "workingDirectory": "./"
+    }
+  }
+}
