@@ -23,6 +23,12 @@ public partial class SampleController : BaseController<SampleController>
     [GenerateGetAttribute(InyectedDatabaseContextName = nameof(SampleController.DatabaseContext))]
     public partial Task<Page<Database.Models.Show>> AutoGet([FromQuery] ShowTempQuery? query = null);
 
+    [HttpPost]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "GetShowList", Description = "Sample Description")]
+    [GenerateGetAttribute(InyectedDatabaseContextName = nameof(SampleController.DatabaseContext))]
+    public partial Task<Page<Database.Models.Show>> AutoGet2([FromBody] ShowTempQuery2? query = null);
+
     [HttpGet(nameof(SampleEndpointWithNoConfiguration))]
     [SwaggerOperation(Summary = "UpdateAvailableShows", Description = "Sample Description")]
     public async Task SampleEndpointWithNoConfiguration(CancellationToken cancellationToken = default)

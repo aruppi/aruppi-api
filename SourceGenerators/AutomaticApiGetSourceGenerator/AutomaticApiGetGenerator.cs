@@ -76,9 +76,19 @@ public partial class AutomaticApiGetGenerator : IIncrementalGenerator
         };
     }
 
+    private static Dictionary<string, HashSet<string>> ExistingItemsPerNamespace = new Dictionary<string, HashSet<string>>();
+
     public static void Execute(SourceProductionContext context, HelperClass helperClass)
     {
         var method = helperClass.IMethodSymbol;
+
+        var @namespace = method.ContainingNamespace.ToString();
+
+        if (!ExistingItemsPerNamespace.TryGetValue(@namespace, out var existingItems))
+        {
+            existingItems = new HashSet<string>();
+            ExistingItemsPerNamespace.Add(@namespace, existingItems);
+        }
 
         var @return = method.ReturnType;
 
@@ -161,6 +171,17 @@ public partial class AutomaticApiGetGenerator : IIncrementalGenerator
         var includeContent = new StringBuilder();
 
         var members = dbType.GetMembers();
+
+
+        columnsSb.Indent(0).AppendLine("[JsonConverter(typeof(JsonStringEnumConverter))]");
+        columnsSb.Indent(0).AppendLine($"public enum {columnsEnumName}");
+        columnsSb.Indent(0).AppendLine("{");
+
+
+        includesSb.Indent(0).AppendLine("[JsonConverter(typeof(JsonStringEnumConverter))]");
+        includesSb.Indent(0).AppendLine($"public enum {includesEnumName}");
+        includesSb.Indent(0).AppendLine("{");
+        
 
         foreach (var member in members)
         {
@@ -247,9 +268,22 @@ public partial class AutomaticApiGetGenerator : IIncrementalGenerator
             }
         }
 
+        columnsSb.Indent(0).AppendLine("}");
+        includesSb.Indent(0).AppendLine("}");
+
+        if (!existingItems.Add(columnsEnumName))
+        {
+            columnsSb.Clear();
+        }
+
+        if (!existingItems.Add(includesEnumName))
+        {
+            includesSb.Clear();
+        }
+
         var replacements = new Dictionary<string, string>
         {
-            { "Namespace", method.ContainingNamespace.ToString() },
+            { "Namespace", @namespace },
             { "QueryModelClassName", queryParamTypeName },
             { "QueryModelContent", queryModelSb.ToString() },
             { "ControllerName", method.ContainingType.Name },
@@ -259,10 +293,10 @@ public partial class AutomaticApiGetGenerator : IIncrementalGenerator
             { "DatabaseClassName", dbType.GetFullyQualifiedName() },
             { "GetEndpointContent", getMethodSb.ToString() },
             { "QueryParamName", queryParamName },
-            { "DatabaseClassColumns", columnsEnumName },
-            { "DatabaseClassColumnsContent", columnsSb.ToString() },
-            { "DatabaseClassIncludes", includesEnumName },
-            { "DatabaseClassIncludesContent", includesSb.ToString() },
+            { "DatabaseClassColumnsName", columnsEnumName },
+            { "DatabaseClassColumns", columnsSb.ToString() },
+            { "DatabaseClassIncludesName", includesEnumName },
+            { "DatabaseClassIncludes", includesSb.ToString() },
             { "OrderBy", orderBySb.ToString() },
             { "OrderByDescending", orderByDescendingSb.ToString() },
             { "ThenOrderBy", thenBySb.ToString() },

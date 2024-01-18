@@ -11,24 +11,16 @@ namespace TemplateNamespaceTemplate;
 
 public partial class TemplateQueryModelClassNameTemplate
 {
-    public List<OrderBy<TemplateDatabaseClassColumnsTemplate>> OrderBy { get; set; }
-    public List<TemplateDatabaseClassIncludesTemplate> Includes { get; set; }
+    public List<OrderBy<TemplateDatabaseClassColumnsNameTemplate>> OrderBy { get; set; }
+    public List<TemplateDatabaseClassIncludesNameTemplate> Includes { get; set; }
     public int? PageSize { get; set; }
     public int? PageIndex { get; set; }
 TemplateQueryModelContentTemplate
 }
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum TemplateDatabaseClassColumnsTemplate
-{
-TemplateDatabaseClassColumnsContentTemplate
-}
+TemplateDatabaseClassColumnsTemplate
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum TemplateDatabaseClassIncludesTemplate
-{
-TemplateDatabaseClassIncludesContentTemplate
-}
+TemplateDatabaseClassIncludesTemplate
 
 public partial class TemplateControllerNameTemplate
 {

@@ -2,7 +2,7 @@
   "profiles": {
     "Profile 1": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "..\\AruppiApi\\AruppiApi.csproj"
+      "targetProject": "..\\..\\AruppiApi\\AruppiApi.csproj"
     }
   }
 }
