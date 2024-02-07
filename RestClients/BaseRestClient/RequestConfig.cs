@@ -19,7 +19,7 @@ public class RequestConfig<TContext> : RequestConfig
 public class RequestConfig
 {
     public string? Endpoint { get; set; }
-    public List<KeyValuePair<string, dynamic>>? QueryParams { get; set; }
+    public List<(string Key, dynamic Value)>? QueryParams { get; set; }
     public Func<HttpRequestMessage> MessageBuilder { get; set; } = null!;
 
     public virtual HttpRequestMessage BuildMessage()

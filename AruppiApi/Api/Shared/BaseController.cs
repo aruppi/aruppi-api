@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AruppiApi.Api.Shared;
 
@@ -8,6 +9,7 @@ namespace AruppiApi.Api.Shared;
 // services.AddHttpContextAccessor();
 // var ctx = IServiceProvider.GetRequiredService<IHttpContextAccessor>();
 
+[AllowAnonymous]
 [Route("api/v{version:apiVersion}/[controller]")]
 public abstract class BaseController<TController> : ControllerBase where TController : BaseController<TController>
 {

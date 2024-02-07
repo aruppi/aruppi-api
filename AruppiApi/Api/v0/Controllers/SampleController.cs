@@ -17,28 +17,28 @@ public partial class SampleController : BaseController<SampleController>
         this.DatabaseContext = DatabaseContext;
     }
 
-    [HttpGet]
-    [AllowAnonymous]
-    [SwaggerOperation(Summary = "GetShowList", Description = "Sample Description")]
-    [GenerateGetAttribute(InyectedDatabaseContextName = nameof(SampleController.DatabaseContext))]
-    public partial Task<Page<Database.Models.Show>> AutoGet([FromQuery] ShowTempQuery? query = null);
+    //[HttpGet]
+    //[AllowAnonymous]
+    //[SwaggerOperation(Summary = "GetShowList", Description = "Sample Description")]
+    //[GenerateGetAttribute(InyectedDatabaseContextName = nameof(SampleController.DatabaseContext))]
+    //public partial Task<Page<Database.Models.Show>> AutoGet([FromQuery] ShowTempQuery? query = null);
 
-    [HttpPost]
-    [AllowAnonymous]
-    [SwaggerOperation(Summary = "GetShowList", Description = "Sample Description")]
-    [GenerateGetAttribute(InyectedDatabaseContextName = nameof(SampleController.DatabaseContext))]
-    public partial Task<Page<Database.Models.Show>> AutoGet2([FromBody] ShowTempQuery2? query = null);
+    //[HttpPost]
+    //[AllowAnonymous]
+    //[SwaggerOperation(Summary = "GetShowList", Description = "Sample Description")]
+    //[GenerateGetAttribute(InyectedDatabaseContextName = nameof(SampleController.DatabaseContext))]
+    //public partial Task<Page<Database.Models.Show>> AutoGet2([FromBody] ShowTempQuery2? query = null);
 
-    [HttpGet(nameof(SampleEndpointWithNoConfiguration))]
-    [SwaggerOperation(Summary = "UpdateAvailableShows", Description = "Sample Description")]
-    public async Task SampleEndpointWithNoConfiguration(CancellationToken cancellationToken = default)
-    {
-    }
+    //[HttpGet(nameof(SampleEndpointWithNoConfiguration))]
+    //[SwaggerOperation(Summary = "UpdateAvailableShows", Description = "Sample Description")]
+    //public async Task SampleEndpointWithNoConfiguration(CancellationToken cancellationToken = default)
+    //{
+    //}
 
-    [Authorize(Policy = "SamplePolicy, Other", Roles = "SampleRole, Others")]
-    [HttpGet(nameof(SampleEndpointWithCustomPoliciesAndRoles))]
-    [SwaggerOperation(Summary = "UpdateAvailableShows", Description = "Sample Description")]
-    public async Task SampleEndpointWithCustomPoliciesAndRoles(CancellationToken cancellationToken = default)
-    {
-    }
+    //[Authorize(Policy = "SamplePolicy, Other", Roles = "SampleRole, Others")]
+    //[HttpGet(nameof(SampleEndpointWithCustomPoliciesAndRoles))]
+    //[SwaggerOperation(Summary = "UpdateAvailableShows", Description = "Sample Description")]
+    //public async Task SampleEndpointWithCustomPoliciesAndRoles(CancellationToken cancellationToken = default)
+    //{
+    //}
 }

@@ -6,13 +6,13 @@ namespace BaseRestClient;
 
 public abstract class BaseHttpClient
 {
-    private readonly Uri BaseUrl;
+    protected virtual string BaseUrl { get; set; }
+    protected virtual int AuthRetryCount { get; set; } = 0;
+
     private readonly HttpClient HttpClient = null!;
     private readonly IHttpClientFactory IHttpClientFactory = null!;
 
-    protected abstract int AuthRetryCount { get; set; }
-
-    public BaseHttpClient(Uri BaseUrl, IHttpClientFactory IHttpClientFactory) : this(BaseUrl)
+    public BaseHttpClient(IHttpClientFactory IHttpClientFactory)
     {
         if (IHttpClientFactory is null)
         {
@@ -21,18 +21,13 @@ public abstract class BaseHttpClient
         this.IHttpClientFactory = IHttpClientFactory;
     }
 
-    public BaseHttpClient(Uri BaseUrl, HttpClient HttpClient) : this(BaseUrl)
+    public BaseHttpClient(HttpClient HttpClient)
     {
         if (HttpClient is null)
         {
             throw new NullReferenceException(nameof(HttpClient));
         }
         this.HttpClient = HttpClient;
-    }
-
-    private BaseHttpClient(Uri BaseUrl)
-    {
-        this.BaseUrl = BaseUrl;
     }
 
     protected abstract void SetupHttpClient(HttpClient httpClient);
@@ -78,53 +73,57 @@ public abstract class BaseHttpClient
         return response.Content;
     }
 
-    private Uri GetUri(string? endpoint, List<KeyValuePair<string, dynamic>>? param = null)
+    private Uri GetUri(string? endpoint, List<(string Key, dynamic Value)>? param = null)
     {
-        if (param is null && endpoint is null)
-        {
-            return BaseUrl;
-        }
+        var uriBuilder = new StringBuilder();
 
-        if (param is null)
-        {
-            return new Uri(BaseUrl, endpoint);
-        }
+        uriBuilder.Append(BaseUrl);
 
         endpoint ??= "";
 
-        var query = new StringBuilder();
+        uriBuilder.Append(endpoint);
 
-        query.Append(endpoint);
-
-        foreach (var pair in param)
+        if (param is not null && param.Count > 0)
         {
-            if (string.IsNullOrWhiteSpace(pair.Key))
-            {
-                continue;
-            }
+            uriBuilder.Append('?');
 
-            if (query.Length > endpoint.Length)
-            {
-                query.Append('&');
-            }
-
-            query.Append(pair.Key);
-
-            if (string.IsNullOrWhiteSpace(pair.Key))
-            {
-                continue;
-            }
-
-            query.Append('=');
-
-            query.Append(pair.Value);
+            UrlEncode(uriBuilder, param);
         }
 
-        var relativeUri = query.ToString();
+        var fullUrl = uriBuilder.ToString();
 
-        var uri = new Uri(BaseUrl, relativeUri);
+        var uri = new Uri(fullUrl);
 
         return uri;
+    }
+
+    private void UrlEncode(StringBuilder sb, List<(string Key, dynamic Value)>? param = null)
+    {
+        for (int i = 0; i < param.Count; i++)
+        {
+            var pair = param[i];
+
+            if (string.IsNullOrWhiteSpace(pair.Key))
+            {
+                continue;
+            }
+
+            if (i != 0)
+            {
+                sb.Append('&');
+            }
+
+            sb.Append(pair.Key);
+
+            if (string.IsNullOrWhiteSpace(pair.Key))
+            {
+                continue;
+            }
+
+            sb.Append('=');
+
+            sb.Append(pair.Value);
+        }
     }
 
     private HttpClient GetHttpClient()
