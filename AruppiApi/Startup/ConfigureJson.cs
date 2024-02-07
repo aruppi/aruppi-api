@@ -23,6 +23,7 @@ public class ConfigureJsonOptions : IConfigureNamedOptions<JsonOptions>
     {
         var so = options.JsonSerializerOptions;
         // Sane Defaults
+        so.Converters.Add(new JsonStringEnumConverter());
         so.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         so.MaxDepth = 128;
     }

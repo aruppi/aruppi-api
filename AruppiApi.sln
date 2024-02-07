@@ -27,7 +27,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SourceGenerators", "SourceG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutomaticApiGetSourceGenerator", "SourceGenerators\AutomaticApiGetSourceGenerator\AutomaticApiGetSourceGenerator.csproj", "{A2FC9BC1-2E10-45CE-AB86-C364BFF03373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JikanClient", "JikanClient\JikanClient.csproj", "{AD6EC06B-5F9A-40F1-B38C-C2C11D11AB96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JikanClient", "JikanClient\JikanClient.csproj", "{AD6EC06B-5F9A-40F1-B38C-C2C11D11AB96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JikanOpenApiClient", "JikanOpenApiClient\JikanOpenApiClient.csproj", "{A951A8AB-AACD-4F52-8EC3-2E7B66345A10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,10 @@ Global
 		{AD6EC06B-5F9A-40F1-B38C-C2C11D11AB96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD6EC06B-5F9A-40F1-B38C-C2C11D11AB96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD6EC06B-5F9A-40F1-B38C-C2C11D11AB96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A951A8AB-AACD-4F52-8EC3-2E7B66345A10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A951A8AB-AACD-4F52-8EC3-2E7B66345A10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A951A8AB-AACD-4F52-8EC3-2E7B66345A10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A951A8AB-AACD-4F52-8EC3-2E7B66345A10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +89,7 @@ Global
 		{E65AA5D6-A689-4EFC-880C-25C603267773} = {10CC495A-63EB-435E-970B-F051BAECA7A3}
 		{A2FC9BC1-2E10-45CE-AB86-C364BFF03373} = {C618060E-0FD8-45EE-84E6-93449313EF70}
 		{AD6EC06B-5F9A-40F1-B38C-C2C11D11AB96} = {3FE62DC5-97DE-47A5-807D-CAF6ACBD7020}
+		{A951A8AB-AACD-4F52-8EC3-2E7B66345A10} = {3FE62DC5-97DE-47A5-807D-CAF6ACBD7020}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7283B8FE-D905-456E-9271-5AC8EAEBF247}

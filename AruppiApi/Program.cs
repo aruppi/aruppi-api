@@ -3,7 +3,9 @@ using AruppiApi.Startup.ApiVersioning;
 using AruppiApi.Startup.AuthenticationAndAuthorizationOptions;
 using AruppiApi.Startup.HealthCheck;
 using AruppiApi.Startup.Swagger;
-using JikanClient;
+using JikanRest;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace AruppiApi;
 
@@ -46,12 +48,25 @@ public class Program
 #if DEBUG
         services.AddHttpLogging((options) => { });
 #endif
-        
+
         services.AddSingleton((IServiceProvider) =>
         {
-            var httpClientFactory = IServiceProvider.GetRequiredService<IHttpClientFactory>();
-            return new JikanApiClient(httpClientFactory);
+            var httpClient = IServiceProvider.GetRequiredService<HttpClient>();
+
+            var authProvider = new AnonymousAuthenticationProvider();
+            
+            var adapter = new HttpClientRequestAdapter(authenticationProvider: authProvider, httpClient: httpClient);
+            
+            var client = new JikanApi(adapter);
+
+            return client;
         });
+
+        //services.AddSingleton((IServiceProvider) =>
+        //{
+        //    var httpClientFactory = IServiceProvider.GetRequiredService<IHttpClientFactory>();
+        //    return new JikanApiClient(httpClientFactory);
+        //});
 
         //services.AddTransient<RestApiClient>((IServiceProvider) =>
         //{

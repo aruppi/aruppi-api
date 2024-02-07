@@ -34,8 +34,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\JikanClient\JikanClient.csproj" />
-		<ProjectReference Include="..\SourceGenerators\AutomaticApiGetSourceGenerator\AutomaticApiGetSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\JikanOpenApiClient\JikanOpenApiClient.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

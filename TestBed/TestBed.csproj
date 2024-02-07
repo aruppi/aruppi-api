@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JikanClient\JikanClient.csproj" />
+    <ProjectReference Include="..\JikanOpenApiClient\JikanOpenApiClient.csproj" />
     <ProjectReference Include="..\Scrappers\MonosScrapper\MonosScrapper.csproj" />
     <ProjectReference Include="..\Scrappers\TioScrapper\TioScrapper.csproj" />
   </ItemGroup>

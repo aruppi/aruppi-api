@@ -1,9 +1,9 @@
-﻿using JikanClient;
-using JikanClient.Models.Request;
-using JikanClient.Models.Response;
-using MonosScrapper;
+﻿using JikanClient.Models.Response;
+using JikanRest;
+using JikanRest.Models;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 using Riok.Mapperly.Abstractions;
-using TioScrapper;
 
 namespace TestBed;
 
@@ -19,29 +19,37 @@ internal class Program
 
         //var sources2 = Monos.GetSourcesFromUrl(url2);
 
-        var test = new JikanApiClient(new HttpClient());
+        //var test = new JikanApiClient(new HttpClient());
 
-        var request = new GetSchedulesRequest()
+        //var request = new GetSchedulesRequest()
+        //{
+        //    Day = Days.Monday,
+        //};
+
+        //var data = await test.SchedulesGet(request);
+
+        //var slim = data.Data.Select(i => i.ToDto());
+
+        // API requires no authentication, so use the anonymous
+        // authentication provider
+        var authProvider = new AnonymousAuthenticationProvider();
+        // Create request adapter using the HttpClient-based implementation
+        var adapter = new HttpClientRequestAdapter(authProvider);
+        // Create the API client
+        var client = new JikanApi(adapter);
+
+
+        var year = 1999;
+        var season = "spring";
+        var result = await client.Seasons[year][season].GetAsync(b =>
         {
-            Day = Days.Monday,
-        };
+        });
+        
+        Pagination_plus? data = await client.Schedules.GetAsync((requestBuilder) =>
+        {
+            requestBuilder.QueryParameters.Filter = JikanRest.Schedules.GetFilterQueryParameterType.Monday;
+        });
 
-        var data = await test.SchedulesGet(request);
-
-        var slim = data.Data.Select(i => i.ToDto());
+        Console.WriteLine($"Retrieved {data.Pagination.Items.Count} posts.");
     }
-}
-
-[Mapper]
-public static partial class ScheduleMapper
-{
-    [MapProperty(nameof(@GetScheduleResponse.Images.Webp.LargeImageUrl), nameof(@ScheduleSlim.Image))]
-    public static partial ScheduleSlim ToDto(this GetScheduleResponse src);
-}
-
-public class ScheduleSlim
-{
-    public long MalId { get; set; }
-    public string Title { get; set; }
-    public string Image { get; set; }
 }
