@@ -1,0 +1,63 @@
+
+services:
+  app:
+    image: ghcr.io/aruppi/aruppi-api:5
+    restart: unless-stopped
+    ports:
+    #  - 8080-8085:8080
+      - 8080:8080
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - MONGO_CONNECTION_STRING="mongodb://${DB_USER}:${DB_PASSWORD}@mongo:27017/${DB_NAME}?authSource=admin"
+      - MONGO_DATABASE_NAME=${DB_NAME}
+    links:
+      - db:mongo
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    healthcheck:
+      test: "curl -fs http://127.0.0.1:8080/api/v5/anime/directory > /dev/null || false"
+      interval: 30s
+      timeout: 2s
+      start_period: 15s
+      start_interval: 2s
+      retries: 3
+    #deploy:
+    #  mode: replicated
+    #  replicas: 1
+    #  endpoint_mode: vip
+    #  restart_policy:
+    #    condition: on-failure
+    #    delay: 5s
+    #    max_attempts: 3
+    #    window: 60s
+    #  rollback_config:
+    #    parallelism: 1
+    #    delay: 10s
+    #    failure_action: pause
+    #    order: start-first
+    #  update_config:
+    #    parallelism: 1
+    #    delay: 10s
+    #    failure_action: rollback
+    #    order: start-first
+  
+  db:
+    image: mongo:8
+    restart: unless-stopped
+    volumes:
+      - db_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet > /dev/null || false
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  db_data:
