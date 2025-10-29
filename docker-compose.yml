@@ -5,14 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ktor_app
+    container_name: aruppi-api-dev
     ports:
       - "8080:8080"
     env_file:
       - .env
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
