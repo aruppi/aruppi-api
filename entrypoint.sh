@@ -12,6 +12,9 @@ if [ -z "$MONGO_DATABASE_NAME" ]; then
   MONGO_DATABASE_NAME="aruppi"
 fi
 
+# Strip vars of enclosing quotes if any
+[[ "${MONGO_CONNECTION_STRING}" == \"*\" || "${MONGO_CONNECTION_STRING}" == \'*\' ]] && MONGO_CONNECTION_STRING="${MONGO_CONNECTION_STRING:1:-1}"
+[[ "${MONGO_DATABASE_NAME}" == \"*\" || "${MONGO_DATABASE_NAME}" == \'*\' ]] && MONGO_DATABASE_NAME="${MONGO_DATABASE_NAME:1:-1}"
 
 # Generate the application.yaml file
 cat <<EOF > /app/application.yaml
@@ -25,9 +28,9 @@ ktor:
 
 db:
   mongo:
-    connectionStrings: ${MONGO_CONNECTION_STRING}
+    connectionStrings: "${MONGO_CONNECTION_STRING}"
     database:
-      name: ${MONGO_DATABASE_NAME:-mongodb}
+      name: "${MONGO_DATABASE_NAME:-mongodb}"
 EOF
 
 cd /app/
