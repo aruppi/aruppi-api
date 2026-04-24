@@ -1,0 +1,70 @@
+name: Publish API Docs (GitHub Pages)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/main/resources/openapi/documentation.yaml
+      - docs/**
+      - .github/workflows/pages-docs.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build static docs site
+        run: |
+          mkdir -p site/api/v5/docs
+          mkdir -p site/api/v5/swagger
+
+          cp src/main/resources/openapi/documentation.yaml site/api/v5/openapi.yaml
+          cp docs/redoc.html site/api/v5/docs/index.html
+          cp docs/swagger.html site/api/v5/swagger/index.html
+
+          cat > site/index.html << 'HTML'
+          <!doctype html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <meta http-equiv="refresh" content="0; url=./api/v5/docs/" />
+              <title>Aruppi API Docs</title>
+            </head>
+            <body>
+              <p>Redirecting to <a href="./api/v5/docs/">API docs</a>...</p>
+            </body>
+          </html>
+          HTML
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

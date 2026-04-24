@@ -10,6 +10,12 @@ import com.jeluchu.features.rankings.models.MangaTopEntity
 import com.jeluchu.features.rankings.models.PeopleTopEntity
 import com.jeluchu.features.schedule.models.DayEntity
 import com.jeluchu.features.themes.models.anime.*
+import com.jeluchu.features.themes.models.artist.ArtistEntity
+import com.jeluchu.features.themes.models.artist.ArtistSong
+import com.jeluchu.features.themes.models.artist.ArtistSongTheme
+import com.jeluchu.features.themes.models.song.SongArtist
+import com.jeluchu.features.themes.models.song.SongEntity
+import com.jeluchu.features.themes.models.song.SongTheme
 import org.bson.Document
 
 fun documentToMoreInfoEntity(doc: Document): MoreInfoEntity {
@@ -352,4 +358,49 @@ fun documentToVideo(doc: Document) = Video(
     overlap = doc.getStringSafe("overlap"),
     filename = doc.getStringSafe("filename"),
     resolution = doc.getIntSafe("resolution")
+)
+
+fun documentToArtistEntity(doc: Document) = ArtistEntity(
+    id = doc.getIntSafe("id"),
+    name = doc.getStringSafe("name"),
+    slug = doc.getStringSafe("slug"),
+    songs = doc.getListSafe<Document>("songs").map { documentToArtistSong(it) }
+)
+
+fun documentToArtistSong(doc: Document) = ArtistSong(
+    id = doc.getIntSafe("id"),
+    title = doc.getStringSafe("title"),
+    themes = doc.getListSafe<Document>("themes").map { documentToArtistSongTheme(it) }
+)
+
+fun documentToArtistSongTheme(doc: Document) = ArtistSongTheme(
+    type = doc.getStringSafe("type"),
+    slug = doc.getStringSafe("slug"),
+    sequence = doc.getIntSafe("sequence"),
+    animeName = doc.getStringSafe("animeName"),
+    animeSlug = doc.getStringSafe("animeSlug"),
+    videoLink = doc.getStringSafe("videoLink")
+)
+
+
+fun documentToSongEntity(doc: Document) = SongEntity(
+    id = doc.getIntSafe("id"),
+    title = doc.getStringSafe("title"),
+    artists = doc.getListSafe<Document>("artists").map { documentToSongArtist(it) },
+    themes = doc.getListSafe<Document>("themes").map { documentToSongTheme(it) }
+)
+
+fun documentToSongArtist(doc: Document) = SongArtist(
+    id = doc.getIntSafe("id"),
+    name = doc.getStringSafe("name"),
+    slug = doc.getStringSafe("slug")
+)
+
+fun documentToSongTheme(doc: Document) = SongTheme(
+    type = doc.getStringSafe("type"),
+    slug = doc.getStringSafe("slug"),
+    sequence = doc.getIntSafe("sequence"),
+    animeName = doc.getStringSafe("animeName"),
+    animeSlug = doc.getStringSafe("animeSlug"),
+    videoLink = doc.getStringSafe("videoLink")
 )

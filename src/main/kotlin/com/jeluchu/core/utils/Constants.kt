@@ -77,6 +77,9 @@ object Routes {
     const val SUGGESTIONS = "/suggestions"
     const val YEAR_INDEX = "/yearIndex"
     const val RANDOM = "/random"
+    const val ARTISTS = "/artists"
+    const val SLUG = "/{slug}"
+    const val SONGS = "/songs"
 }
 
 object TimerKey {
@@ -100,6 +103,8 @@ object Collections {
     const val RADIO = "radio_stations"
     const val ANIME_THEMES = "anime_themes"
     const val ARTISTS_INDEX = "artists_index"
+    const val SONGS_INDEX = "songs_index"
+    const val ANIME_THEMES_DETAIL = "anime_themes_detail"
     const val LAST_EPISODES = "last_episodes"
     const val ANIME_RANKING = "anime_ranking"
     const val MANGA_RANKING = "manga_ranking"

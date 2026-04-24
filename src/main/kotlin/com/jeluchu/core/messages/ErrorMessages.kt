@@ -19,4 +19,7 @@ sealed class ErrorMessages(val message: String) {
     data object InvalidInput : ErrorMessages("Invalid input provided")
     data object InvalidValueTopPage : ErrorMessages("Value 26 is higher than the configured '25' max value")
     data object UnauthorizedMongo : ErrorMessages("Check the MongoDb Connection String to be able to correctly access this request.")
+    data object ArtistNotFound : ErrorMessages("No artist found with that slug")
+    data object MissingArtistSlug : ErrorMessages("Missing 'slug' path parameter")
+    data object SongNotFound : ErrorMessages("No songs found matching that query")
 }

@@ -1,36 +1,506 @@
 openapi: "3.0.3"
 info:
   title: "Aruppi API"
-  description: "Application API"
-  version: "5.0.0-preview"
+  description: "Public REST API for anime, themes, rankings, gallery and news."
+  version: "5.0.0"
 servers:
   - url: "http://0.0.0.0:8080/api/v5"
+tags:
+  - name: "news"
+  - name: "anime"
+  - name: "themes"
+  - name: "gallery"
+  - name: "rankings"
+  - name: "schedule"
+  - name: "anitakume"
+  - name: "radio"
 paths:
-  /directory:
+  /news/es:
     get:
-      description: "Hello World!"
+      tags: ["news"]
+      summary: "Spanish news"
       responses:
         "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Hello World!"
+          $ref: "#/components/responses/OkArray"
+
+  /news/en:
+    get:
+      tags: ["news"]
+      summary: "English news"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
+  /anime:
+    get:
+      tags: ["anime"]
+      summary: "Anime list filtered by type/status"
+      parameters:
+        - $ref: "#/components/parameters/AnimeTypeQuery"
+        - $ref: "#/components/parameters/AnimeStatusQuery"
+        - $ref: "#/components/parameters/NsfwQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
   /anime/{id}:
     get:
-      description: "Hello World!"
+      tags: ["anime"]
+      summary: "Anime detail by MAL id"
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
       responses:
         "200":
-          description: "OK"
-          content:
-            text/plain:
-              schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "Hello World!"
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /anime/random:
+    get:
+      tags: ["anime"]
+      summary: "Random anime"
+      parameters:
+        - $ref: "#/components/parameters/NsfwQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /anime/lastEpisodes:
+    get:
+      tags: ["anime"]
+      summary: "Latest episodes"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
+  /anime/suggestions:
+    get:
+      tags: ["anime"]
+      summary: "Anime suggestions by tags"
+      parameters:
+        - $ref: "#/components/parameters/TagsQuery"
+        - $ref: "#/components/parameters/NsfwQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /anime/season:
+    get:
+      tags: ["anime"]
+      summary: "Anime by season"
+      parameters:
+        - $ref: "#/components/parameters/YearQuery"
+        - $ref: "#/components/parameters/StationQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
+  /anime/season/yearIndex:
+    get:
+      tags: ["anime"]
+      summary: "Year and season index"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
+  /anime/directory:
+    get:
+      tags: ["anime"]
+      summary: "Anime directory"
+      parameters:
+        - $ref: "#/components/parameters/AnimeTypeQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /anime/directory/{type}:
+    get:
+      tags: ["anime"]
+      summary: "Anime directory by type in path"
+      parameters:
+        - $ref: "#/components/parameters/TypePath"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /themes/anime:
+    get:
+      tags: ["themes"]
+      summary: "Anime themes list"
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /themes/anime/{slug}:
+    get:
+      tags: ["themes"]
+      summary: "Anime themes detail"
+      parameters:
+        - $ref: "#/components/parameters/SlugPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /themes/anime/{slug}/random:
+    get:
+      tags: ["themes"]
+      summary: "Random theme for an anime"
+      parameters:
+        - $ref: "#/components/parameters/SlugPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /themes/artists:
+    get:
+      tags: ["themes"]
+      summary: "Artists list"
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /themes/artists/{slug}:
+    get:
+      tags: ["themes"]
+      summary: "Artist detail"
+      parameters:
+        - $ref: "#/components/parameters/SlugPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /themes/songs:
+    get:
+      tags: ["themes"]
+      summary: "Song list or search"
+      parameters:
+        - $ref: "#/components/parameters/QQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /themes/songs/random:
+    get:
+      tags: ["themes"]
+      summary: "Random song"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /gallery:
+    get:
+      tags: ["gallery"]
+      summary: "Image search in gallery"
+      parameters:
+        - $ref: "#/components/parameters/QueryQuery"
+        - $ref: "#/components/parameters/PageQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /gallery/lastPosts:
+    get:
+      tags: ["gallery"]
+      summary: "Latest gallery posts"
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /top/anime:
+    get:
+      tags: ["rankings"]
+      summary: "Anime ranking"
+      description: "Requires `type`, `filter`, `page` and `size` as query values."
+      parameters:
+        - $ref: "#/components/parameters/TopTypeQuery"
+        - $ref: "#/components/parameters/FilterQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /top/anime/topTen:
+    get:
+      tags: ["rankings"]
+      summary: "Anime top ten"
+      parameters:
+        - $ref: "#/components/parameters/TopTypeQuery"
+        - $ref: "#/components/parameters/FilterQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
+  /top/manga:
+    get:
+      tags: ["rankings"]
+      summary: "Manga ranking"
+      parameters:
+        - $ref: "#/components/parameters/TopTypeQuery"
+        - $ref: "#/components/parameters/FilterQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /top/people:
+    get:
+      tags: ["rankings"]
+      summary: "People ranking"
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /top/characters:
+    get:
+      tags: ["rankings"]
+      summary: "Character ranking"
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /schedule:
+    get:
+      tags: ["schedule"]
+      summary: "Weekly schedule"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+
+  /schedule/{day}:
+    get:
+      tags: ["schedule"]
+      summary: "Schedule by day"
+      parameters:
+        - $ref: "#/components/parameters/DayPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /anitakume:
+    get:
+      tags: ["anitakume"]
+      summary: "Anitakume podcast episodes"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
+  /radio:
+    get:
+      tags: ["radio"]
+      summary: "Radio stations list"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkArray"
+
 components:
-  schemas: {}
+  parameters:
+    IdPath:
+      name: "id"
+      in: "path"
+      required: true
+      schema:
+        type: "integer"
+    TypePath:
+      name: "type"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+    SlugPath:
+      name: "slug"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+    DayPath:
+      name: "day"
+      in: "path"
+      required: true
+      schema:
+        type: "string"
+        enum: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    PageQuery:
+      name: "page"
+      in: "query"
+      required: false
+      schema:
+        type: "integer"
+        minimum: 1
+        default: 1
+    SizeQuery:
+      name: "size"
+      in: "query"
+      required: false
+      schema:
+        type: "integer"
+        minimum: 1
+        default: 25
+    QueryQuery:
+      name: "query"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+    QQuery:
+      name: "q"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+    TagsQuery:
+      name: "tags"
+      in: "query"
+      required: true
+      schema:
+        type: "string"
+      description: "Comma-separated tags."
+    YearQuery:
+      name: "year"
+      in: "query"
+      required: false
+      schema:
+        type: "integer"
+    StationQuery:
+      name: "station"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+        example: "SPRING"
+    NsfwQuery:
+      name: "nsfw"
+      in: "query"
+      required: false
+      schema:
+        type: "boolean"
+        default: false
+    AnimeTypeQuery:
+      name: "type"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+    AnimeStatusQuery:
+      name: "status"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+    TopTypeQuery:
+      name: "type"
+      in: "query"
+      required: true
+      schema:
+        type: "string"
+      description: "For rankings, expected values depend on endpoint type."
+    FilterQuery:
+      name: "filter"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+
+  responses:
+    OkArray:
+      description: "Successful response (array)"
+      content:
+        application/json:
+          schema:
+            type: "array"
+            items:
+              $ref: "#/components/schemas/GenericObject"
+    OkObject:
+      description: "Successful response (object)"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GenericObject"
+    OkPagination:
+      description: "Successful paginated response"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaginationResponse"
+    BadRequest:
+      description: "Invalid request"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: "Resource not found"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    InternalServerError:
+      description: "Unexpected error"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    GenericObject:
+      type: "object"
+      additionalProperties: true
+    PaginationResponse:
+      type: "object"
+      properties:
+        page:
+          type: "integer"
+        size:
+          type: "integer"
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/GenericObject"
+    ErrorResponse:
+      type: "object"
+      properties:
+        message:
+          type: "string"

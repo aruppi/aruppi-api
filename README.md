@@ -107,7 +107,27 @@ The API documentation is included within the API. If you want to:
 - **Perform tests**
 - **See the types of responses**
 
-Simply navigate to [http://0.0.0.0:8080/api/v5/](http://0.0.0.0:8080/api/v5/) to view the complete documentation.
+Use these URLs to browse the API docs:
+
+- ReDoc (main): [http://0.0.0.0:8080/api/v5/docs](http://0.0.0.0:8080/api/v5/docs)
+- Swagger UI: [http://0.0.0.0:8080/api/v5/swagger](http://0.0.0.0:8080/api/v5/swagger)
+- OpenAPI YAML: [http://0.0.0.0:8080/api/v5/openapi.yaml](http://0.0.0.0:8080/api/v5/openapi.yaml)
+
+### GitHub Pages (static docs)
+
+This repository includes a workflow at `.github/workflows/pages-docs.yml` that publishes static docs to GitHub Pages.
+
+1. Go to **Settings > Pages** in GitHub.
+2. In **Build and deployment**, select **GitHub Actions** as source.
+3. Push to `main` (or run the workflow manually from the Actions tab).
+
+Once deployed, docs are available at:
+
+- ReDoc: `https://<org-or-user>.github.io/<repo>/api/v5/docs/`
+- Swagger UI: `https://<org-or-user>.github.io/<repo>/api/v5/swagger/`
+- OpenAPI YAML: `https://<org-or-user>.github.io/<repo>/api/v5/openapi.yaml`
+
+> Note: "Try it out" in Swagger requires CORS enabled on your API server for your GitHub Pages domain.
 
 ## Countdown to deprecation of v3 API
 

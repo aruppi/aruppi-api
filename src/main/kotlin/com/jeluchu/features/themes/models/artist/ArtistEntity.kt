@@ -1,0 +1,35 @@
+package com.jeluchu.features.themes.models.artist
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ArtistEntity(
+    val id: Int? = null,
+    val name: String? = null,
+    val slug: String? = null,
+    val songs: List<ArtistSong>? = null
+) {
+    companion object {
+        fun ArtistData.toArtistEntity() = ArtistEntity(
+            id = id,
+            name = name,
+            slug = slug,
+            songs = songs?.map { song ->
+                ArtistSong(
+                    id = song.id,
+                    title = song.title,
+                    themes = song.animethemes?.map { theme ->
+                        ArtistSongTheme(
+                            type = theme.type,
+                            slug = theme.slug,
+                            sequence = theme.sequence,
+                            animeName = theme.anime?.name,
+                            animeSlug = theme.anime?.slug,
+                            videoLink = theme.entries?.firstOrNull()?.videos?.firstOrNull()?.link
+                        )
+                    }
+                )
+            }
+        )
+    }
+}
