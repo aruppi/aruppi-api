@@ -19,6 +19,7 @@ paths:
     get:
       tags: ["news"]
       summary: "Spanish news"
+      description: "Returns the latest Spanish-language news feed aggregated from multiple RSS sources."
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -27,6 +28,7 @@ paths:
     get:
       tags: ["news"]
       summary: "English news"
+      description: "Returns the latest English-language news feed aggregated from multiple RSS sources."
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -35,6 +37,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime list filtered by type/status"
+      description: "Lists anime stored in the directory and allows filtering by type, status and NSFW flag."
       parameters:
         - $ref: "#/components/parameters/AnimeTypeQuery"
         - $ref: "#/components/parameters/AnimeStatusQuery"
@@ -49,6 +52,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime detail by MAL id"
+      description: "Fetches a single anime by MyAnimeList identifier and returns the detailed metadata object."
       parameters:
         - $ref: "#/components/parameters/IdPath"
       responses:
@@ -61,6 +65,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Random anime"
+      description: "Returns one random anime from the directory, with an optional NSFW filter."
       parameters:
         - $ref: "#/components/parameters/NsfwQuery"
       responses:
@@ -73,6 +78,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Latest episodes"
+      description: "Returns the airing anime with latest episodes cached per current day."
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -81,6 +87,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime suggestions by tags"
+      description: "Finds anime matching one or more tags, excluding unsupported content types."
       parameters:
         - $ref: "#/components/parameters/TagsQuery"
         - $ref: "#/components/parameters/NsfwQuery"
@@ -94,6 +101,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime by season"
+      description: "Returns the anime released in a given year and season."
       parameters:
         - $ref: "#/components/parameters/YearQuery"
         - $ref: "#/components/parameters/StationQuery"
@@ -105,6 +113,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Year and season index"
+      description: "Returns the available years together with the seasons found in the directory."
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -113,6 +122,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime directory"
+      description: "Returns the paginated anime directory, optionally filtered by type."
       parameters:
         - $ref: "#/components/parameters/AnimeTypeQuery"
         - $ref: "#/components/parameters/PageQuery"
@@ -125,6 +135,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime directory by type in path"
+      description: "Returns the anime directory for a specific type provided in the path segment."
       parameters:
         - $ref: "#/components/parameters/TypePath"
         - $ref: "#/components/parameters/PageQuery"
@@ -139,6 +150,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Anime themes list"
+      description: "Returns the cached list of anime with their associated theme metadata."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -150,6 +162,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Anime themes detail"
+      description: "Returns the full theme details for a given anime slug."
       parameters:
         - $ref: "#/components/parameters/SlugPath"
       responses:
@@ -162,6 +175,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Random theme for an anime"
+      description: "Returns one random opening/ending entry for the provided anime slug."
       parameters:
         - $ref: "#/components/parameters/SlugPath"
       responses:
@@ -174,6 +188,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Artists list"
+      description: "Returns the paginated artists index used by AnimeThemes."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -185,6 +200,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Artist detail"
+      description: "Returns a single artist and the songs associated with that artist."
       parameters:
         - $ref: "#/components/parameters/SlugPath"
       responses:
@@ -197,6 +213,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Song list or search"
+      description: "Searches songs by query or returns the cached paginated song list if no query is provided."
       parameters:
         - $ref: "#/components/parameters/QQuery"
         - $ref: "#/components/parameters/PageQuery"
@@ -209,6 +226,7 @@ paths:
     get:
       tags: ["themes"]
       summary: "Random song"
+      description: "Returns one random song together with its related anime information."
       responses:
         "200":
           $ref: "#/components/responses/OkObject"
@@ -219,6 +237,7 @@ paths:
     get:
       tags: ["gallery"]
       summary: "Image search in gallery"
+      description: "Searches anime-pictures images by query text and returns paginated results."
       parameters:
         - $ref: "#/components/parameters/QueryQuery"
         - $ref: "#/components/parameters/PageQuery"
@@ -230,6 +249,7 @@ paths:
     get:
       tags: ["gallery"]
       summary: "Latest gallery posts"
+      description: "Returns the latest gallery posts cached by page."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
       responses:
@@ -256,6 +276,7 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Anime top ten"
+      description: "Returns the top ten anime for the requested type and filter combination."
       parameters:
         - $ref: "#/components/parameters/TopTypeQuery"
         - $ref: "#/components/parameters/FilterQuery"
@@ -267,6 +288,7 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Manga ranking"
+      description: "Returns the paginated manga ranking for a given type and filter."
       parameters:
         - $ref: "#/components/parameters/TopTypeQuery"
         - $ref: "#/components/parameters/FilterQuery"
@@ -282,6 +304,7 @@ paths:
     get:
       tags: ["rankings"]
       summary: "People ranking"
+      description: "Returns the paginated people ranking from Jikan."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -293,6 +316,7 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Character ranking"
+      description: "Returns the paginated character ranking from Jikan."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -304,6 +328,7 @@ paths:
     get:
       tags: ["schedule"]
       summary: "Weekly schedule"
+      description: "Returns the weekly anime schedule grouped by day of the week."
       responses:
         "200":
           $ref: "#/components/responses/OkObject"
@@ -312,6 +337,7 @@ paths:
     get:
       tags: ["schedule"]
       summary: "Schedule by day"
+      description: "Returns the schedule for a single day. Day must be one of monday through sunday."
       parameters:
         - $ref: "#/components/parameters/DayPath"
       responses:
@@ -324,6 +350,7 @@ paths:
     get:
       tags: ["anitakume"]
       summary: "Anitakume podcast episodes"
+      description: "Returns the podcast episodes fetched from the Anitakume RSS feed."
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -332,6 +359,7 @@ paths:
     get:
       tags: ["radio"]
       summary: "Radio stations list"
+      description: "Returns the full list of radio stations stored in the database."
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -453,36 +481,134 @@ components:
             type: "array"
             items:
               $ref: "#/components/schemas/GenericObject"
+          examples:
+            Example:
+              $ref: "#/components/examples/ArrayExample"
     OkObject:
       description: "Successful response (object)"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/GenericObject"
+          examples:
+            Example:
+              $ref: "#/components/examples/ObjectExample"
     OkPagination:
       description: "Successful paginated response"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/PaginationResponse"
+          examples:
+            Example:
+              $ref: "#/components/examples/PaginationExample"
     BadRequest:
       description: "Invalid request"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            Example:
+              $ref: "#/components/examples/ErrorExample"
     NotFound:
       description: "Resource not found"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            Example:
+              $ref: "#/components/examples/ErrorExample"
     InternalServerError:
       description: "Unexpected error"
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            Example:
+              $ref: "#/components/examples/ErrorExample"
+
+  examples:
+    ArrayExample:
+      summary: "Example news list payload"
+      value:
+        - source: "MangaLatam"
+          sourceDescription: "MangaLatam RSS feed"
+          link: "https://www.mangalatam.com/2026/04/sample-article.html"
+          title: "Nuevo anuncio sobre una pelicula de anime"
+          date: "2026-04-24T10:30:00Z"
+          description: "Resumen breve de la noticia."
+          content: "Contenido completo de la noticia."
+          image: "https://example.com/news/image.jpg"
+          categories: ["anime", "news"]
+        - source: "Somos Kudasai"
+          sourceDescription: "Somos Kudasai RSS feed"
+          link: "https://somoskudasai.com/noticias/otro-ejemplo"
+          title: "La temporada de primavera arranca con novedades"
+          date: "2026-04-24T12:15:00Z"
+          description: "Otra noticia de ejemplo."
+          content: "Más contenido de ejemplo."
+          image: "https://example.com/news/image-2.jpg"
+          categories: ["season", "anime"]
+    ObjectExample:
+      summary: "Example anime theme detail payload"
+      value:
+        id: 1502
+        name: "Kimetsu no Yaiba"
+        slug: "kimetsu_no_yaiba"
+        year: 2019
+        season: "Spring"
+        synopsis: "Desde la muerte de su padre, Tanjiro ha sostenido a su familia..."
+        image: "https://api.animethemes.moe/images/anime/1502.jpg"
+        themes:
+          - id: 2
+            type: "OP"
+            slug: "OP1"
+            sequence: 1
+            song:
+              id: 2
+              title: "Gurenge"
+            entries:
+              - id: 3
+                episodes: "1-26"
+                nsfw: false
+                spoiler: false
+                videos:
+                  - link: "https://v.animethemes.moe/KimetsuNoYaiba-OP1.webm"
+                    resolution: 1080
+                    nc: true
+                    subbed: false
+                    lyrics: false
+                    source: "BD"
+                    overlap: "None"
+    PaginationExample:
+      summary: "Example anime directory payload"
+      value:
+        page: 1
+        size: 25
+        data:
+          - malId: 5114
+            type: "TV"
+            title: "Fullmetal Alchemist: Brotherhood"
+            image: "https://cdn.myanimelist.net/images/anime/1223/96541.jpg"
+            score: "9.10"
+            season:
+              year: 2009
+              station: "SPRING"
+          - malId: 16498
+            type: "TV"
+            title: "Shingeki no Kyojin"
+            image: "https://cdn.myanimelist.net/images/anime/10/47347.jpg"
+            score: "8.55"
+            season:
+              year: 2013
+              station: "SPRING"
+    ErrorExample:
+      summary: "Example error payload"
+      value:
+        message: "Not found"
 
   schemas:
     GenericObject:
