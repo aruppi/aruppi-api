@@ -82,6 +82,10 @@ object Routes {
     const val SONGS = "/songs"
 }
 
+object Path {
+    const val RANDOM = "random"
+}
+
 object TimerKey {
     const val KEY = "key"
     const val SCHEDULE = "schedule"

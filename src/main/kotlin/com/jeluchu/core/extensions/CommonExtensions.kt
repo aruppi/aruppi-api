@@ -1,6 +1,10 @@
 package com.jeluchu.core.extensions
 
+import com.jeluchu.core.configuration.ApiMetadata
+import com.jeluchu.core.models.DocumentationLinks
+import com.jeluchu.core.models.ErrorResponse
 import io.ktor.http.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.bson.Document
@@ -27,7 +31,22 @@ fun RoutingCall.getIntSafeParam(
     defaultValue: Int = 0
 ) = parameters[key]?.toIntOrNull() ?: defaultValue
 
-suspend fun RoutingCall.badRequestError(message: String) = respond(HttpStatusCode.BadRequest, message)
+suspend fun RoutingCall.respondError(status: HttpStatusCode, message: String) = respond(
+    status,
+    ErrorResponse(
+        error = message,
+        status = status.value,
+        path = request.path(),
+        version = ApiMetadata.version,
+        documentation = DocumentationLinks(
+            redoc = ApiMetadata.docsPath,
+            swagger = ApiMetadata.swaggerPath,
+            openapi = ApiMetadata.openApiPath
+        )
+    )
+)
+
+suspend fun RoutingCall.badRequestError(message: String) = respondError(HttpStatusCode.BadRequest, message)
 
 fun Document.getStringSafe(key: String, defaultValue: String = ""): String {
     return try {

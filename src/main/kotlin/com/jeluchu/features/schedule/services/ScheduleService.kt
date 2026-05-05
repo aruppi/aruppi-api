@@ -5,6 +5,7 @@ import com.jeluchu.core.enums.Day
 import com.jeluchu.core.enums.TimeUnit
 import com.jeluchu.core.enums.parseDay
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.ErrorResponse
@@ -60,10 +61,7 @@ class ScheduleService(
 
     suspend fun getScheduleByDay(call: RoutingCall) {
         val param = call.parameters["day"] ?: throw IllegalArgumentException(ErrorMessages.InvalidMalId.message)
-        if (parseDay(param) == null) call.respond(
-            HttpStatusCode.BadRequest,
-            ErrorResponse(ErrorMessages.InvalidDay.message)
-        )
+        if (parseDay(param) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidDay.message)
 
         val elements = schedules.find(Filters.eq("day", param.lowercase())).toList()
         val directory = elements.map { documentToScheduleDayEntity(it) }

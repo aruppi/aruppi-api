@@ -3,6 +3,7 @@ package com.jeluchu.features.rankings.services
 import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.*
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.ErrorResponse
@@ -51,8 +52,9 @@ class RankingsService(
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
         val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
 
-        if (size > 25) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidValueTopPage.message))
-        if (parseAnimeType(type) == null) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidTopAnimeType.message))
+        if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
+        if (parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
+        if (parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
 
         val timerKey = "${Collections.ANIME_RANKING}_${type}_${filter}_${page}"
 
@@ -62,9 +64,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
-        if (page < 1 || size < 1) call.respond(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        val skipCount = (page - 1) * size
-
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             animeRanking.deleteMany(
                 Filters.and(
@@ -113,7 +113,6 @@ class RankingsService(
                         Filters.eq("subtype", filter)
                     )
                 )
-                .skip(skipCount)
                 .limit(size)
                 .toList()
 
@@ -134,8 +133,9 @@ class RankingsService(
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
         val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopMangaType.message)
 
-        if (size > 25) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidValueTopPage.message))
-        if (parseMangaType(type) == null) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidTopAnimeType.message))
+        if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
+        if (parseMangaType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaType.message)
+        if (parseMangaFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaFilterType.message)
 
         val timerKey = "${Collections.MANGA_RANKING}_${type}_${filter}_${page}"
 
@@ -145,9 +145,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
-        if (page < 1 || size < 1) call.respond(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        val skipCount = (page - 1) * size
-
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             mangaRanking.deleteMany(
                 Filters.and(
@@ -196,7 +194,6 @@ class RankingsService(
                         Filters.eq("subtype", filter)
                     )
                 )
-                .skip(skipCount)
                 .limit(size)
                 .toList()
 
@@ -215,7 +212,7 @@ class RankingsService(
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
 
-        if (size > 25) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidValueTopPage.message))
+        if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
         val timerKey = "${Collections.PEOPLE_RANKING}_${page}"
 
         val needsUpdate = timers.needsUpdate(
@@ -224,9 +221,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
-        if (page < 1 || size < 1) call.respond(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        val skipCount = (page - 1) * size
-
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             peopleRanking.deleteMany(Filters.and(Filters.eq("page", page)))
             val response = RestClient.request(
@@ -255,7 +250,6 @@ class RankingsService(
         } else {
             val peoples = peopleRanking
                 .find(Filters.and(Filters.eq("page", page)))
-                .skip(skipCount)
                 .limit(size)
                 .toList()
 
@@ -274,7 +268,7 @@ class RankingsService(
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
 
-        if (size > 25) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidValueTopPage.message))
+        if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
         val timerKey = "${Collections.CHARACTER_RANKING}_${page}"
 
         val needsUpdate = timers.needsUpdate(
@@ -283,9 +277,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
-        if (page < 1 || size < 1) call.respond(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        val skipCount = (page - 1) * size
-
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             characterRanking.deleteMany(Filters.and(Filters.eq("page", page)))
             val response = RestClient.request(
@@ -314,7 +306,6 @@ class RankingsService(
         } else {
             val characters = characterRanking
                 .find(Filters.and(Filters.eq("page", page)))
-                .skip(skipCount)
                 .limit(size)
                 .toList()
 
@@ -333,7 +324,8 @@ class RankingsService(
         val filter = call.request.queryParameters["filter"] ?: "airing"
         val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
 
-        if (parseAnimeType(type) == null) call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.InvalidTopAnimeType.message))
+        if (parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
+        if (parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
 
         val timerKey = "${Collections.ANIME_RANKING}_${Collections.TOP_TEN}_${type}_${filter}"
 

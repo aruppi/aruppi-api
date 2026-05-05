@@ -7,6 +7,7 @@ import com.jeluchu.core.extensions.getIntSafeQueryParam
 import com.jeluchu.core.extensions.getStringSafeParam
 import com.jeluchu.core.extensions.getStringSafeQueryParam
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.ErrorResponse
@@ -61,7 +62,7 @@ class AnimeThemesService(
         val size = call.getIntSafeQueryParam("size", 25)
 
         val skipCount = (page - 1) * size
-        if (page < 1 || size < 1) call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
+        if (page < 1 || size < 1) return call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
 
         val query = themesDirectory
             .find()
@@ -74,95 +75,101 @@ class AnimeThemesService(
         call.respond(HttpStatusCode.OK, Json.encodeToString(paginate))
     }
 
-    suspend fun getAnimeThemeBySlug(call: RoutingCall) = try {
-        val slug = call.getStringSafeParam("slug").toAnimeThemesSlug()
+    suspend fun getAnimeThemeBySlug(call: RoutingCall) {
+        try {
+            val slug = call.getStringSafeParam("slug").toAnimeThemesSlug()
 
-        if (slug.isBlank()) {
-            call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.NotFound.message))
+            if (slug.isBlank()) {
+                return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidAnimeThemeSlug.message)
+            }
+
+            val timerKey = "${TimerKey.THEMES}anime_$slug"
+            val needsUpdate = timers.needsUpdate(key = timerKey, amount = 7, unit = TimeUnit.DAY)
+
+            if (needsUpdate) {
+                animeThemeDetail.deleteMany(Filters.eq("slug", slug))
+
+                val raw = RestClient.request(
+                    "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude",
+                    AnimeThemeShow.serializer()
+                )
+
+                val detail = raw.anime?.toAnimeThemeDetail()
+                    ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
+
+                val documents = parseDataToDocuments(listOf(detail), AnimeThemeDetail.serializer())
+                if (documents.isNotEmpty()) animeThemeDetail.insertMany(documents)
+                timers.update(timerKey)
+
+                call.respond(HttpStatusCode.OK, Json.encodeToString(detail))
+            } else {
+                val cached = animeThemeDetail.find(Filters.eq("slug", slug)).firstOrNull()
+                    ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
+
+                call.respond(HttpStatusCode.OK, Json.encodeToString(documentToAnimeThemeDetail(cached)))
+            }
+        } catch (ex: Exception) {
+            call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
         }
-
-        val timerKey = "${TimerKey.THEMES}anime_$slug"
-        val needsUpdate = timers.needsUpdate(key = timerKey, amount = 7, unit = TimeUnit.DAY)
-
-        if (needsUpdate) {
-            animeThemeDetail.deleteMany(Filters.eq("slug", slug))
-
-            val raw = RestClient.request(
-                "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude",
-                AnimeThemeShow.serializer()
-            )
-
-            val detail = raw.anime?.toAnimeThemeDetail()
-                ?: return call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.NotFound.message))
-
-            val documents = parseDataToDocuments(listOf(detail), AnimeThemeDetail.serializer())
-            if (documents.isNotEmpty()) animeThemeDetail.insertMany(documents)
-            timers.update(timerKey)
-
-            call.respond(HttpStatusCode.OK, Json.encodeToString(detail))
-        } else {
-            val cached = animeThemeDetail.find(Filters.eq("slug", slug)).firstOrNull()
-                ?: return call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.NotFound.message))
-
-            call.respond(HttpStatusCode.OK, Json.encodeToString(documentToAnimeThemeDetail(cached)))
-        }
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.NotFound, Json.encodeToString(ErrorResponse(ErrorMessages.NotFound.message)))
     }
 
     // ── GET /api/v5/themes/anime/{slug}/random ────────────────────────────────
 
-    suspend fun getRandomAnimeTheme(call: RoutingCall) = try {
-        val slug = call.getStringSafeParam("slug").toAnimeThemesSlug()
+    suspend fun getRandomAnimeTheme(call: RoutingCall) {
+        try {
+            val slug = call.getStringSafeParam("slug").toAnimeThemesSlug()
 
-        if (slug.isBlank()) {
-            call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.NotFound.message))
+            if (slug.isBlank()) {
+                return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidAnimeThemeSlug.message)
+            }
+
+            val cached = animeThemeDetail.find(Filters.eq("slug", slug)).firstOrNull()
+
+            val detail = if (cached != null) {
+                documentToAnimeThemeDetail(cached)
+            } else {
+                val raw = RestClient.request(
+                    "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude",
+                    AnimeThemeShow.serializer()
+                )
+                raw.anime?.toAnimeThemeDetail()
+                    ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
+            }
+
+            val randomTheme = detail.themes?.randomOrNull()
+                ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.NotFoundContent.message)
+
+            call.response.headers.append("Cache-Control", "no-store")
+            call.respond(HttpStatusCode.OK, Json.encodeToString(randomTheme))
+        } catch (ex: Exception) {
+            call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
         }
+    }
 
-        val cached = animeThemeDetail.find(Filters.eq("slug", slug)).firstOrNull()
-
-        val detail = if (cached != null) {
-            documentToAnimeThemeDetail(cached)
-        } else {
+    suspend fun getRandomSong(call: RoutingCall) {
+        try {
             val raw = RestClient.request(
-                "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude",
-                AnimeThemeShow.serializer()
+                "${BaseUrls.ANIME_THEMES}song?include=$songInclude&page[number]=1&page[size]=1&sort=random",
+                SongSearch.serializer()
             )
-            raw.anime?.toAnimeThemeDetail()
-                ?: return call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.NotFound.message))
+
+            val song = raw.songs?.firstOrNull()?.toSongEntity()
+                ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.NotFoundContent.message)
+
+            call.response.headers.append("Cache-Control", "no-store")
+            call.respond(HttpStatusCode.OK, Json.encodeToString(song.withVideoLinks()))
+        } catch (ex: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, Json.encodeToString(ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message)))
         }
-
-        val randomTheme = detail.themes?.randomOrNull()
-            ?: return call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.NotFoundContent.message))
-
-        call.response.headers.append("Cache-Control", "no-store")
-        call.respond(HttpStatusCode.OK, Json.encodeToString(randomTheme))
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.NotFound, Json.encodeToString(ErrorResponse(ErrorMessages.NotFound.message)))
     }
 
-    suspend fun getRandomSong(call: RoutingCall) = try {
-        val raw = RestClient.request(
-            "${BaseUrls.ANIME_THEMES}song?include=$songInclude&page[number]=1&page[size]=1&sort=random",
-            SongSearch.serializer()
-        )
-
-        val song = raw.songs?.firstOrNull()?.toSongEntity()
-            ?: return call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.NotFoundContent.message))
-
-        call.response.headers.append("Cache-Control", "no-store")
-        call.respond(HttpStatusCode.OK, Json.encodeToString(song))
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.InternalServerError, Json.encodeToString(ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message)))
-    }
-
-    suspend fun getArtists(call: RoutingCall) = try {
+    suspend fun getArtists(call: RoutingCall) {
+        try {
         val page = call.getIntSafeQueryParam("page", 1)
         val size = call.getIntSafeQueryParam("size", 25)
 
-        if (page < 1 || size < 1) call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
+        if (page < 1 || size < 1) return call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
 
-        val skipCount = (page - 1) * size
         val timerKey = "${TimerKey.THEMES}artists_$page"
         val needsUpdate = timers.needsUpdate(key = timerKey, amount = 7, unit = TimeUnit.DAY)
 
@@ -188,7 +195,6 @@ class AnimeThemesService(
         } else {
             val artists = artistsDirectory
                 .find(Filters.eq("page_cache", page))
-                .skip(skipCount)
                 .limit(size)
                 .toList()
                 .map { documentToArtistEntity(it) }
@@ -198,15 +204,17 @@ class AnimeThemesService(
                 Json.encodeToString(PaginationResponse(page = page, size = artists.size, data = artists))
             )
         }
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.InternalServerError, ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message))
+        } catch (ex: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message))
+        }
     }
 
-    suspend fun getArtistBySlug(call: RoutingCall) = try {
+    suspend fun getArtistBySlug(call: RoutingCall) {
+        try {
         val slug = call.getStringSafeParam("slug")
 
         if (slug.isBlank()) {
-            call.respond(HttpStatusCode.BadRequest, ErrorResponse(ErrorMessages.ArtistNotFound.message))
+            return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.ArtistNotFound.message)
         }
 
         val raw = RestClient.request(
@@ -222,16 +230,18 @@ class AnimeThemesService(
         if (documents.isNotEmpty()) artistsDirectory.insertMany(documents)
 
         call.respond(HttpStatusCode.OK, Json.encodeToString(artist))
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.ArtistNotFound.message))
+        } catch (ex: Exception) {
+            call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.ArtistNotFound.message))
+        }
     }
 
-    suspend fun searchSongs(call: RoutingCall) = try {
+    suspend fun searchSongs(call: RoutingCall) {
+        try {
         val query = call.getStringSafeQueryParam("q")
         val page = call.getIntSafeQueryParam("page", 1)
         val size = call.getIntSafeQueryParam("size", 25)
 
-        if (page < 1 || size < 1) call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
+        if (page < 1 || size < 1) return call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
 
         if (query.isNotBlank()) {
             val raw = RestClient.request(
@@ -268,11 +278,8 @@ class AnimeThemesService(
                     Json.encodeToString(PaginationResponse(page = page, size = songs.size, data = songs))
                 )
             } else {
-                val skipCount = (page - 1) * size
-
                 val songs = songsDirectory
                     .find(Filters.eq("page_cache", page))
-                    .skip(skipCount)
                     .limit(size)
                     .toList()
                     .map { documentToSongEntity(it) }
@@ -283,7 +290,30 @@ class AnimeThemesService(
                 )
             }
         }
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.InternalServerError, ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message))
+        } catch (ex: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message))
+        }
+    }
+
+    private suspend fun SongEntity.withVideoLinks(): SongEntity {
+        val updatedThemes = themes?.map { theme ->
+            if (!theme.videoLink.isNullOrBlank()) return@map theme
+
+            val animeSlug = theme.animeSlug ?: return@map theme
+            val anime = RestClient.request(
+                "${BaseUrls.ANIME_THEMES}anime/$animeSlug?include=$animeDetailInclude",
+                AnimeThemeShow.serializer()
+            ).anime?.toAnimeThemeDetail() ?: return@map theme
+
+            val matchingTheme = anime.themes?.firstOrNull { animeTheme ->
+                animeTheme.slug == theme.slug &&
+                    animeTheme.type == theme.type &&
+                    (theme.sequence == null || animeTheme.sequence == theme.sequence)
+            }
+
+            theme.copy(videoLink = matchingTheme?.entries?.firstOrNull()?.videos?.firstOrNull()?.link)
+        }
+
+        return copy(themes = updatedThemes)
     }
 }

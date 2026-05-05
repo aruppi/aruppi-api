@@ -1,10 +1,10 @@
 
 [versions]
-kotlin-version = "2.0.21"
-ktor-version = "3.0.1"
-logback-version = "1.5.18"
+kotlin-version = "2.3.21"
+ktor-version = "3.4.1"
+logback-version = "1.5.32"
 mongo-version = "4.10.2"
-rss-version = "6.0.11"
+rss-version = "6.1.5"
 
 [libraries]
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-version" }

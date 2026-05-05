@@ -25,7 +25,7 @@ fun PostsResponse.Post.toProcessedPost(page: Int): ProcessedPost {
         height = height,
         pubtime = pubtime,
         size = size,
-        erotics = erotics,
+        erotics = erotics != 0,
         spoiler = spoiler,
         haveAlpha = haveAlpha,
         page = page
@@ -42,7 +42,7 @@ fun PostsResponse.Post.toProcessedPostQuery(page: Int, query: String): Processed
         height = height,
         pubtime = pubtime,
         size = size,
-        erotics = erotics,
+        erotics = erotics != 0,
         spoiler = spoiler,
         haveAlpha = haveAlpha,
         page = page,
@@ -57,7 +57,7 @@ fun documentToProcessedPost(doc: Document) = ProcessedPost(
     height = doc.getIntSafe("height"),
     pubtime = doc.getStringSafe("pubtime"),
     size = doc.getIntSafe("size"),
-    erotics = doc.getIntSafe("erotics"),
+    erotics = doc.getBooleanSafe("erotics"),
     spoiler = doc.getBooleanSafe("spoiler"),
     haveAlpha = doc.getBooleanSafe("haveAlpha")
 )

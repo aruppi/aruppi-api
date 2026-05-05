@@ -32,8 +32,8 @@ class DirectoryService(
         val skipCount = (page - 1) * size
         val timerKey = "${TimerKey.ANIME_TYPE}${param.lowercase()}"
         val collection = database.getCollection(timerKey)
-        if (page < 1 || size < 1) call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
-        if (parseAnimeType(param) == null) call.badRequestError(ErrorMessages.InvalidAnimeType.message)
+        if (page < 1 || size < 1) return call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
+        if (parseAnimeType(param) == null) return call.badRequestError(ErrorMessages.InvalidAnimeType.message)
 
         if (timers.needsUpdate(timerKey, 30, TimeUnit.DAY)) {
             getRemoteData(

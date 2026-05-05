@@ -1,5 +1,7 @@
 package com.jeluchu.core.configuration
 
+import com.jeluchu.core.models.ApiInfoResponse
+import com.jeluchu.core.models.DocumentationLinks
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.plugins.swagger.*
@@ -11,9 +13,21 @@ fun Route.initDocumentation() {
         ?.readText()
         .orEmpty()
 
-    get("/") {
-        call.respondRedirect("docs", permanent = false)
+    suspend fun RoutingContext.respondApiInfo() {
+        call.respond(
+            ApiInfoResponse(
+                version = ApiMetadata.version,
+                documentation = DocumentationLinks(
+                    redoc = ApiMetadata.docsPath,
+                    swagger = ApiMetadata.swaggerPath,
+                    openapi = ApiMetadata.openApiPath
+                )
+            )
+        )
     }
+
+    get { respondApiInfo() }
+    get("/") { respondApiInfo() }
 
     get("/openapi.yaml") {
         call.respondText(openApiFile, ContentType.parse("application/yaml"))
@@ -33,7 +47,7 @@ fun Route.initDocumentation() {
                 </style>
               </head>
               <body>
-                <redoc spec-url="/api/v5/openapi.yaml"></redoc>
+                <redoc spec-url="${ApiMetadata.openApiPath}"></redoc>
                 <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
               </body>
             </html>

@@ -4,8 +4,6 @@ import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.TimeUnit
 import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.update
-import com.jeluchu.core.messages.ErrorMessages
-import com.jeluchu.core.models.ErrorResponse
 import com.jeluchu.core.models.PaginationResponse
 import com.jeluchu.core.utils.BaseUrls
 import com.jeluchu.core.utils.Collections
@@ -36,10 +34,8 @@ class GalleryService(
 
     suspend fun getLastPosts(call: RoutingCall) {
         val size = 80
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val page = (call.request.queryParameters["page"]?.toIntOrNull() ?: 1).coerceAtLeast(1)
         val timerKey = "${Collections.ANIME_PICTURES_RECENT}_${page}"
-        val skipCount = (page - 1) * size
-
         val needsUpdate = timers.needsUpdate(
             amount = 30,
             key = timerKey,
@@ -69,7 +65,6 @@ class GalleryService(
         } else {
             val posts = recentPosts
                 .find(Filters.and(Filters.eq("page", page)))
-                .skip(skipCount)
                 .limit(size)
                 .toList()
 
@@ -87,10 +82,9 @@ class GalleryService(
     suspend fun getQueryImages(call: RoutingCall) {
         val size = 80
         val query = call.request.queryParameters["query"].orEmpty()
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 0
+        val page = (call.request.queryParameters["page"]?.toIntOrNull() ?: 1).coerceAtLeast(1)
+        val animePicturesPage = page - 1
         val timerKey = "${Collections.ANIME_PICTURES_QUERY}_${query}_${page}"
-        val skipCount = (page - 1) * size
-        val fixedPage = page + 1
 
         val needsUpdate = timers.needsUpdate(
             amount = 30,
@@ -99,13 +93,13 @@ class GalleryService(
         )
 
         if (needsUpdate) {
-            queryPosts.deleteMany(Filters.and(Filters.eq("page", fixedPage)))
+            queryPosts.deleteMany(Filters.and(Filters.eq("page", page)))
 
             try {
                 val response = RestClient.request(
-                    BaseUrls.ANIME_PICTURES + Endpoints.POSTS + "?search_tag=${URLEncoder.encode(query, "UTF-8")}" + "&lang=en&type=json_v3" + "&page=$page",
+                    BaseUrls.ANIME_PICTURES + Endpoints.POSTS + "?search_tag=${URLEncoder.encode(query, "UTF-8")}" + "&lang=en&type=json_v3" + "&page=$animePicturesPage",
                     PostsResponse.serializer()
-                ).posts.map { it.toProcessedPostQuery(fixedPage, query) }
+                ).posts.map { it.toProcessedPostQuery(page, query) }
 
                 val documentsToInsert = parseDataToDocuments(response, ProcessedPost.serializer())
                 if (documentsToInsert.isNotEmpty()) queryPosts.insertMany(documentsToInsert)
@@ -114,7 +108,7 @@ class GalleryService(
                 val elements = documentsToInsert.map { documentToProcessedPost(it) }
 
                 val paginationResponse = PaginationResponse(
-                    page = fixedPage,
+                    page = page,
                     size = size,
                     data = elements
                 )
@@ -122,7 +116,7 @@ class GalleryService(
                 call.respond(HttpStatusCode.OK, Json.encodeToString(paginationResponse))
             } catch (e: IOException) {
                 val paginationResponse = PaginationResponse(
-                    page = fixedPage,
+                    page = page,
                     size = size,
                     data = emptyList<ProcessedPost>()
                 )
@@ -131,14 +125,13 @@ class GalleryService(
             }
         } else {
             val posts = queryPosts
-                .find(Filters.and(Filters.eq("page", fixedPage)))
-                .skip(skipCount)
+                .find(Filters.and(Filters.eq("page", page)))
                 .limit(size)
                 .toList()
 
             val elements = posts.map { documentToProcessedPost(it) }
             val response = PaginationResponse(
-                page = fixedPage,
+                page = page,
                 size = size,
                 data = elements
             )

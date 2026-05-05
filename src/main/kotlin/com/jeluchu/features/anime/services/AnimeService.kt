@@ -7,6 +7,7 @@ import com.jeluchu.core.enums.TimeUnit
 import com.jeluchu.core.enums.parseAnimeStatusType
 import com.jeluchu.core.enums.parseAnimeType
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.ErrorResponse
@@ -43,49 +44,51 @@ class AnimeService(
     private val timers = database.getCollection(Collections.TIMERS)
     private val directoryCollection = database.getCollection(Collections.ANIME_DIRECTORY)
 
-    suspend fun getDirectory(call: RoutingCall) = try {
-        val type = call.request.queryParameters["type"].orEmpty()
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+    suspend fun getDirectory(call: RoutingCall) {
+        try {
+            val type = call.request.queryParameters["type"].orEmpty()
+            val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+            val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
 
-        if (page < 1 || size < 1) call.respond(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        val skipCount = (page - 1) * size
+            if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
+            val skipCount = (page - 1) * size
 
-        if (parseAnimeType(type) == null) {
-            val animes = directoryCollection
-                .find()
-                .skip(skipCount)
-                .limit(size)
-                .toList()
+            if (parseAnimeType(type) == null) {
+                val animes = directoryCollection
+                    .find()
+                    .skip(skipCount)
+                    .limit(size)
+                    .toList()
 
-            val elements = animes.map { documentToAnimeTypeEntity(it) }
+                val elements = animes.map { documentToAnimeTypeEntity(it) }
 
-            val response = PaginationResponse(
-                page = page,
-                size = size,
-                data = elements
-            )
+                val response = PaginationResponse(
+                    page = page,
+                    size = size,
+                    data = elements
+                )
 
-            call.respond(HttpStatusCode.OK, Json.encodeToString(response))
-        } else {
-            val animes = directoryCollection
-                .find(Filters.eq("type", type.uppercase()))
-                .skip(skipCount)
-                .limit(size)
-                .toList()
+                call.respond(HttpStatusCode.OK, Json.encodeToString(response))
+            } else {
+                val animes = directoryCollection
+                    .find(Filters.eq("type", type.uppercase()))
+                    .skip(skipCount)
+                    .limit(size)
+                    .toList()
 
-            val elements = animes.map { documentToAnimeTypeEntity(it) }
+                val elements = animes.map { documentToAnimeTypeEntity(it) }
 
-            val response = PaginationResponse(
-                page = page,
-                size = size,
-                data = elements
-            )
+                val response = PaginationResponse(
+                    page = page,
+                    size = size,
+                    data = elements
+                )
 
-            call.respond(HttpStatusCode.OK, Json.encodeToString(response))
+                call.respond(HttpStatusCode.OK, Json.encodeToString(response))
+            }
+        } catch (ex: Exception) {
+            call.respond(HttpStatusCode.Unauthorized, ErrorResponse(ErrorMessages.UnauthorizedMongo.message))
         }
-    } catch (ex: Exception) {
-        call.respond(HttpStatusCode.Unauthorized, ErrorResponse(ErrorMessages.UnauthorizedMongo.message))
     }
 
     suspend fun getAnimeByMalId(call: RoutingCall) = try {

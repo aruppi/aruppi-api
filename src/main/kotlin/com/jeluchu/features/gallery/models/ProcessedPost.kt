@@ -24,7 +24,7 @@ data class ProcessedPost(
     val size: Int,
 
     @SerialName("erotics")
-    val erotics: Int,
+    val erotics: Boolean,
 
     @SerialName("spoiler")
     val spoiler: Boolean,

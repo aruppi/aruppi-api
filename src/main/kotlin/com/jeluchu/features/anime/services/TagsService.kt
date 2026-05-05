@@ -2,6 +2,8 @@ package com.jeluchu.features.anime.services
 
 import com.jeluchu.core.enums.AnimeStatusTypes
 import com.jeluchu.core.enums.AnimeTypes
+import com.jeluchu.core.extensions.respondError
+import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.documentToSimpleAnimeEntity
 import com.jeluchu.core.utils.Collections
 import com.mongodb.client.MongoCollection
@@ -27,8 +29,7 @@ class TagsService(
         } else emptyList()
 
         if (tagsList.isEmpty()) {
-            call.respond(HttpStatusCode.BadRequest, "No tags provided")
-            return
+            return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.MissingTags.message)
         }
 
         val filters = mutableListOf<org.bson.conversions.Bson>().apply {

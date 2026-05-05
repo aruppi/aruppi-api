@@ -2,11 +2,12 @@ package com.jeluchu.features.gallery.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class PostsResponse(
     @SerialName("exclusive_tag")
-    val exclusiveTag: String? = null,
+    val exclusiveTag: JsonElement? = null,
 
     @SerialName("posts_per_page")
     val postsPerPage: Int = 0,
@@ -50,7 +51,7 @@ data class PostsResponse(
         val datetime: String = "",
 
         @SerialName("score")
-        val score: Int = 0,
+        val score: Double = 0.0,
 
         @SerialName("score_number")
         val scoreNumber: Int = 0,
