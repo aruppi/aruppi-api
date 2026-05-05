@@ -113,6 +113,45 @@ Use these URLs to browse the API docs:
 - Swagger UI: [http://0.0.0.0:8080/api/v5/swagger](http://0.0.0.0:8080/api/v5/swagger)
 - OpenAPI YAML: [http://0.0.0.0:8080/api/v5/openapi.yaml](http://0.0.0.0:8080/api/v5/openapi.yaml)
 
+### Endpoint examples
+
+Base path: `/api/v5`. All endpoints use `GET`.
+
+| Endpoint | Example request | Required params | Optional params |
+|---|---|---|---|
+| `/docs` | `/api/v5/docs` | None | None |
+| `/swagger` | `/api/v5/swagger` | None | None |
+| `/openapi.yaml` | `/api/v5/openapi.yaml` | None | None |
+| `/news/es` | `/api/v5/news/es` | None | None |
+| `/news/en` | `/api/v5/news/en` | None | None |
+| `/anime` | `/api/v5/anime?type=tv&status=finished&nsfw=false` | `type`, `status` | `nsfw` (default: `false`) |
+| `/anime/{id}` | `/api/v5/anime/1` | `id` (path, MAL ID) | None |
+| `/anime/random` | `/api/v5/anime/random?nsfw=false` | None | `nsfw` (default: `false`) |
+| `/anime/lastEpisodes` | `/api/v5/anime/lastEpisodes` | None | None |
+| `/anime/suggestions` | `/api/v5/anime/suggestions?tags=action,comedy&nsfw=false` | `tags` (csv) | `nsfw` (default: `false`) |
+| `/anime/season` | `/api/v5/anime/season?year=2026&station=spring` | None | `year` (default: current year), `station` (default: current season) |
+| `/anime/season/yearIndex` | `/api/v5/anime/season/yearIndex` | None | None |
+| `/anime/directory` | `/api/v5/anime/directory?type=tv&page=1&size=10` | None | `type`, `page` (default: `1`), `size` (default: `10`) |
+| `/anime/directory/{type}` | `/api/v5/anime/directory/tv?page=1&size=10` | `type` (path) | `page` (default: `1`), `size` (default: `10`) |
+| `/themes/anime` | `/api/v5/themes/anime?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`) |
+| `/themes/anime/{slug}` | `/api/v5/themes/anime/cowboy_bebop` | `slug` (path) | None |
+| `/themes/anime/{slug}/random` | `/api/v5/themes/anime/cowboy_bebop/random` | `slug` (path) | None |
+| `/themes/artists` | `/api/v5/themes/artists?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`) |
+| `/themes/artists/{slug}` | `/api/v5/themes/artists/yoko_kanno` | `slug` (path) | None |
+| `/themes/songs` | `/api/v5/themes/songs?q=tank&page=1&size=25` | None | `q`, `page` (default: `1`), `size` (default: `25`) |
+| `/themes/songs/random` | `/api/v5/themes/songs/random` | None | None |
+| `/gallery` | `/api/v5/gallery?query=hatsune%20miku&page=1` | None | `query` (default: empty), `page` (default: `1`) |
+| `/gallery/lastPosts` | `/api/v5/gallery/lastPosts?page=1` | None | `page` (default: `1`) |
+| `/top/anime` | `/api/v5/top/anime?type=tv&filter=airing&page=1&size=25` | `type` | `filter` (default: `airing`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/top/anime/topTen` | `/api/v5/top/anime/topTen?type=tv&filter=airing` | `type` | `filter` (default: `airing`) |
+| `/top/manga` | `/api/v5/top/manga?type=manga&filter=publishing&page=1&size=25` | `type` | `filter` (default: `publishing`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/top/people` | `/api/v5/top/people?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/top/characters` | `/api/v5/top/characters?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/schedule` | `/api/v5/schedule` | None | None |
+| `/schedule/{day}` | `/api/v5/schedule/monday` | `day` (path) | None |
+| `/anitakume` | `/api/v5/anitakume` | None | None |
+| `/radio` | `/api/v5/radio` | None | None |
+
 ### GitHub Pages (static docs)
 
 This repository includes a workflow at `.github/workflows/pages-docs.yml` that publishes static docs to GitHub Pages.
