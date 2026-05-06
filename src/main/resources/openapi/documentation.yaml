@@ -2,12 +2,14 @@ openapi: "3.0.3"
 info:
   title: "Aruppi API"
   description: "Public REST API for anime, themes, rankings, gallery and news."
-  version: "5.9.1"
+  version: "5.9.2"
 servers:
   - url: "http://0.0.0.0:8080/api/v5"
 tags:
   - name: "news"
   - name: "anime"
+  - name: "manga"
+  - name: "search"
   - name: "themes"
   - name: "gallery"
   - name: "rankings"
@@ -75,6 +77,82 @@ paths:
           $ref: "#/components/responses/OkObject"
         "404":
           $ref: "#/components/responses/NotFound"
+
+  /manga:
+    get:
+      tags: ["manga"]
+      summary: "Manga list"
+      description: "Returns a paginated manga list from the manga directory cache. Results are cached in MongoDB by page, size and filters."
+      parameters:
+        - $ref: "#/components/parameters/MangaTypeQuery"
+        - $ref: "#/components/parameters/MangaStatusQuery"
+        - $ref: "#/components/parameters/SfwQuery"
+        - $ref: "#/components/parameters/QQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /manga/{id}:
+    get:
+      tags: ["manga"]
+      summary: "Manga detail by MAL id"
+      description: "Fetches a manga detail by MyAnimeList identifier and caches it in MongoDB."
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /manga/random:
+    get:
+      tags: ["manga"]
+      summary: "Random manga"
+      description: "Returns one random manga from Jikan. Random responses are not cached."
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /manga/directory:
+    get:
+      tags: ["manga"]
+      summary: "Manga directory"
+      description: "Alias of /manga for directory-style clients. Supports q, type, status, sfw, page and size."
+      parameters:
+        - $ref: "#/components/parameters/MangaTypeQuery"
+        - $ref: "#/components/parameters/MangaStatusQuery"
+        - $ref: "#/components/parameters/SfwQuery"
+        - $ref: "#/components/parameters/QQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /search:
+    get:
+      tags: ["search"]
+      summary: "Unified search"
+      description: "Searches anime, manga and characters through a single endpoint."
+      parameters:
+        - $ref: "#/components/parameters/SearchQuery"
+        - $ref: "#/components/parameters/SearchTypeQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/SearchSizeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "400":
+          $ref: "#/components/responses/BadRequest"
 
   /anime/lastEpisodes:
     get:
@@ -431,6 +509,31 @@ components:
       required: false
       schema:
         type: "string"
+    SearchQuery:
+      name: "q"
+      in: "query"
+      required: true
+      schema:
+        type: "string"
+      description: "Search text."
+    SearchTypeQuery:
+      name: "type"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+        example: "anime,manga,characters"
+      description: "Comma-separated categories. Supported values: anime, manga, characters."
+    SearchSizeQuery:
+      name: "size"
+      in: "query"
+      required: false
+      description: "Results per category. Maximum value is 10."
+      schema:
+        type: "integer"
+        minimum: 1
+        maximum: 10
+        default: 5
     TagsQuery:
       name: "tags"
       in: "query"
@@ -458,6 +561,13 @@ components:
       schema:
         type: "boolean"
         default: false
+    SfwQuery:
+      name: "sfw"
+      in: "query"
+      required: false
+      schema:
+        type: "boolean"
+        default: true
     AnimeTypeQuery:
       name: "type"
       in: "query"
@@ -470,6 +580,20 @@ components:
       required: false
       schema:
         type: "string"
+    MangaTypeQuery:
+      name: "type"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+        enum: ["manga", "novel", "lightnovel", "oneshot", "doujin", "manhwa", "manhua"]
+    MangaStatusQuery:
+      name: "status"
+      in: "query"
+      required: false
+      schema:
+        type: "string"
+        enum: ["publishing", "complete", "hiatus", "discontinued", "upcoming"]
     TopTypeQuery:
       name: "type"
       in: "query"
@@ -638,7 +762,7 @@ components:
         status: 404
         path: "/api/v5/gallery/unknown"
         requestId: "0f2d6d40-4b7a-4f4a-a1a1-f9d8cf8d6a21"
-        version: "5.9.1"
+        version: "5.9.2"
         documentation:
           redoc: "/api/v5/docs"
           swagger: "/api/v5/swagger"

@@ -127,6 +127,11 @@ Base path: `/api/v5`. All endpoints use `GET`.
 | `/anime` | `/api/v5/anime?type=tv&status=finished&nsfw=false&page=1&size=25` | `type`, `status` | `nsfw` (default: `false`), `page`, `size` (max: `100`; response stays as legacy array when `page`/`size` are omitted) |
 | `/anime/{id}` | `/api/v5/anime/1` | `id` (path, MAL ID) | None |
 | `/anime/random` | `/api/v5/anime/random?nsfw=false` | None | `nsfw` (default: `false`) |
+| `/manga` | `/api/v5/manga?page=1&size=25` | None | `q`, `type`, `status`, `sfw` (default: `true`), `page`, `size` (max: `25`) |
+| `/manga/{id}` | `/api/v5/manga/1` | `id` (path, MAL ID) | None |
+| `/manga/random` | `/api/v5/manga/random` | None | None |
+| `/manga/directory` | `/api/v5/manga/directory?q=berserk&page=1&size=10` | None | `q`, `type`, `status`, `sfw` (default: `true`), `page`, `size` (max: `25`) |
+| `/search` | `/api/v5/search?q=naruto&type=anime,manga,characters&page=1&size=5` | `q` | `type` (csv), `page`, `size` (max: `10`) |
 | `/anime/lastEpisodes` | `/api/v5/anime/lastEpisodes` | None | None |
 | `/anime/suggestions` | `/api/v5/anime/suggestions?tags=action,comedy&nsfw=false` | `tags` (csv) | `nsfw` (default: `false`) |
 | `/anime/season` | `/api/v5/anime/season?year=2026&station=spring` | None | `year` (default: current year), `station` (default: current season) |

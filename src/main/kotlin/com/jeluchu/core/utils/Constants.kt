@@ -112,6 +112,8 @@ object Collections {
     const val LAST_EPISODES = "last_episodes"
     const val ANIME_RANKING = "anime_ranking"
     const val MANGA_RANKING = "manga_ranking"
+    const val MANGA_DIRECTORY = "manga_directory"
+    const val MANGA_DETAIL = "manga_detail"
     const val PEOPLE_RANKING = "people_ranking"
     const val ANIME_DIRECTORY = "anime_directory"
     const val CHARACTER_RANKING = "character_ranking"
