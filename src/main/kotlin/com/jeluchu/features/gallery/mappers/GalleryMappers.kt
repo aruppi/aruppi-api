@@ -1,26 +1,21 @@
 package com.jeluchu.features.gallery.mappers
 
 import com.jeluchu.core.extensions.getBooleanSafe
-import com.jeluchu.core.extensions.getDocumentSafe
-import com.jeluchu.core.extensions.getFloatSafe
 import com.jeluchu.core.extensions.getIntSafe
-import com.jeluchu.core.extensions.getListSafe
 import com.jeluchu.core.extensions.getStringSafe
-import com.jeluchu.core.extensions.parseRssDate
-import com.jeluchu.features.anime.mappers.documentToVideoPromo
-import com.jeluchu.features.anime.models.anime.VideoPromo
 import com.jeluchu.features.gallery.models.PostsResponse
 import com.jeluchu.features.gallery.models.ProcessedPost
-import com.jeluchu.features.news.models.NewEntity
-import com.prof18.rssparser.model.RssChannel
 import org.bson.Document
 
 fun PostsResponse.Post.toProcessedPost(page: Int): ProcessedPost {
-    val imageUrl = "https://oimages.anime-pictures.net/${md5.take(3)}/$md5$ext"
+    val dir = if (md5.length > 3) md5.substring(0, 3) else ""
+    val largeImage = "https://oimages.anime-pictures.net/$dir/$md5$ext"
+    val thumbnail = "https://opreviews.anime-pictures.net/$dir/${md5}_lp.avif"
 
     return ProcessedPost(
         id = id,
-        image = imageUrl,
+        largeImage = largeImage,
+        thumbnail = thumbnail,
         width = width,
         height = height,
         pubtime = pubtime,
@@ -33,11 +28,14 @@ fun PostsResponse.Post.toProcessedPost(page: Int): ProcessedPost {
 }
 
 fun PostsResponse.Post.toProcessedPostQuery(page: Int, query: String): ProcessedPost {
-    val imageUrl = "https://oimages.anime-pictures.net/${md5.take(3)}/$md5$ext"
+    val dir = if (md5.length > 3) md5.substring(0, 3) else ""
+    val largeImage = "https://oimages.anime-pictures.net/$dir/$md5$ext"
+    val thumbnail = "https://opreviews.anime-pictures.net/$dir/${md5}_lp.avif"
 
     return ProcessedPost(
         id = id,
-        image = imageUrl,
+        largeImage = largeImage,
+        thumbnail = thumbnail,
         width = width,
         height = height,
         pubtime = pubtime,
@@ -52,7 +50,8 @@ fun PostsResponse.Post.toProcessedPostQuery(page: Int, query: String): Processed
 
 fun documentToProcessedPost(doc: Document) = ProcessedPost(
     id = doc.getIntSafe("id"),
-    image = doc.getStringSafe("image"),
+    largeImage = doc.getStringSafe("large_image"),
+    thumbnail = doc.getStringSafe("thumbnail"),
     width = doc.getIntSafe("width"),
     height = doc.getIntSafe("height"),
     pubtime = doc.getStringSafe("pubtime"),

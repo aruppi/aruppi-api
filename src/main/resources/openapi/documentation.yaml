@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: "Aruppi API"
   description: "Public REST API for anime, themes, rankings, gallery and news."
-  version: "5.0.0"
+  version: "5.9.1"
 servers:
   - url: "http://0.0.0.0:8080/api/v5"
 tags:

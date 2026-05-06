@@ -8,8 +8,11 @@ data class ProcessedPost(
     @SerialName("id")
     val id: Int,
 
-    @SerialName("image")
-    val image: String,
+    @SerialName("large_image")
+    val largeImage: String,
+
+    @SerialName("thumbnail")
+    val thumbnail: String,
 
     @SerialName("width")
     val width: Int,
