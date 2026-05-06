@@ -10,7 +10,6 @@ import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
-import com.jeluchu.core.models.ErrorResponse
 import com.jeluchu.core.models.PaginationResponse
 import com.jeluchu.core.models.documentToSimpleAnimeEntity
 import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity
@@ -87,7 +86,7 @@ class AnimeService(
                 call.respond(HttpStatusCode.OK, Json.encodeToString(response))
             }
         } catch (ex: Exception) {
-            call.respond(HttpStatusCode.Unauthorized, ErrorResponse(ErrorMessages.UnauthorizedMongo.message))
+            call.respondError(HttpStatusCode.Unauthorized, ErrorMessages.UnauthorizedMongo.message)
         }
     }
 
@@ -96,9 +95,9 @@ class AnimeService(
         directoryCollection.find(Filters.eq("malId", id)).firstOrNull()?.let { anime ->
             val info = documentToMoreInfoEntity(anime)
             call.respond(HttpStatusCode.OK, Json.encodeToString(info))
-        } ?: call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.AnimeNotFound.message))
+        } ?: call.respondError(HttpStatusCode.NotFound, ErrorMessages.AnimeNotFound.message)
     } catch (ex: Exception) {
-        call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.InvalidInput.message))
+        call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
     }
 
     suspend fun getRandomAnime(call: RoutingCall) = try {
@@ -132,9 +131,9 @@ class AnimeService(
             call.response.headers.append("Cache-Control", "no-store")
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(info))
-        } ?: call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.AnimeNotFound.message))
+        } ?: call.respondError(HttpStatusCode.NotFound, ErrorMessages.AnimeNotFound.message)
     } catch (ex: Exception) {
-        call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.InvalidInput.message))
+        call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
     }
 
     suspend fun getLastEpisodes(call: RoutingCall) = try {
@@ -197,7 +196,7 @@ class AnimeService(
             call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
         }
     } catch (ex: Exception) {
-        call.respond(HttpStatusCode.Unauthorized, ErrorResponse(ErrorMessages.UnauthorizedMongo.message))
+        call.respondError(HttpStatusCode.Unauthorized, ErrorMessages.UnauthorizedMongo.message)
     }
 
     suspend fun getAnimeByType(call: RoutingCall) = try {
@@ -218,6 +217,6 @@ class AnimeService(
         val elements = animes.map { documentToSimpleAnimeEntity(it) }
         call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
     } catch (ex: Exception) {
-        call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.InvalidInput.message))
+        call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
     }
 }

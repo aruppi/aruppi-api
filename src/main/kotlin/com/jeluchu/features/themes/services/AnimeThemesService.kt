@@ -10,7 +10,6 @@ import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
-import com.jeluchu.core.models.ErrorResponse
 import com.jeluchu.core.models.PaginationResponse
 import com.jeluchu.core.utils.BaseUrls
 import com.jeluchu.core.utils.Collections
@@ -159,7 +158,7 @@ class AnimeThemesService(
             call.response.headers.append("Cache-Control", "no-store")
             call.respond(HttpStatusCode.OK, Json.encodeToString(song.withVideoLinks()))
         } catch (ex: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, Json.encodeToString(ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message)))
+            call.respondError(HttpStatusCode.InternalServerError, ex.message ?: ErrorMessages.InvalidInput.message)
         }
     }
 
@@ -205,7 +204,7 @@ class AnimeThemesService(
             )
         }
         } catch (ex: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message))
+            call.respondError(HttpStatusCode.InternalServerError, ex.message ?: ErrorMessages.InvalidInput.message)
         }
     }
 
@@ -223,7 +222,7 @@ class AnimeThemesService(
         )
 
         val artist = raw.artist?.toArtistEntity()
-            ?: return call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.ArtistNotFound.message))
+            ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.ArtistNotFound.message)
 
         artistsDirectory.deleteMany(Filters.eq("slug", slug))
         val documents = parseDataToDocuments(listOf(artist), ArtistEntity.serializer())
@@ -231,7 +230,7 @@ class AnimeThemesService(
 
         call.respond(HttpStatusCode.OK, Json.encodeToString(artist))
         } catch (ex: Exception) {
-            call.respond(HttpStatusCode.NotFound, ErrorResponse(ErrorMessages.ArtistNotFound.message))
+            call.respondError(HttpStatusCode.NotFound, ErrorMessages.ArtistNotFound.message)
         }
     }
 
@@ -291,7 +290,7 @@ class AnimeThemesService(
             }
         }
         } catch (ex: Exception) {
-            call.respond(HttpStatusCode.InternalServerError, ErrorResponse(ex.message ?: ErrorMessages.InvalidInput.message))
+            call.respondError(HttpStatusCode.InternalServerError, ex.message ?: ErrorMessages.InvalidInput.message)
         }
     }
 

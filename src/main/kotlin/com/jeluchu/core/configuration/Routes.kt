@@ -58,9 +58,17 @@ fun Application.initRoutes(
 
 private fun notFoundMessage(path: String): String {
     return when {
+        path.startsWith("/api/v5/news") -> ErrorMessages.InvalidNewsEndpoint.message
+        path.startsWith("/api/v5/anime") -> ErrorMessages.InvalidAnimeEndpoint.message
         path.startsWith("/api/v5/themes/songs") -> ErrorMessages.InvalidThemesSongsEndpoint.message
         path.startsWith("/api/v5/themes/anime") -> ErrorMessages.InvalidThemesAnimeEndpoint.message
         path.startsWith("/api/v5/themes/artists") -> ErrorMessages.InvalidThemesArtistsEndpoint.message
+        path.startsWith("/api/v5/themes") -> ErrorMessages.InvalidThemesEndpoint.message
+        path.startsWith("/api/v5/gallery") -> ErrorMessages.InvalidGalleryEndpoint.message
+        path.startsWith("/api/v5/top") -> ErrorMessages.InvalidTopEndpoint.message
+        path.startsWith("/api/v5/schedule") -> ErrorMessages.InvalidScheduleEndpoint.message
+        path.startsWith("/api/v5/anitakume") -> ErrorMessages.InvalidAnitakumeEndpoint.message
+        path.startsWith("/api/v5/radio") -> ErrorMessages.InvalidRadioEndpoint.message
         else -> ErrorMessages.NotFound.message
     }
 }
