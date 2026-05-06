@@ -30,11 +30,12 @@ import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.delay
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.bson.Document
+import org.bson.conversions.Bson
 import java.time.LocalDate
 import java.time.format.TextStyle
+import kotlin.math.ceil
 import java.util.*
 
 class AnimeService(
@@ -42,6 +43,7 @@ class AnimeService(
 ) {
     private val timers = database.getCollection(Collections.TIMERS)
     private val directoryCollection = database.getCollection(Collections.ANIME_DIRECTORY)
+    private val maxAnimePageSize = 100
 
     suspend fun getDirectory(call: RoutingCall) {
         try {
@@ -85,7 +87,7 @@ class AnimeService(
 
                 call.respond(HttpStatusCode.OK, Json.encodeToString(response))
             }
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
             call.respondError(HttpStatusCode.Unauthorized, ErrorMessages.UnauthorizedMongo.message)
         }
     }
@@ -96,14 +98,14 @@ class AnimeService(
             val info = documentToMoreInfoEntity(anime)
             call.respond(HttpStatusCode.OK, Json.encodeToString(info))
         } ?: call.respondError(HttpStatusCode.NotFound, ErrorMessages.AnimeNotFound.message)
-    } catch (ex: Exception) {
+    } catch (_: Exception) {
         call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
     }
 
     suspend fun getRandomAnime(call: RoutingCall) = try {
         val nsfw = call.request.queryParameters["nsfw"]?.toBoolean() ?: false
 
-        val filters = mutableListOf<org.bson.conversions.Bson>().apply {
+        val filters = mutableListOf<Bson>().apply {
             add(Filters.`in`("type", listOf(
                 AnimeTypes.TV,
                 AnimeTypes.MOVIE,
@@ -132,7 +134,7 @@ class AnimeService(
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(info))
         } ?: call.respondError(HttpStatusCode.NotFound, ErrorMessages.AnimeNotFound.message)
-    } catch (ex: Exception) {
+    } catch (_: Exception) {
         call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
     }
 
@@ -195,28 +197,83 @@ class AnimeService(
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
         }
-    } catch (ex: Exception) {
+    } catch (_: Exception) {
         call.respondError(HttpStatusCode.Unauthorized, ErrorMessages.UnauthorizedMongo.message)
     }
 
-    suspend fun getAnimeByType(call: RoutingCall) = try {
-        val type = call.request.queryParameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
-        val status = call.request.queryParameters["status"] ?: throw IllegalArgumentException(ErrorMessages.InvalidAnimeStatusType.message)
-        val nsfw = call.request.queryParameters["nsfw"].toBoolean()
+    suspend fun getAnimeByType(call: RoutingCall) {
+        try {
+            val type = call.request.queryParameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
+            val status = call.request.queryParameters["status"] ?: throw IllegalArgumentException(ErrorMessages.InvalidAnimeStatusType.message)
+            val nsfw = call.request.queryParameters["nsfw"].toBoolean()
+            val pageParam = call.request.queryParameters["page"]
+            val sizeParam = call.request.queryParameters["size"]
+            val isPaginatedRequest = pageParam != null || sizeParam != null
+            val page = pageParam?.toIntOrNull()
+            val size = sizeParam?.toIntOrNull()
 
-        val animes = directoryCollection.find(
-            Filters.and(
+            if ((pageParam != null && page == null) || (sizeParam != null && size == null)) {
+                return call.respondError(
+                    status = HttpStatusCode.BadRequest,
+                    message = ErrorMessages.InvalidSizeAndPage.message,
+                    code = "INVALID_PAGE_SIZE"
+                )
+            }
+
+            val safePage = page ?: 1
+            val safeSize = size ?: 25
+
+            if (safePage < 1 || safeSize < 1 || safeSize > maxAnimePageSize) {
+                return call.respondError(
+                    status = HttpStatusCode.BadRequest,
+                    message = ErrorMessages.InvalidSizeAndPage.message,
+                    code = "INVALID_PAGE_SIZE"
+                )
+            }
+
+            val filter = Filters.and(
                 Filters.eq("type", parseAnimeType(type)),
                 Filters.eq("status", parseAnimeStatusType(status)),
                 Filters.eq("nsfw", nsfw),
             )
-        )
-            .sort(Sorts.descending("aired.from"))
-            .toList()
 
-        val elements = animes.map { documentToSimpleAnimeEntity(it) }
-        call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
-    } catch (ex: Exception) {
-        call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
+            if (isPaginatedRequest) call.respondAnimePage(filter = filter, page = safePage, size = safeSize)
+            else {
+                val animes = directoryCollection.find(filter)
+                    .sort(Sorts.descending("aired.from"))
+                    .toList()
+
+                val elements = animes.map { documentToSimpleAnimeEntity(it) }
+                call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
+            }
+        } catch (_: Exception) {
+            call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidInput.message)
+        }
+    }
+
+    private suspend fun RoutingCall.respondAnimePage(
+        filter: Bson,
+        page: Int,
+        size: Int
+    ) {
+        val skipCount = (page - 1) * size
+        val totalItems = directoryCollection.countDocuments(filter).toInt()
+        val totalPages = if (totalItems == 0) 0 else ceil(totalItems.toDouble() / size).toInt()
+        val animes = directoryCollection.find(filter)
+            .sort(Sorts.descending("aired.from"))
+            .skip(skipCount)
+            .limit(size)
+            .toList()
+            .map { documentToSimpleAnimeEntity(it) }
+
+        val response = PaginationResponse(
+            page = page,
+            size = size,
+            totalPages = totalPages,
+            totalItems = totalItems,
+            data = animes
+        )
+
+        respond(HttpStatusCode.OK, Json.encodeToString(response))
     }
 }

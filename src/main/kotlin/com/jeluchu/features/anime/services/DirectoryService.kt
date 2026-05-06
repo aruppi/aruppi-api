@@ -55,7 +55,7 @@ class DirectoryService(
             skipCount = skipCount,
             collection = collection,
             mapper = { documentToAnimeDirectoryEntity(it) },
-            onQuerySuccess = { data -> call.respond(HttpStatusCode.OK, Json.encodeToString(data)) }
+            onQuerySuccess = { data -> call.respond(status = HttpStatusCode.OK, message = Json.encodeToString(value = data)) }
         )
     }
 }

@@ -37,14 +37,16 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime list filtered by type/status"
-      description: "Lists anime stored in the directory and allows filtering by type, status and NSFW flag."
+      description: "Lists anime stored in the directory and allows filtering by type, status and NSFW flag. When page or size is provided, the response is paginated; otherwise it keeps the legacy array response."
       parameters:
         - $ref: "#/components/parameters/AnimeTypeQuery"
         - $ref: "#/components/parameters/AnimeStatusQuery"
         - $ref: "#/components/parameters/NsfwQuery"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/AnimeSizeQuery"
       responses:
         "200":
-          $ref: "#/components/responses/OkArray"
+          $ref: "#/components/responses/OkAnimeList"
         "400":
           $ref: "#/components/responses/BadRequest"
 
@@ -407,6 +409,16 @@ components:
         type: "integer"
         minimum: 1
         default: 25
+    AnimeSizeQuery:
+      name: "size"
+      in: "query"
+      required: false
+      description: "Page size for /anime when paginated. Maximum value is 100."
+      schema:
+        type: "integer"
+        minimum: 1
+        maximum: 100
+        default: 25
     QueryQuery:
       name: "query"
       in: "query"
@@ -501,6 +513,19 @@ components:
             $ref: "#/components/schemas/PaginationResponse"
           examples:
             Example:
+              $ref: "#/components/examples/PaginationExample"
+    OkAnimeList:
+      description: "Successful anime list response. Returns an array by default, or a paginated object when page or size is provided."
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - type: "array"
+                items:
+                  $ref: "#/components/schemas/GenericObject"
+              - $ref: "#/components/schemas/PaginationResponse"
+          examples:
+            Paginated:
               $ref: "#/components/examples/PaginationExample"
     BadRequest:
       description: "Invalid request"

@@ -124,7 +124,7 @@ Base path: `/api/v5`. All endpoints use `GET`.
 | `/openapi.yaml` | `/api/v5/openapi.yaml` | None | None |
 | `/news/es` | `/api/v5/news/es` | None | None |
 | `/news/en` | `/api/v5/news/en` | None | None |
-| `/anime` | `/api/v5/anime?type=tv&status=finished&nsfw=false` | `type`, `status` | `nsfw` (default: `false`) |
+| `/anime` | `/api/v5/anime?type=tv&status=finished&nsfw=false&page=1&size=25` | `type`, `status` | `nsfw` (default: `false`), `page`, `size` (max: `100`; response stays as legacy array when `page`/`size` are omitted) |
 | `/anime/{id}` | `/api/v5/anime/1` | `id` (path, MAL ID) | None |
 | `/anime/random` | `/api/v5/anime/random?nsfw=false` | None | `nsfw` (default: `false`) |
 | `/anime/lastEpisodes` | `/api/v5/anime/lastEpisodes` | None | None |
