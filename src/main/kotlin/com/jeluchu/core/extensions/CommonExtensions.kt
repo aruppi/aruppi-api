@@ -4,6 +4,7 @@ import com.jeluchu.core.configuration.ApiMetadata
 import com.jeluchu.core.models.DocumentationLinks
 import com.jeluchu.core.models.ErrorResponse
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -31,22 +32,44 @@ fun RoutingCall.getIntSafeParam(
     defaultValue: Int = 0
 ) = parameters[key]?.toIntOrNull() ?: defaultValue
 
-suspend fun RoutingCall.respondError(status: HttpStatusCode, message: String) = respond(
+suspend fun RoutingCall.respondError(
+    status: HttpStatusCode,
+    message: String,
+    code: String = status.defaultErrorCode()
+) = respond(
     status,
-    ErrorResponse(
-        error = message,
-        status = status.value,
-        path = request.path(),
-        version = ApiMetadata.version,
-        documentation = DocumentationLinks(
-            redoc = ApiMetadata.docsPath,
-            swagger = ApiMetadata.swaggerPath,
-            openapi = ApiMetadata.openApiPath
-        )
-    )
+    errorResponse(status = status, message = message, code = code)
 )
 
 suspend fun RoutingCall.badRequestError(message: String) = respondError(HttpStatusCode.BadRequest, message)
+
+fun ApplicationCall.errorResponse(
+    status: HttpStatusCode,
+    message: String,
+    code: String = status.defaultErrorCode()
+) = ErrorResponse(
+    error = message,
+    code = code,
+    status = status.value,
+    path = request.path(),
+    requestId = request.headers["X-Request-ID"] ?: UUID.randomUUID().toString(),
+    version = ApiMetadata.version,
+    documentation = DocumentationLinks(
+        redoc = ApiMetadata.docsPath,
+        swagger = ApiMetadata.swaggerPath,
+        openapi = ApiMetadata.openApiPath
+    )
+)
+
+fun HttpStatusCode.defaultErrorCode(): String = when (value) {
+    HttpStatusCode.BadRequest.value -> "BAD_REQUEST"
+    HttpStatusCode.Unauthorized.value -> "UNAUTHORIZED"
+    HttpStatusCode.Forbidden.value -> "FORBIDDEN"
+    HttpStatusCode.NotFound.value -> "NOT_FOUND"
+    HttpStatusCode.TooManyRequests.value -> "RATE_LIMITED"
+    in 500..599 -> "INTERNAL_SERVER_ERROR"
+    else -> "REQUEST_FAILED"
+}
 
 fun Document.getStringSafe(key: String, defaultValue: String = ""): String {
     return try {

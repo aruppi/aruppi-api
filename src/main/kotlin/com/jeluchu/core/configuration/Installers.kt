@@ -1,8 +1,7 @@
 package com.jeluchu.core.configuration
 
+import com.jeluchu.core.extensions.errorResponse
 import com.jeluchu.core.messages.ErrorMessages
-import com.jeluchu.core.models.ErrorResponse
-import com.jeluchu.core.models.DocumentationLinks
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -17,12 +16,10 @@ fun Application.initInstallers() {
         exception<BadRequestException> { call, _ ->
             call.respond(
                 status = HttpStatusCode.BadRequest,
-                message = ErrorResponse(
-                    error = ErrorMessages.InvalidRequest.message,
-                    status = HttpStatusCode.BadRequest.value,
-                    path = call.request.path(),
-                    version = ApiMetadata.version,
-                    documentation = documentationLinks()
+                message = call.errorResponse(
+                    status = HttpStatusCode.BadRequest,
+                    message = ErrorMessages.InvalidRequest.message,
+                    code = "INVALID_REQUEST"
                 )
             )
         }
@@ -30,12 +27,10 @@ fun Application.initInstallers() {
         exception<IllegalArgumentException> { call, cause ->
             call.respond(
                 status = HttpStatusCode.BadRequest,
-                message = ErrorResponse(
-                    error = cause.message ?: ErrorMessages.InvalidRequest.message,
-                    status = HttpStatusCode.BadRequest.value,
-                    path = call.request.path(),
-                    version = ApiMetadata.version,
-                    documentation = documentationLinks()
+                message = call.errorResponse(
+                    status = HttpStatusCode.BadRequest,
+                    message = cause.message ?: ErrorMessages.InvalidRequest.message,
+                    code = "INVALID_ARGUMENT"
                 )
             )
         }
@@ -44,12 +39,10 @@ fun Application.initInstallers() {
             call.application.environment.log.error("Unhandled error while processing ${call.request.path()}", cause)
             call.respond(
                 status = HttpStatusCode.InternalServerError,
-                message = ErrorResponse(
-                    error = ErrorMessages.InternalServerError.message,
-                    status = HttpStatusCode.InternalServerError.value,
-                    path = call.request.path(),
-                    version = ApiMetadata.version,
-                    documentation = documentationLinks()
+                message = call.errorResponse(
+                    status = HttpStatusCode.InternalServerError,
+                    message = ErrorMessages.InternalServerError.message,
+                    code = "INTERNAL_SERVER_ERROR"
                 )
             )
         }
@@ -58,12 +51,4 @@ fun Application.initInstallers() {
     install(plugin = ContentNegotiation) {
         json()
     }
-}
-
-private fun documentationLinks(): DocumentationLinks {
-    return DocumentationLinks(
-        redoc = ApiMetadata.docsPath,
-        swagger = ApiMetadata.swaggerPath,
-        openapi = ApiMetadata.openApiPath
-    )
 }
