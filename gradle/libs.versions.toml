@@ -3,7 +3,7 @@
 kotlin-version = "2.3.21"
 ktor-version = "3.4.1"
 logback-version = "1.5.32"
-mongo-version = "4.10.2"
+mongo-version = "5.7.0"
 rss-version = "6.1.5"
 
 [libraries]
