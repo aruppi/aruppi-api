@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PeopleTopEntity(
+    val rank: Int? = 0,
     val malId: Int? = 0,
     val name: String? = "",
     val givenName: String? = "",

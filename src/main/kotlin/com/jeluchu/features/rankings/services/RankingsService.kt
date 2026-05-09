@@ -35,6 +35,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.times
 
 class RankingsService(
     database: MongoDatabase
@@ -64,6 +65,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
+        val offset = (page - 1) * size
         if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             animeRanking.deleteMany(
@@ -95,7 +97,12 @@ class RankingsService(
             if (documentsToInsert.isNotEmpty()) animeRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
-            val elements = documentsToInsert.map { documentToAnimeTopEntity(it) }
+            val elements = documentsToInsert.mapIndexed { index, document ->
+                documentToAnimeTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
 
             val paginationResponse = PaginationResponse(
                 page = page,
@@ -116,7 +123,13 @@ class RankingsService(
                 .limit(size)
                 .toList()
 
-            val elements = animes.map { documentToAnimeTopEntity(it) }
+            val elements = animes.mapIndexed { index, document ->
+                documentToAnimeTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
+
             val response = PaginationResponse(
                 page = page,
                 size = size,
@@ -145,6 +158,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
+        val offset = (page - 1) * size
         if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             mangaRanking.deleteMany(
@@ -176,7 +190,12 @@ class RankingsService(
             if (documentsToInsert.isNotEmpty()) mangaRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
-            val elements = documentsToInsert.map { documentToMangaTopEntity(it) }
+            val elements = documentsToInsert.mapIndexed { index, document ->
+                documentToMangaTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
 
             val paginationResponse = PaginationResponse(
                 page = page,
@@ -197,7 +216,13 @@ class RankingsService(
                 .limit(size)
                 .toList()
 
-            val elements = mangas.map { documentToMangaTopEntity(it) }
+            val elements = mangas.mapIndexed { index, document ->
+                documentToMangaTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
+
             val response = PaginationResponse(
                 page = page,
                 size = size,
@@ -221,6 +246,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
+        val offset = (page - 1) * size
         if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             peopleRanking.deleteMany(Filters.and(Filters.eq("page", page)))
@@ -238,7 +264,12 @@ class RankingsService(
             if (documentsToInsert.isNotEmpty()) peopleRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
-            val elements = documentsToInsert.map { documentToPeopleTopEntity(it) }
+            val elements = documentsToInsert.mapIndexed { index, document ->
+                documentToPeopleTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
 
             val paginationResponse = PaginationResponse(
                 page = page,
@@ -253,7 +284,13 @@ class RankingsService(
                 .limit(size)
                 .toList()
 
-            val elements = peoples.map { documentToPeopleTopEntity(it) }
+            val elements = peoples.mapIndexed { index, document ->
+                documentToPeopleTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
+
             val response = PaginationResponse(
                 page = page,
                 size = size,
@@ -277,6 +314,7 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
+        val offset = (page - 1) * size
         if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             characterRanking.deleteMany(Filters.and(Filters.eq("page", page)))
@@ -294,7 +332,12 @@ class RankingsService(
             if (documentsToInsert.isNotEmpty()) characterRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
-            val elements = documentsToInsert.map { documentToCharacterTopEntity(it) }
+            val elements = documentsToInsert.mapIndexed { index, document ->
+                documentToCharacterTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
 
             val paginationResponse = PaginationResponse(
                 page = page,
@@ -309,7 +352,13 @@ class RankingsService(
                 .limit(size)
                 .toList()
 
-            val elements = characters.map { documentToCharacterTopEntity(it) }
+            val elements = characters.mapIndexed { index, document ->
+                documentToCharacterTopEntity(
+                    doc = document,
+                    position = offset + index
+                )
+            }
+
             val response = PaginationResponse(
                 page = page,
                 size = size,
@@ -363,7 +412,12 @@ class RankingsService(
             if (documentsToInsert.isNotEmpty()) animeRankingTopTen.insertMany(documentsToInsert)
             timers.update(timerKey)
 
-            val elements = documentsToInsert.map { documentToAnimeTopEntity(it) }
+            val elements = documentsToInsert.mapIndexed { index, document ->
+                documentToAnimeTopEntity(
+                    doc = document,
+                    position = index
+                )
+            }
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
         } else {
@@ -376,7 +430,12 @@ class RankingsService(
                 )
                 .toList()
 
-            val elements = animes.map { documentToAnimeTopEntity(it) }
+            val elements = animes.mapIndexed { index, document ->
+                documentToAnimeTopEntity(
+                    doc = document,
+                    position = index
+                )
+            }
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
         }

@@ -244,9 +244,9 @@ fun documentToScheduleDayEntity(doc: Document) = DayEntity(
     title = doc.getStringSafe("title")
 )
 
-fun documentToAnimeTopEntity(doc: Document) = AnimeTopEntity(
+fun documentToAnimeTopEntity(position: Int, doc: Document) = AnimeTopEntity(
+    rank = position + 1,
     malId = doc.getIntSafe("malId"),
-    rank = doc.getIntSafe("rank"),
     score = doc.getFloatSafe("score"),
     title = doc.getStringSafe("title"),
     image = doc.getStringSafe("image"),
@@ -269,9 +269,9 @@ fun documentToAnimeLastEpisodeEntity(doc: Document) = LastEpisodeEntity(
     timezone = doc.getStringSafe("timezone")
 )
 
-fun documentToMangaTopEntity(doc: Document) = MangaTopEntity(
+fun documentToMangaTopEntity(position: Int, doc: Document) = MangaTopEntity(
     malId = doc.getIntSafe("malId"),
-    rank = doc.getIntSafe("rank"),
+    rank = position + 1,
     score = doc.getDoubleSafe("score"),
     title = doc.getStringSafe("title"),
     image = doc.getStringSafe("image"),
@@ -283,7 +283,8 @@ fun documentToMangaTopEntity(doc: Document) = MangaTopEntity(
     subtype = doc.getStringSafe("subtype"),
 )
 
-fun documentToPeopleTopEntity(doc: Document) = PeopleTopEntity(
+fun documentToPeopleTopEntity(position: Int, doc: Document) = PeopleTopEntity(
+    rank = position + 1,
     malId = doc.getIntSafe("malId"),
     name = doc.getStringSafe("name"),
     givenName = doc.getStringSafe("givenName"),
@@ -293,7 +294,8 @@ fun documentToPeopleTopEntity(doc: Document) = PeopleTopEntity(
     top = doc.getStringSafe("top"),
 )
 
-fun documentToCharacterTopEntity(doc: Document) = CharacterTopEntity(
+fun documentToCharacterTopEntity(position: Int, doc: Document) = CharacterTopEntity(
+    rank = position + 1,
     malId = doc.getIntSafe("malId"),
     name = doc.getStringSafe("name"),
     nameKanji = doc.getStringSafe("nameKanji"),
