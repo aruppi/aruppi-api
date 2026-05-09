@@ -46,7 +46,7 @@ class AnimeThemesService(
     private val songsDirectory = database.getCollection(Collections.SONGS_INDEX)
     private val animeThemeDetail = database.getCollection(Collections.ANIME_THEMES_DETAIL)
 
-    private val artistInclude = "songs.animethemes.anime,songs.animethemes.animethemeentries.videos"
+    private val artistInclude = "songs.animethemes.anime,songs.animethemes.animethemeentries.videos,images"
     private val songInclude = "artists,animethemes.anime"
     private val animeDetailInclude = "animethemes.song,animethemes.animethemeentries.videos,images"
 

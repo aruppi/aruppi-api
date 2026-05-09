@@ -8,7 +8,14 @@ data class ArtistData(
     val id: Int? = null,
     val name: String? = null,
     val slug: String? = null,
-    val songs: List<SongData>? = null
+    val songs: List<SongData>? = null,
+    val images: List<ArtistImageData>? = null
+)
+
+@Serializable
+data class ArtistImageData(
+    val link: String? = null,
+    val facet: String? = null
 )
 
 @Serializable

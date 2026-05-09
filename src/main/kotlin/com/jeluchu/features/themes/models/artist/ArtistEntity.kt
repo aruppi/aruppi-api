@@ -7,6 +7,7 @@ data class ArtistEntity(
     val id: Int? = null,
     val name: String? = null,
     val slug: String? = null,
+    val image: String? = null,
     val songs: List<ArtistSong>? = null
 ) {
     companion object {
@@ -14,6 +15,8 @@ data class ArtistEntity(
             id = id,
             name = name,
             slug = slug,
+            image = images?.firstOrNull { it.facet == "Large Cover" }?.link
+                ?: images?.firstOrNull()?.link,
             songs = songs?.map { song ->
                 ArtistSong(
                     id = song.id,

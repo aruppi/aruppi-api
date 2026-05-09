@@ -366,6 +366,17 @@ fun documentToArtistEntity(doc: Document) = ArtistEntity(
     id = doc.getIntSafe("id"),
     name = doc.getStringSafe("name"),
     slug = doc.getStringSafe("slug"),
+    image = doc.getStringSafe("image").ifBlank {
+        doc.getListSafe<Document>("images")
+            .firstOrNull { it.getStringSafe("facet") == "Large Cover" }
+            ?.getStringSafe("link")
+            ?.ifBlank {
+                doc.getListSafe<Document>("images")
+                    .firstOrNull()
+                    ?.getStringSafe("link")
+                    .orEmpty()
+            }
+    },
     songs = doc.getListSafe<Document>("songs").map { documentToArtistSong(it) }
 )
 
