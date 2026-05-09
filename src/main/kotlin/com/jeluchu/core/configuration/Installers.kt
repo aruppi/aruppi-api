@@ -10,6 +10,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import kotlinx.serialization.json.Json
 
 fun Application.initInstallers() {
     install(plugin = StatusPages) {
@@ -49,6 +50,11 @@ fun Application.initInstallers() {
     }
 
     install(plugin = ContentNegotiation) {
-        json()
+        json(
+            Json {
+                explicitNulls = true
+                encodeDefaults = true
+            }
+        )
     }
 }

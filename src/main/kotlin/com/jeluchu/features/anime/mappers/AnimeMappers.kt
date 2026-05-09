@@ -4,13 +4,14 @@ import com.jeluchu.core.extensions.*
 import com.jeluchu.features.anime.models.anime.*
 import com.jeluchu.features.anime.models.directory.AnimeTypeEntity
 import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity
+import com.jeluchu.features.anime.models.seasons.UpcomingAnimeSeasonEntity
+import com.jeluchu.features.anime.models.seasons.UpcomingAnimeSeasonEntity.AnimeSeasonStartEntity
 import com.jeluchu.features.rankings.models.AnimeTopEntity
 import com.jeluchu.features.rankings.models.CharacterTopEntity
 import com.jeluchu.features.rankings.models.MangaTopEntity
 import com.jeluchu.features.rankings.models.PeopleTopEntity
 import com.jeluchu.features.schedule.models.DayEntity
 import com.jeluchu.features.themes.models.anime.*
-import com.jeluchu.features.themes.models.artist.ArtistEntity
 import com.jeluchu.features.themes.models.artist.ArtistSong
 import com.jeluchu.features.themes.models.artist.ArtistSongTheme
 import com.jeluchu.features.themes.models.artist.SimpleArtistEntity
@@ -269,6 +270,26 @@ fun documentToAnimeLastEpisodeEntity(doc: Document) = LastEpisodeEntity(
     score = doc.getStringSafe("score"),
     timezone = doc.getStringSafe("timezone")
 )
+
+fun documentToUpcomingAnimeSeason(doc: Document) = UpcomingAnimeSeasonEntity(
+    malId = doc.getIntSafe("malId"),
+    title = doc.getStringSafe("title"),
+    image = doc.getStringSafe("image"),
+    url = doc.getStringSafe("url"),
+    type = doc.getStringSafe("type"),
+    rating = doc.getStringSafe("rating"),
+    start = doc.getDocumentSafe("start")
+        ?.takeUnless { it.isEmpty() }
+        ?.let { documentToAnimeSeasonStartEntity(it) }
+)
+
+fun documentToAnimeSeasonStartEntity(doc: Document): AnimeSeasonStartEntity {
+    return AnimeSeasonStartEntity(
+        day = doc.getIntSafe("day"),
+        month = doc.getIntSafe("month"),
+        year = doc.getIntSafe("year")
+    )
+}
 
 fun documentToMangaTopEntity(position: Int, doc: Document) = MangaTopEntity(
     malId = doc.getIntSafe("malId"),

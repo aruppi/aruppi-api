@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: "Aruppi API"
   description: "Public REST API for anime, themes, rankings, gallery and news."
-  version: "5.9.4"
+  version: "5.9.5"
 servers:
   - url: "http://0.0.0.0:8080/api/v5"
 tags:
@@ -188,6 +188,24 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
+
+  /anime/season/upcoming:
+    get:
+      tags: ["anime"]
+      summary: "Upcoming anime season"
+      description: "Returns the upcoming anime season from Jikan, including pagination metadata."
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/LimitQuery"
+        - $ref: "#/components/parameters/FilterQuery"
+        - $ref: "#/components/parameters/SfwQuery"
+        - $ref: "#/components/parameters/UnapprovedQuery"
+        - $ref: "#/components/parameters/ContinuingQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkObject"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /anime/season/yearIndex:
     get:
@@ -487,6 +505,14 @@ components:
         type: "integer"
         minimum: 1
         default: 25
+    LimitQuery:
+      name: "limit"
+      in: "query"
+      required: false
+      schema:
+        type: "integer"
+        minimum: 1
+        default: 25
     AnimeSizeQuery:
       name: "size"
       in: "query"
@@ -568,6 +594,20 @@ components:
       schema:
         type: "boolean"
         default: true
+    UnapprovedQuery:
+      name: "unapproved"
+      in: "query"
+      required: false
+      schema:
+        type: "boolean"
+        default: false
+    ContinuingQuery:
+      name: "continuing"
+      in: "query"
+      required: false
+      schema:
+        type: "boolean"
+        default: false
     AnimeTypeQuery:
       name: "type"
       in: "query"
@@ -762,7 +802,7 @@ components:
         status: 404
         path: "/api/v5/gallery/unknown"
         requestId: "0f2d6d40-4b7a-4f4a-a1a1-f9d8cf8d6a21"
-        version: "5.9.4"
+        version: "5.9.5"
         documentation:
           redoc: "/api/v5/docs"
           swagger: "/api/v5/swagger"

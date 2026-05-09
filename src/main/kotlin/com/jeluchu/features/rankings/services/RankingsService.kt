@@ -84,7 +84,7 @@ class RankingsService(
             val response = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
                 AnimeSearch.serializer()
-            ).data?.map { anime ->
+            ).data.map { anime ->
                 anime.toAnimeTopEntity(
                     top = "anime",
                     page = page,

@@ -75,6 +75,7 @@ object Routes {
     const val DAY = "/{day}"
     const val THEMES = "/themes"
     const val SUGGESTIONS = "/suggestions"
+    const val UPCOMING = "/upcoming"
     const val YEAR_INDEX = "/yearIndex"
     const val RANDOM = "/random"
     const val ARTISTS = "/artists"
@@ -95,6 +96,7 @@ object TimerKey {
     const val THEMES = "themes_"
     const val EPISODES = "episodes_"
     const val LAST_EPISODES = "last_episodes"
+    const val UPCOMING_SEASON = "upcoming_season"
 }
 
 object Collections {

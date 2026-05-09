@@ -2,6 +2,8 @@ package com.jeluchu.core.models.jikan.anime
 
 import com.jeluchu.core.enums.Day
 import com.jeluchu.core.extensions.toYouTubeWatchUrl
+import com.jeluchu.features.anime.models.seasons.UpcomingAnimeSeasonEntity
+import com.jeluchu.features.anime.models.seasons.UpcomingAnimeSeasonEntity.AnimeSeasonStartEntity
 import com.jeluchu.features.rankings.models.AnimeTopEntity
 import com.jeluchu.features.schedule.models.DayEntity
 import kotlinx.serialization.SerialName
@@ -303,6 +305,20 @@ data class AnimeData(
             type = type,
             subtype = subType,
             page = page
+        )
+
+        fun AnimeData.toUpcomingAnime() = UpcomingAnimeSeasonEntity(
+            malId = malId ?: 0,
+            url = url.orEmpty(),
+            type = type.orEmpty(),
+            rating = rating.orEmpty(),
+            image = images?.webp?.large.orEmpty(),
+            title = titles?.first()?.title.orEmpty(),
+            start = AnimeSeasonStartEntity(
+                day = aired?.prop?.from?.day ?: 0,
+                month = aired?.prop?.from?.month ?: 0,
+                year = aired?.prop?.from?.year ?: 0
+            )
         )
     }
 }

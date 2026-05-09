@@ -27,6 +27,7 @@ fun Route.animeEndpoints(
 
     route(Routes.SEASON) {
         getToJson { seasonService.getAnimeBySeason(call) }
+        getToJson(Routes.UPCOMING) { seasonService.getUpcomingAnimeSeason(call) }
         getToJson(Routes.YEAR_INDEX) { seasonService.getYearsAndSeasons(call) }
     }
 
