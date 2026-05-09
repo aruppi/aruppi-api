@@ -2,13 +2,7 @@ package com.jeluchu.features.themes.services
 
 import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.TimeUnit
-import com.jeluchu.core.extensions.badRequestError
-import com.jeluchu.core.extensions.getIntSafeQueryParam
-import com.jeluchu.core.extensions.getStringSafeParam
-import com.jeluchu.core.extensions.getStringSafeQueryParam
-import com.jeluchu.core.extensions.needsUpdate
-import com.jeluchu.core.extensions.respondError
-import com.jeluchu.core.extensions.update
+import com.jeluchu.core.extensions.*
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.PaginationResponse
 import com.jeluchu.core.utils.BaseUrls
@@ -16,17 +10,12 @@ import com.jeluchu.core.utils.Collections
 import com.jeluchu.core.utils.TimerKey
 import com.jeluchu.core.utils.parseDataToDocuments
 import com.jeluchu.features.anime.mappers.documentToAnimesThemeEntity
-import com.jeluchu.features.anime.mappers.documentToArtistEntity
+import com.jeluchu.features.anime.mappers.documentToSimpleArtistEntity
 import com.jeluchu.features.anime.mappers.documentToSongEntity
-import com.jeluchu.features.themes.models.artist.AnimeThemeDetail
+import com.jeluchu.features.themes.models.artist.*
 import com.jeluchu.features.themes.models.artist.AnimeThemeDetail.Companion.toAnimeThemeDetail
-import com.jeluchu.features.themes.models.artist.AnimeThemeShow
-import com.jeluchu.features.themes.models.artist.ArtistEntity
 import com.jeluchu.features.themes.models.artist.ArtistEntity.Companion.toArtistEntity
-import com.jeluchu.features.themes.models.artist.ArtistSearch
-import com.jeluchu.features.themes.models.artist.ArtistShow
-import com.jeluchu.features.themes.models.artist.SongSearch
-import com.jeluchu.features.themes.models.artist.documentToAnimeThemeDetail
+import com.jeluchu.features.themes.models.artist.SimpleArtistEntity.Companion.toSimpleArtistEntity
 import com.jeluchu.features.themes.models.song.SongEntity
 import com.jeluchu.features.themes.models.song.SongEntity.Companion.toSongEntity
 import com.mongodb.client.MongoDatabase
@@ -34,7 +23,6 @@ import com.mongodb.client.model.Filters
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class AnimeThemesService(
@@ -179,9 +167,9 @@ class AnimeThemesService(
                 "${BaseUrls.ANIME_THEMES}artist?include=$artistInclude&page[number]=$page&page[size]=$size",
                 ArtistSearch.serializer()
             )
-            val artists = raw.artists?.map { it.toArtistEntity() } ?: emptyList()
+            val artists = raw.artists?.map { it.toSimpleArtistEntity() } ?: emptyList()
 
-            val documents = parseDataToDocuments(artists, ArtistEntity.serializer())
+            val documents = parseDataToDocuments(artists, SimpleArtistEntity.serializer())
                 .onEach { it.append("page_cache", page) }
 
             if (documents.isNotEmpty()) artistsDirectory.insertMany(documents)
@@ -196,7 +184,7 @@ class AnimeThemesService(
                 .find(Filters.eq("page_cache", page))
                 .limit(size)
                 .toList()
-                .map { documentToArtistEntity(it) }
+                .map { documentToSimpleArtistEntity(it) }
 
             call.respond(
                 HttpStatusCode.OK,

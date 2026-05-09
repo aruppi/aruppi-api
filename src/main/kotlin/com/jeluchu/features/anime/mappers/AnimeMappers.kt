@@ -13,6 +13,7 @@ import com.jeluchu.features.themes.models.anime.*
 import com.jeluchu.features.themes.models.artist.ArtistEntity
 import com.jeluchu.features.themes.models.artist.ArtistSong
 import com.jeluchu.features.themes.models.artist.ArtistSongTheme
+import com.jeluchu.features.themes.models.artist.SimpleArtistEntity
 import com.jeluchu.features.themes.models.song.SongArtist
 import com.jeluchu.features.themes.models.song.SongEntity
 import com.jeluchu.features.themes.models.song.SongTheme
@@ -362,8 +363,8 @@ fun documentToVideo(doc: Document) = Video(
     resolution = doc.getIntSafe("resolution")
 )
 
-fun documentToArtistEntity(doc: Document) = ArtistEntity(
-    id = doc.getIntSafe("id"),
+fun documentToSimpleArtistEntity(doc: Document) = SimpleArtistEntity(
+    id = doc.getIntSafe("id").takeIf { it != 0 } ?: doc.getIntSafe("malId").takeIf { it != 0 },
     name = doc.getStringSafe("name"),
     slug = doc.getStringSafe("slug"),
     image = doc.getStringSafe("image").ifBlank {
@@ -376,8 +377,7 @@ fun documentToArtistEntity(doc: Document) = ArtistEntity(
                     ?.getStringSafe("link")
                     .orEmpty()
             }
-    },
-    songs = doc.getListSafe<Document>("songs").map { documentToArtistSong(it) }
+    }
 )
 
 fun documentToArtistSong(doc: Document) = ArtistSong(
