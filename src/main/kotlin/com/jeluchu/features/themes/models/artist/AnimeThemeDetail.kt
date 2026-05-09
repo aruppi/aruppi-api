@@ -4,6 +4,7 @@ import com.jeluchu.core.extensions.getIntSafe
 import com.jeluchu.core.extensions.getBooleanSafe
 import com.jeluchu.core.extensions.getListSafe
 import com.jeluchu.core.extensions.getStringSafe
+import com.jeluchu.core.extensions.toYouTubeWatchUrl
 import kotlinx.serialization.Serializable
 import org.bson.Document
 
@@ -79,7 +80,7 @@ data class AnimeThemeDetail(
                             spoiler = entry.spoiler,
                             videos = entry.videos?.map { video ->
                                 AnimeThemeVideo(
-                                    link = video.link,
+                                    link = video.link.toYouTubeWatchUrl(),
                                     resolution = video.resolution,
                                     nc = video.nc,
                                     subbed = video.subbed,

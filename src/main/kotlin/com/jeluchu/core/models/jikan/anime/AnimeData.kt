@@ -1,7 +1,7 @@
 package com.jeluchu.core.models.jikan.anime
 
 import com.jeluchu.core.enums.Day
-import com.jeluchu.core.utils.toVideoPromo
+import com.jeluchu.core.extensions.toYouTubeWatchUrl
 import com.jeluchu.features.rankings.models.AnimeTopEntity
 import com.jeluchu.features.schedule.models.DayEntity
 import kotlinx.serialization.SerialName
@@ -295,7 +295,7 @@ data class AnimeData(
             image = images?.webp?.large.orEmpty(),
             title = titles?.first()?.title.orEmpty(),
             url = url,
-            promo = trailer?.toVideoPromo(),
+            promo = trailer?.embedUrl.toYouTubeWatchUrl().orEmpty(),
             season = season,
             year = year,
             airing = airing,

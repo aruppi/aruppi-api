@@ -126,7 +126,7 @@ fun documentToRelated(doc: Document): Related {
 
 fun documentToVideoPromo(doc: Document): VideoPromo {
     return VideoPromo(
-        embedUrl = doc.getStringSafe("embedUrl"),
+        embedUrl = doc.getStringSafe("embedUrl").toYouTubeWatchUrl().orEmpty(),
         url = doc.getStringSafe("url"),
         youtubeId = doc.getStringSafe("youtubeId"),
         images = doc.getDocumentSafe("images")?.let { documentToImages(it) } ?: Images()
@@ -251,7 +251,7 @@ fun documentToAnimeTopEntity(doc: Document) = AnimeTopEntity(
     title = doc.getStringSafe("title"),
     image = doc.getStringSafe("image"),
     url = doc.getStringSafe("url"),
-    promo = doc.getDocumentSafe("promo")?.let { documentToVideoPromo(it) } ?: VideoPromo(),
+    promo = doc.getDocumentSafe("promo")?.getStringSafe("embedUrl").toYouTubeWatchUrl().orEmpty(),
     season = doc.getStringSafe("season"),
     year = doc.getIntSafe("year"),
     airing = doc.getBooleanSafe("airing"),

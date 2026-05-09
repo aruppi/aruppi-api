@@ -1,6 +1,5 @@
 package com.jeluchu.features.rankings.models
 
-import com.jeluchu.features.anime.models.anime.VideoPromo
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,7 +10,7 @@ data class AnimeTopEntity(
     val title: String? = "",
     val image: String? = "",
     val url: String? = "",
-    val promo: VideoPromo? = VideoPromo(),
+    val promo: String? = "",
     val season: String? = "",
     val year: Int? = 0,
     val airing: Boolean? = false,
