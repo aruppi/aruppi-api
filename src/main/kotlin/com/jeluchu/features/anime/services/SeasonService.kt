@@ -63,10 +63,8 @@ class SeasonService(
         if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
         if (parseAnimeType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
 
-        val timerKey = if (sfw) "${TimerKey.UPCOMING_SEASON}_sfw_${sfw}_${filter}_${page}"
-        else "${TimerKey.UPCOMING_SEASON}_${filter}_${page}"
-
-        val collection = database.getCollection(timerKey)
+        val timerKey = "${TimerKey.UPCOMING_SEASON}_sfw_${sfw}_${filter}_page_${page}"
+        val collection = database.getCollection(Collections.UPCOMING_SEASON)
 
         val needsUpdate = timers.needsUpdate(
             amount = 6,
@@ -80,8 +78,7 @@ class SeasonService(
                 Filters.and(
                     Filters.eq("sfw", sfw),
                     Filters.eq("page", page),
-                    Filters.eq("size", size),
-                    Filters.eq("filter", filter),
+                    Filters.eq("filter", parseAnimeType(filter)),
                 )
             )
 
@@ -97,7 +94,13 @@ class SeasonService(
             val raw = RestClient.request(
                 url = "${BaseUrls.JIKAN}seasons/upcoming$paramsPath",
                 deserializer = AnimeSearch.serializer()
-            ).data.map { it.toUpcomingAnime() }
+            ).data.map {
+                it.toUpcomingAnime(
+                    sfw = sfw,
+                    page = page,
+                    filter = filter
+                )
+            }
 
             val documentsToInsert = parseDataToDocuments(
                 data = raw.distinctBy { it.malId },
@@ -122,10 +125,10 @@ class SeasonService(
                     Filters.and(
                         Filters.eq("sfw", sfw),
                         Filters.eq("page", page),
-                        Filters.eq("size", size),
                         Filters.eq("filter", filter),
                     )
                 )
+                .limit(size)
                 .toList()
                 .map { documentToUpcomingAnimeSeason(it) }
 

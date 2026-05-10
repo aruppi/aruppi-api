@@ -307,7 +307,15 @@ data class AnimeData(
             page = page
         )
 
-        fun AnimeData.toUpcomingAnime() = UpcomingAnimeSeasonEntity(
+        fun AnimeData.toUpcomingAnime(
+            page: Int,
+            sfw: Boolean,
+            filter: String
+
+        ) = UpcomingAnimeSeasonEntity(
+            sfw = sfw,
+            page = page,
+            filter = filter,
             malId = malId ?: 0,
             url = url.orEmpty(),
             type = type.orEmpty(),

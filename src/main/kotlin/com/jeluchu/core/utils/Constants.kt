@@ -112,6 +112,7 @@ object Collections {
     const val SONGS_INDEX = "songs_index"
     const val ANIME_THEMES_DETAIL = "anime_themes_detail"
     const val LAST_EPISODES = "last_episodes"
+    const val UPCOMING_SEASON = "upcoming_season"
     const val ANIME_RANKING = "anime_ranking"
     const val MANGA_RANKING = "manga_ranking"
     const val MANGA_DIRECTORY = "manga_directory"

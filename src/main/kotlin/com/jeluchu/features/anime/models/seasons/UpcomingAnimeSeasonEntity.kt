@@ -16,9 +16,9 @@ data class UpcomingAnimeSeasonEntity(
     val title: String? = "",
     val rating: String? = "",
     val filter: String? = "",
+    @EncodeDefault(mode = EncodeDefault.Mode.ALWAYS)
     val sfw: Boolean? = false,
-    val continuing: Boolean? = false,
-    @EncodeDefault(EncodeDefault.Mode.ALWAYS)
+    @EncodeDefault(mode = EncodeDefault.Mode.ALWAYS)
     val start: AnimeSeasonStartEntity? = null,
 ) {
     @Serializable
