@@ -2,7 +2,6 @@ package com.jeluchu.features.anime.services
 
 import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.TimeUnit
-import com.jeluchu.core.enums.parseAnimeType
 import com.jeluchu.core.enums.parseSeasons
 import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.respondError
@@ -34,6 +33,7 @@ class SeasonService(
     private val directory: MongoCollection<Document> = database.getCollection(Collections.ANIME_DIRECTORY)
 ) {
     private val timers = database.getCollection(Collections.TIMERS)
+    private val upcomingSeasonFilters = setOf("tv", "movie", "ova", "special", "ona", "music")
 
     suspend fun getAnimeBySeason(call: RoutingCall) {
         val year = call.request.queryParameters["year"]?.toInt() ?: SeasonCalendar.currentYear
@@ -56,14 +56,17 @@ class SeasonService(
 
     suspend fun getUpcomingAnimeSeason(call: RoutingCall) {
         val sfw = call.request.queryParameters["sfw"].toBoolean()
-        val filter = call.request.queryParameters["filter"] ?: "tv"
+        val filter = call.request.queryParameters["filter"]?.lowercase() ?: "tv"
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
+        val size = call.request.queryParameters["limit"]?.toIntOrNull()
+            ?: call.request.queryParameters["size"]?.toIntOrNull()
+            ?: 25
 
         if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
-        if (parseAnimeType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
+        if (filter !in upcomingSeasonFilters) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
 
-        val timerKey = "${TimerKey.UPCOMING_SEASON}_sfw_${sfw}_${filter}_page_${page}"
+        val timerKey = "${TimerKey.UPCOMING_SEASON}_sfw_${sfw}_${filter}_page_${page}_limit_${size}"
         val collection = database.getCollection(Collections.UPCOMING_SEASON)
 
         val needsUpdate = timers.needsUpdate(
@@ -72,13 +75,13 @@ class SeasonService(
             unit = TimeUnit.HOUR
         )
 
-        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             collection.deleteMany(
                 Filters.and(
                     Filters.eq("sfw", sfw),
                     Filters.eq("page", page),
-                    Filters.eq("filter", parseAnimeType(filter)),
+                    Filters.eq("limit", size),
+                    Filters.eq("filter", filter),
                 )
             )
 
@@ -98,24 +101,25 @@ class SeasonService(
                 it.toUpcomingAnime(
                     sfw = sfw,
                     page = page,
+                    limit = size,
                     filter = filter
                 )
-            }
+            }.distinctBy { it.malId }
 
             val documentsToInsert = parseDataToDocuments(
-                data = raw.distinctBy { it.malId },
+                data = raw,
                 serializer = UpcomingAnimeSeasonEntity.serializer()
             )
 
             if (documentsToInsert.isNotEmpty()) collection.insertMany(documentsToInsert)
             timers.update(timerKey)
 
-            val elements = collection.find().toList().map { documentToUpcomingAnimeSeason(it) }
+            val elements = documentsToInsert.map { documentToUpcomingAnimeSeason(it) }
 
             val paginationResponse = PaginationResponse(
                 page = page,
-                size = size,
-                data = elements
+                data = elements,
+                size = elements.size
             )
 
             call.respond(status = HttpStatusCode.OK, message = Json.encodeToString(value = paginationResponse))
@@ -125,17 +129,19 @@ class SeasonService(
                     Filters.and(
                         Filters.eq("sfw", sfw),
                         Filters.eq("page", page),
+                        Filters.eq("limit", size),
                         Filters.eq("filter", filter),
                     )
                 )
-                .limit(size)
                 .toList()
                 .map { documentToUpcomingAnimeSeason(it) }
+                .distinctBy { it.malId }
+                .take(size)
 
             val response = PaginationResponse(
                 page = page,
-                size = size,
-                data = elements
+                data = elements,
+                size = elements.size
             )
 
             call.respond(status = HttpStatusCode.OK, message = Json.encodeToString(value = response))
