@@ -9,8 +9,8 @@ import io.ktor.server.routing.*
 fun Route.newsEndpoints(
     mongoDatabase: MongoDatabase,
     service: NewsService = NewsService(mongoDatabase)
-) = route(Routes.NEWS) {
-    route(Routes.ES) {
+) = route(path = Routes.NEWS) {
+    route(path = Routes.ES) {
         getToJson { service.getSpanishNews(call) }
     }
 

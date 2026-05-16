@@ -8,6 +8,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.delay
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.milliseconds
 
 object RestClient {
     private val client = HttpClient(CIO)
@@ -26,6 +27,15 @@ object RestClient {
         }.getOrElse { throwable -> throw throwable }
     }
 
+    // Fetch raw response body as string (useful for debugging)
+    suspend fun fetchRaw(url: String): String {
+        val response = client.get(url) {
+            headers { append(HttpHeaders.Accept, ContentType.Application.Json.toString()) }
+        }
+
+        return response.bodyAsText()
+    }
+
     suspend fun <T> requestWithDelay(
         url: String,
         delay: Long = 1000,
@@ -36,7 +46,7 @@ object RestClient {
                 headers { append(HttpHeaders.Accept, ContentType.Application.Json.toString()) }
             }
 
-            delay(delay)
+            delay(duration = delay.milliseconds)
             json.decodeFromString(deserializer, response.bodyAsText())
         }.getOrElse { throwable -> throw throwable }
     }

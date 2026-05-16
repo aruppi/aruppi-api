@@ -1,6 +1,5 @@
 package com.jeluchu.features.themes.models.anime
 
-import com.jeluchu.features.themes.models.anime.Video
 import kotlinx.serialization.Serializable
 
 @Serializable

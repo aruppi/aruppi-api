@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.jeluchu"
-version = "5.9.7"
+version = "5.9.8"
 
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")

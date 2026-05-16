@@ -350,8 +350,7 @@ fun documentToAnimesThemeEntity(doc: Document) = Anime(
     slug = doc.getStringSafe("slug"),
     name = doc.getStringSafe("name"),
     image = doc.getStringSafe("image"),
-    season = doc.getStringSafe("season"),
-    themes = doc.getListSafe<Document>("themes").map { documentToAnimeVideoTheme(it) }
+    season = doc.getStringSafe("season")
 )
 
 fun documentToAnimeVideoTheme(doc: Document) = AnimeVideoTheme(

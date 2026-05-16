@@ -22,13 +22,16 @@ data class ArtistEntity(
                     id = song.id,
                     title = song.title,
                     themes = song.animethemes?.map { theme ->
+                        val allVideos = theme.entries.orEmpty().flatMap { it.videos.orEmpty() }
+                        val bestVideo = allVideos.bestVideoDataForEntryOrNull()
+
                         ArtistSongTheme(
                             type = theme.type,
                             slug = theme.slug,
                             sequence = theme.sequence,
                             animeName = theme.anime?.name,
                             animeSlug = theme.anime?.slug,
-                            videoLink = theme.entries?.firstOrNull()?.videos?.firstOrNull()?.link
+                            videoLink = bestVideo?.link?.takeIf { it.isNotBlank() }
                         )
                     }
                 )

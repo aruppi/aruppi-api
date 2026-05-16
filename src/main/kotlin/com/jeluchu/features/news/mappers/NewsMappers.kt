@@ -15,27 +15,27 @@ fun RssChannel.toNews(
         add(
             NewEntity(
                 source = source,
-                sourceDescription = description.orEmpty(),
                 link = item.link.orEmpty(),
                 title = item.title.orEmpty(),
-                date = item.pubDate?.parseRssDate().orEmpty(),
-                description = item.description.orEmpty(),
-                content = item.content.orEmpty(),
                 image = item.image.orEmpty(),
-                categories = item.categories
+                categories = item.categories,
+                content = item.content.orEmpty(),
+                description = item.description.orEmpty(),
+                sourceDescription = description.orEmpty(),
+                date = item.pubDate?.parseRssDate().orEmpty()
             )
         )
     }
 }
 
 fun documentToNewsEntity(doc: Document) = NewEntity(
-    source = doc.getStringSafe("source"),
-    sourceDescription = doc.getStringSafe("sourceDescription"),
-    link = doc.getStringSafe("link"),
-    title = doc.getStringSafe("title"),
-    date = doc.getStringSafe("date"),
-    description = doc.getStringSafe("description"),
-    content = doc.getStringSafe("content"),
-    image = doc.getStringSafe("image"),
-    categories = doc.getListSafe<String>("categories")
+    link = doc.getStringSafe(key = "link"),
+    date = doc.getStringSafe(key = "date"),
+    title = doc.getStringSafe(key = "title"),
+    image = doc.getStringSafe(key = "image"),
+    source = doc.getStringSafe(key = "source"),
+    content = doc.getStringSafe(key = "content"),
+    description = doc.getStringSafe(key = "description"),
+    categories = doc.getListSafe<String>(key = "categories"),
+    sourceDescription = doc.getStringSafe(key = "sourceDescription")
 )

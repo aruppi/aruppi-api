@@ -8,6 +8,7 @@ import com.jeluchu.core.enums.parseAnimeStatusType
 import com.jeluchu.core.enums.parseAnimeType
 import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.respondError
+import com.jeluchu.core.extensions.toJson
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.PaginationResponse
@@ -49,43 +50,41 @@ class AnimeService(
         try {
             val type = call.request.queryParameters["type"].orEmpty()
             val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-            val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+            val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
 
             if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
             val skipCount = (page - 1) * size
 
             if (parseAnimeType(type) == null) {
-                val animes = directoryCollection
+                val elements = directoryCollection
                     .find()
                     .skip(skipCount)
                     .limit(size)
                     .toList()
 
-                val elements = animes.map { documentToAnimeTypeEntity(it) }
-
-                val response = PaginationResponse(
-                    page = page,
-                    size = size,
-                    data = elements
+                call.respond(
+                    status = HttpStatusCode.OK,
+                    message = PaginationResponse(
+                        page = page,
+                        size = elements.size,
+                        data = elements.map { documentToAnimeTypeEntity(it) }
+                    ).toJson()
                 )
-
-                call.respond(HttpStatusCode.OK, Json.encodeToString(response))
             } else {
-                val animes = directoryCollection
+                val elements = directoryCollection
                     .find(Filters.eq("type", type.uppercase()))
                     .skip(skipCount)
                     .limit(size)
                     .toList()
 
-                val elements = animes.map { documentToAnimeTypeEntity(it) }
-
-                val response = PaginationResponse(
-                    page = page,
-                    size = size,
-                    data = elements
+                call.respond(
+                    status = HttpStatusCode.OK,
+                    message = PaginationResponse(
+                        page = page,
+                        size = elements.size,
+                        data = elements.map { documentToAnimeTypeEntity(it) }
+                    ).toJson()
                 )
-
-                call.respond(HttpStatusCode.OK, Json.encodeToString(response))
             }
         } catch (_: Exception) {
             call.respondError(HttpStatusCode.Unauthorized, ErrorMessages.UnauthorizedMongo.message)

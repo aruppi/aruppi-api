@@ -1,5 +1,6 @@
 package com.jeluchu.features.themes.models.artist
 
+import com.jeluchu.core.extensions.toYouTubeWatchUrl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -49,6 +50,8 @@ data class EntryData(
 @Serializable
 data class VideoData(
     val link: String? = null,
+    val filename: String? = null,
+    val embedUrl: String? = null,
     val resolution: Int? = null,
     val nc: Boolean? = null,
     val subbed: Boolean? = null,

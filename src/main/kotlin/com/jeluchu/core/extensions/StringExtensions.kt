@@ -20,3 +20,8 @@ fun String?.toYouTubeWatchUrl(): String? {
     return "https://www.youtube.com/watch?v=$videoId"
 }
 
+fun String.toAnimeThemesSlug() = trim()
+    .lowercase()
+    .replace("+", " ")
+    .replace(Regex("[\\s-]+"), "_")
+    .replace(Regex("_+"), "_")

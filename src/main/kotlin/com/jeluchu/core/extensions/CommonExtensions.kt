@@ -3,11 +3,13 @@ package com.jeluchu.core.extensions
 import com.jeluchu.core.configuration.ApiMetadata
 import com.jeluchu.core.models.DocumentationLinks
 import com.jeluchu.core.models.ErrorResponse
+import com.jeluchu.features.anime.mappers.documentToAnimeTypeEntity
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
 import org.bson.Document
 import java.text.SimpleDateFormat
 import java.util.*
@@ -186,3 +188,6 @@ fun String.parseRssDate(format: String = "dd/MM/yyyy"): String {
     val outputDateFormat = SimpleDateFormat(format, Locale.US)
     return date?.let { outputDateFormat.format(it) }.orEmpty()
 }
+
+inline fun <reified T> List<T>.toJson() = Json.encodeToString(value = this)
+inline fun <reified T> T.toJson() = Json.encodeToString(value = this)
