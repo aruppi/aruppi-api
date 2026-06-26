@@ -15,10 +15,11 @@ import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
 import com.prof18.rssparser.RssParser
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.CancellationException
 import org.bson.Document
-import kotlin.text.toInt
 
 class NewsService(
     val database: MongoDatabase
@@ -60,27 +61,50 @@ class NewsService(
     ) {
         val timersDb = database.getCollection(Collections.TIMERS)
         if (database.isUpdate(timer = timer)) {
-            db.deleteMany(Document())
-
-            parseDataToDocuments(
-                serializer = NewEntity.serializer(),
-                data = mutableListOf<NewEntity>().apply {
-                    with(receiver = RssParser()) {
-                        sources.forEach {
-                            getRssChannel(url = it.link)
+            val news = mutableListOf<NewEntity>().apply {
+                with(receiver = RssParser()) {
+                    sources.forEach { source ->
+                        runCatching {
+                            getRssChannel(url = source.link)
                                 .toNews(
-                                    source = it.source,
+                                    source = source.source,
                                     list = this@apply
                                 )
+                        }.onFailure { cause ->
+                            if (cause is CancellationException) throw cause
+                            call.application.environment.log.warn(
+                                "Unable to refresh news from ${source.source} (${source.link})",
+                                cause
+                            )
                         }
                     }
-                }.shuffled(),
-            ).apply {
-                if (isNotEmpty()) db.insertMany(this)
+                }
+            }
+
+            val documents = parseDataToDocuments(
+                serializer = NewEntity.serializer(),
+                data = news.shuffled(),
+            )
+
+            if (documents.isNotEmpty()) {
+                db.deleteMany(Document())
+                db.insertMany(documents)
                 timersDb.update(key = timer.key)
                 call.respond(
                     status = HttpStatusCode.OK,
-                    message = map { documentToNewsEntity(it) }.toJson()
+                    message = documents.map { documentToNewsEntity(it) }.toJson()
+                )
+            } else {
+                call.application.environment.log.warn(
+                    "News refresh produced no results for timer ${timer.key}; serving cached data"
+                )
+                call.respond(
+                    status = HttpStatusCode.OK,
+                    message = db
+                        .find()
+                        .toList()
+                        .map { documentToNewsEntity(it) }
+                        .toJson()
                 )
             }
         } else call.respond(

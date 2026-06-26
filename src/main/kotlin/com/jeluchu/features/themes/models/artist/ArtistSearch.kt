@@ -5,7 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArtistSearch(
-    @SerialName("artists") val artists: List<ArtistData>? = null
+    @SerialName("artists") val artists: List<ArtistData>? = null,
+    @SerialName("meta") val meta: ThemePaginationMeta? = null,
+    @SerialName("links") val links: ThemePaginationLinks? = null
 )
 
 @Serializable
@@ -15,7 +17,9 @@ data class ArtistShow(
 
 @Serializable
 data class SongSearch(
-    @SerialName("songs") val songs: List<SongData>? = null
+    @SerialName("songs") val songs: List<SongData>? = null,
+    @SerialName("meta") val meta: ThemePaginationMeta? = null,
+    @SerialName("links") val links: ThemePaginationLinks? = null
 )
 
 @Serializable
@@ -26,4 +30,21 @@ data class AnimeThemeShow(
 @Serializable
 data class AnimeThemeSearch(
     @SerialName("animethemes") val animethemes: List<ThemeData>? = null
+)
+
+@Serializable
+data class ThemePaginationMeta(
+    @SerialName("current_page") val currentPage: Int? = null,
+    @SerialName("last_page") val lastPage: Int? = null,
+    @SerialName("total") val total: Int? = null,
+    @SerialName("count") val count: Int? = null,
+    @SerialName("per_page") val perPage: Int? = null
+)
+
+@Serializable
+data class ThemePaginationLinks(
+    @SerialName("first") val first: String? = null,
+    @SerialName("last") val last: String? = null,
+    @SerialName("prev") val prev: String? = null,
+    @SerialName("next") val next: String? = null
 )

@@ -25,6 +25,7 @@ import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
+import kotlin.math.ceil
 
 class AnimeThemesService(
     private val database: MongoDatabase
@@ -50,13 +51,17 @@ class AnimeThemesService(
             .limit(size)
             .toList()
             .map { documentToAnimesThemeEntity(it) }
+        val totalItems = themesDirectory.countDocuments().toInt()
+        val totalPages = if (totalItems == 0) 0 else ceil(totalItems.toDouble() / size).toInt()
 
         call.respond(
             status = HttpStatusCode.OK,
             message = PaginationResponse(
                 page = page,
                 data = elements,
-                size = elements.size
+                size = size,
+                totalPages = totalPages,
+                totalItems = totalItems
             ).toJson()
         )
     }
@@ -70,35 +75,27 @@ class AnimeThemesService(
         }
 
         if (database.isUpdate(timer = Timers.ANIME_THEMES, slug = slug)) {
-            animeThemeDetail.deleteMany(Filters.eq("slug", slug))
-
-            val raw = RestClient.request(
-                deserializer = AnimeThemeShow.serializer(),
-                url = "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude"
-            ).anime?.toAnimeThemeDetail() ?: return call.respondError(
+            val raw = fetchAndCacheAnimeThemeDetail(slug) ?: return call.respondError(
                 status = HttpStatusCode.NotFound,
                 message = ErrorMessages.InvalidAnimeThemeSlug.message
             )
 
-            parseDataToDocuments(
-                data = listOf(raw),
-                serializer = AnimeThemeDetail.serializer()
-            ).apply {
-                if (isNotEmpty()) animeThemeDetail.insertMany(this)
-                timers.update(key = "${Timers.ANIME_THEMES.key}_slug_$slug")
-
-                call.respond(
-                    status = HttpStatusCode.OK,
-                    message = map { documentToAnimeThemeDetail(it) }.toJson()
-                )
-            }
+            call.respond(
+                status = HttpStatusCode.OK,
+                message = raw.toJson()
+            )
         } else {
             val cached = animeThemeDetail.find(Filters.eq("slug", slug)).firstOrNull()
                 ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
 
+            val detail = documentToAnimeThemeDetail(cached)
+                .takeIf { !it.themes.isNullOrEmpty() }
+                ?: fetchAndCacheAnimeThemeDetail(slug)
+                ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
+
             call.respond(
                 status = HttpStatusCode.OK,
-                message = documentToAnimeThemeDetail(cached).toJson()
+                message = detail.toJson()
             )
         }
     }
@@ -117,14 +114,11 @@ class AnimeThemesService(
 
             val detail = if (cached != null) {
                 documentToAnimeThemeDetail(cached)
+                    .takeIf { !it.themes.isNullOrEmpty() }
+                    ?: fetchAndCacheAnimeThemeDetail(slug)
             } else {
-                val raw = RestClient.request(
-                    "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude",
-                    AnimeThemeShow.serializer()
-                )
-                raw.anime?.toAnimeThemeDetail()
-                    ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
-            }
+                fetchAndCacheAnimeThemeDetail(slug)
+            } ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.InvalidAnimeThemeSlug.message)
 
             val randomTheme = detail.themes?.randomOrNull()
                 ?: return call.respondError(HttpStatusCode.NotFound, ErrorMessages.NotFoundContent.message)
@@ -171,27 +165,33 @@ class AnimeThemesService(
                     ArtistSearch.serializer()
                 )
                 val artists = raw.artists?.map { it.toSimpleArtistEntity() } ?: emptyList()
+                val pagination = raw.toPagination(size = size, currentSize = artists.size)
 
                 val documents = parseDataToDocuments(artists, SimpleArtistEntity.serializer())
-                    .onEach { it.append("page_cache", page) }
+                    .onEach {
+                        it.append("page_cache", page)
+                        it.append("totalPages", pagination.totalPages)
+                        it.append("totalItems", pagination.totalItems)
+                    }
 
                 if (documents.isNotEmpty()) artistsDirectory.insertMany(documents)
                 timers.update(timerKey)
 
                 call.respond(
                     HttpStatusCode.OK,
-                    Json.encodeToString(PaginationResponse(page = page, size = artists.size, data = artists))
+                    Json.encodeToString(PaginationResponse(page = page, size = size, totalPages = pagination.totalPages, totalItems = pagination.totalItems, data = artists))
                 )
             } else {
-                val artists = artistsDirectory
+                val documents = artistsDirectory
                     .find(Filters.eq("page_cache", page))
                     .limit(size)
                     .toList()
-                    .map { documentToSimpleArtistEntity(it) }
+                val artists = documents.map { documentToSimpleArtistEntity(it) }
+                val first = documents.firstOrNull()
 
                 call.respond(
                     HttpStatusCode.OK,
-                    Json.encodeToString(PaginationResponse(page = page, size = artists.size, data = artists))
+                    Json.encodeToString(PaginationResponse(page = page, size = size, totalPages = first?.getInteger("totalPages", 0) ?: 0, totalItems = first?.getInteger("totalItems", 0) ?: 0, data = artists))
                 )
             }
         } catch (ex: Exception) {
@@ -239,10 +239,11 @@ class AnimeThemesService(
                     SongSearch.serializer()
                 )
                 val songs = raw.songs?.map { it.toSongEntity() } ?: emptyList()
+                val pagination = raw.toPagination(size = size, currentSize = songs.size)
 
                 call.respond(
                     HttpStatusCode.OK,
-                    Json.encodeToString(PaginationResponse(page = page, size = songs.size, data = songs))
+                    Json.encodeToString(PaginationResponse(page = page, size = size, totalPages = pagination.totalPages, totalItems = pagination.totalItems, data = songs))
                 )
             } else {
                 val timerKey = "${TimerKey.THEMES}songs_$page"
@@ -256,27 +257,33 @@ class AnimeThemesService(
                         SongSearch.serializer()
                     )
                     val songs = raw.songs?.map { it.toSongEntity() } ?: emptyList()
+                    val pagination = raw.toPagination(size = size, currentSize = songs.size)
 
                     val documents = parseDataToDocuments(songs, SongEntity.serializer())
-                        .onEach { it.append("page_cache", page) }
+                        .onEach {
+                            it.append("page_cache", page)
+                            it.append("totalPages", pagination.totalPages)
+                            it.append("totalItems", pagination.totalItems)
+                        }
 
                     if (documents.isNotEmpty()) songsDirectory.insertMany(documents)
                     timers.update(timerKey)
 
                     call.respond(
                         HttpStatusCode.OK,
-                        Json.encodeToString(PaginationResponse(page = page, size = songs.size, data = songs))
+                        Json.encodeToString(PaginationResponse(page = page, size = size, totalPages = pagination.totalPages, totalItems = pagination.totalItems, data = songs))
                     )
                 } else {
-                    val songs = songsDirectory
+                    val documents = songsDirectory
                         .find(Filters.eq("page_cache", page))
                         .limit(size)
                         .toList()
-                        .map { documentToSongEntity(it) }
+                    val songs = documents.map { documentToSongEntity(it) }
+                    val first = documents.firstOrNull()
 
                     call.respond(
                         HttpStatusCode.OK,
-                        Json.encodeToString(PaginationResponse(page = page, size = songs.size, data = songs))
+                        Json.encodeToString(PaginationResponse(page = page, size = size, totalPages = first?.getInteger("totalPages", 0) ?: 0, totalItems = first?.getInteger("totalItems", 0) ?: 0, data = songs))
                     )
                 }
             }
@@ -305,5 +312,59 @@ class AnimeThemesService(
         }
 
         return copy(themes = updatedThemes)
+    }
+
+    private data class ThemePaginationInfo(
+        val totalPages: Int,
+        val totalItems: Int
+    )
+
+    private suspend fun fetchAndCacheAnimeThemeDetail(slug: String): AnimeThemeDetail? {
+        val raw = RestClient.request(
+            deserializer = AnimeThemeShow.serializer(),
+            url = "${BaseUrls.ANIME_THEMES}anime/$slug?include=$animeDetailInclude"
+        ).anime?.toAnimeThemeDetail() ?: return null
+
+        animeThemeDetail.deleteMany(Filters.eq("slug", slug))
+
+        parseDataToDocuments(
+            data = listOf(raw),
+            serializer = AnimeThemeDetail.serializer()
+        ).also {
+            if (it.isNotEmpty()) {
+                animeThemeDetail.insertMany(it)
+            }
+        }
+
+        timers.update(key = "${Timers.ANIME_THEMES.key}_slug_$slug")
+        return raw
+    }
+
+    private fun ArtistSearch.toPagination(size: Int, currentSize: Int): ThemePaginationInfo {
+        return ThemePaginationInfo(
+            totalPages = meta?.lastPage ?: links.extractLastPage() ?: fallbackTotalPages(size, currentSize),
+            totalItems = meta?.total ?: fallbackTotalItems(size, currentSize)
+        )
+    }
+
+    private fun SongSearch.toPagination(size: Int, currentSize: Int): ThemePaginationInfo {
+        return ThemePaginationInfo(
+            totalPages = meta?.lastPage ?: links.extractLastPage() ?: fallbackTotalPages(size, currentSize),
+            totalItems = meta?.total ?: fallbackTotalItems(size, currentSize)
+        )
+    }
+
+    private fun fallbackTotalPages(size: Int, currentSize: Int): Int {
+        return if (currentSize == 0) 0 else if (currentSize < size) 1 else 0
+    }
+
+    private fun fallbackTotalItems(size: Int, currentSize: Int): Int {
+        return if (currentSize < size) currentSize else 0
+    }
+
+    private fun ThemePaginationLinks?.extractLastPage(): Int? {
+        val url = this?.last ?: return null
+        val regex = Regex("""page(?:%5B|\[)number(?:%5D|\])=(\d+)""")
+        return regex.find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
     }
 }

@@ -73,8 +73,13 @@ data class AnimeThemeDetail(
             image = images?.firstOrNull { it.facet == "Large Cover" }?.link
                 ?: images?.firstOrNull()?.link,
             themes = animethemes?.flatMap { theme ->
-                theme.entries.orEmpty().map { entry ->
-                    val bestVideo = entry.videos.orEmpty().bestVideoDataForEntryOrNull()
+                theme.entries.orEmpty().mapNotNull { entry ->
+                    val bestVideo = entry.videos.orEmpty()
+                        .bestVideoDataForEntryOrNull()
+                        ?.normalized()
+                        ?.takeIf { it.hasUsablePayload() }
+                        ?: return@mapNotNull null
+
                     AnimeThemeItem(
                         id = theme.id,
                         type = theme.type,
@@ -85,28 +90,15 @@ data class AnimeThemeDetail(
                         episodes = entry.episodes,
                         nsfw = entry.nsfw,
                         spoiler = entry.spoiler,
-                        link = bestVideo?.link,
-                        filename = bestVideo?.filename,
-                        embedUrl = bestVideo?.embedUrl,
-                        resolution = bestVideo?.resolution,
-                        nc = bestVideo?.nc,
-                        subbed = bestVideo?.subbed,
-                        lyrics = bestVideo?.lyrics,
-                        source = bestVideo?.source,
-                        overlap = bestVideo?.overlap,
-                        video = bestVideo?.let {
-                            AnimeThemeVideo(
-                                link = it.link,
-                                filename = it.filename,
-                                embedUrl = it.embedUrl,
-                                resolution = it.resolution,
-                                nc = it.nc,
-                                subbed = it.subbed,
-                                lyrics = it.lyrics,
-                                source = it.source,
-                                overlap = it.overlap
-                            )
-                        }
+                        link = bestVideo.link,
+                        filename = bestVideo.filename,
+                        embedUrl = bestVideo.embedUrl,
+                        resolution = bestVideo.resolution,
+                        nc = bestVideo.nc,
+                        subbed = bestVideo.subbed,
+                        lyrics = bestVideo.lyrics,
+                        source = bestVideo.source,
+                        overlap = bestVideo.overlap
                     )
                 }
             }
@@ -216,16 +208,8 @@ private fun List<*>.asDocuments(): List<Document> {
 }
 
 fun documentToAnimeThemeDetail(doc: Document): AnimeThemeDetail {
-    println("DEBUG documentToAnimeThemeDetail START")
-    println("DEBUG: doc keys = ${doc.keys}")
-
     val themesRaw = doc["themes"]
-    println("DEBUG: themes raw = $themesRaw (type: ${themesRaw?.javaClass?.simpleName})")
-
-    // Convert themes to Documents if they are Maps
     val themesAsDocuments = if (themesRaw is List<*>) {
-        println("DEBUG: themes is List, size = ${themesRaw.size}")
-        themesRaw.firstOrNull()?.let { println("DEBUG: first element type = ${it.javaClass.simpleName}") }
         themesRaw.asDocuments()
     } else {
         emptyList()
@@ -247,45 +231,33 @@ fun documentToAnimeThemeItem(doc: Document): List<AnimeThemeDetail.AnimeThemeIte
     val entries = doc.getListSafe<Document>(key = "entries")
 
     return if (entries.isNotEmpty()) {
-        entries.map { entryDoc ->
-            AnimeThemeDetail.AnimeThemeItem(
+        entries.mapNotNull { entryDoc ->
+            buildAnimeThemeItem(
                 id = doc.getIntSafe(key = "id"),
                 type = doc.getStringSafe(key = "type"),
                 slug = doc.getStringSafe(key = "slug"),
-                nc = entryDoc.getBooleanSafe(key = "nc"),
                 entryId = entryDoc.getIntSafe(key = "id"),
                 sequence = doc.getIntSafe(key = "sequence"),
-                link = entryDoc.getStringSafe(key = "link"),
                 nsfw = entryDoc.getBooleanSafe(key = "nsfw"),
-                source = entryDoc.getStringSafe(key = "source"),
-                subbed = entryDoc.getBooleanSafe(key = "subbed"),
-                lyrics = entryDoc.getBooleanSafe(key = "lyrics"),
                 spoiler = entryDoc.getBooleanSafe(key = "spoiler"),
                 episodes = entryDoc.getStringSafe(key = "episodes"),
-                filename = entryDoc.getStringSafe(key = "filename"),
-                embedUrl = entryDoc.getStringSafe(key = "embedUrl"),
-                resolution = entryDoc.getIntSafe(key = "resolution"),
-                song = doc.getDocumentSafe(key = "song")?.let { documentToAnimeThemeSong(it) }
+                song = doc.getDocumentSafe(key = "song")?.let { documentToAnimeThemeSong(it) },
+                videoDoc = entryDoc.getDocumentSafe(key = "video") ?: entryDoc
             )
         }
     } else {
-        listOf(
-            AnimeThemeDetail.AnimeThemeItem(
+        listOfNotNull(
+            buildAnimeThemeItem(
                 id = doc.getIntSafe(key = "id"),
-                link = doc.getStringSafe(key = "link"),
                 type = doc.getStringSafe(key = "type"),
                 slug = doc.getStringSafe(key = "slug"),
                 nsfw = doc.getBooleanSafe(key = "nsfw"),
                 entryId = doc.getIntSafe(key = "entryId"),
-                source = doc.getStringSafe(key = "source"),
                 sequence = doc.getIntSafe(key = "sequence"),
-                subbed = doc.getBooleanSafe(key = "subbed"),
-                lyrics = doc.getBooleanSafe(key = "lyrics"),
                 spoiler = doc.getBooleanSafe(key = "spoiler"),
                 episodes = doc.getStringSafe(key = "episodes"),
-                filename = doc.getStringSafe(key = "filename"),
-                resolution = doc.getIntSafe(key = "resolution"),
-                song = doc.getDocumentSafe(key = "song")?.let { documentToAnimeThemeSong(it) }
+                song = doc.getDocumentSafe(key = "song")?.let { documentToAnimeThemeSong(it) },
+                videoDoc = doc.getDocumentSafe(key = "video") ?: doc
             )
         )
     }
@@ -299,16 +271,15 @@ fun documentToAnimeThemeSong(doc: Document) = AnimeThemeDetail.AnimeThemeSong(
 // Removed documentToAnimeThemeEntry - now handled in documentToAnimeThemeItem
 
 fun documentToAnimeThemeVideo(doc: Document) = AnimeThemeDetail.AnimeThemeVideo(
-    // Keep link as null when empty or missing to preserve original semantics from the API
-    link = (doc.get("link") as? String)?.takeIf { it.isNotBlank() },
+    link = doc.getStringSafe("link").ifBlank { null },
     filename = doc.getStringSafe("filename").ifBlank { null },
     embedUrl = doc.getStringSafe("embedUrl").ifBlank { null },
     resolution = doc.getIntSafe("resolution"),
     nc = doc.getBooleanSafe("nc"),
     subbed = doc.getBooleanSafe("subbed"),
     lyrics = doc.getBooleanSafe("lyrics"),
-    source = doc.getStringSafe("source"),
-    overlap = doc.getStringSafe("overlap")
+    source = doc.getStringSafe("source").ifBlank { null },
+    overlap = doc.getStringSafe("overlap").ifBlank { null }
 )
 
 private val preferredAnimeThemeResolutions = listOf(1080, 720, 480, 360, 240, 144)
@@ -350,4 +321,64 @@ fun AnimeThemeDetail.AnimeThemeVideo.resolveLink(): String? {
     return link?.takeIf { it.isNotBlank() }
         ?: embedUrl?.takeIf { it.isNotBlank() }
         ?: filename?.takeIf { it.isNotBlank() }
+}
+
+private fun buildAnimeThemeItem(
+    id: Int,
+    type: String,
+    slug: String,
+    entryId: Int,
+    sequence: Int,
+    nsfw: Boolean,
+    spoiler: Boolean,
+    episodes: String,
+    song: AnimeThemeDetail.AnimeThemeSong?,
+    videoDoc: Document
+): AnimeThemeDetail.AnimeThemeItem? {
+    val video = documentToAnimeThemeVideo(videoDoc)
+        .takeIf { it.hasUsablePayload() }
+        ?: return null
+
+    return AnimeThemeDetail.AnimeThemeItem(
+        id = id,
+        type = type,
+        slug = slug,
+        sequence = sequence,
+        song = song,
+        entryId = entryId,
+        episodes = episodes,
+        nsfw = nsfw,
+        spoiler = spoiler,
+        link = video.link,
+        filename = video.filename,
+        embedUrl = video.embedUrl,
+        resolution = video.resolution,
+        nc = video.nc,
+        subbed = video.subbed,
+        lyrics = video.lyrics,
+        source = video.source,
+        overlap = video.overlap
+    )
+}
+
+private fun VideoData.normalized() = copy(
+    link = link?.takeIf { it.isNotBlank() },
+    filename = filename?.takeIf { it.isNotBlank() },
+    embedUrl = embedUrl?.takeIf { it.isNotBlank() },
+    source = source?.takeIf { it.isNotBlank() },
+    overlap = overlap?.takeIf { it.isNotBlank() }
+)
+
+private fun VideoData.hasUsablePayload(): Boolean {
+    return !link.isNullOrBlank() ||
+            !filename.isNullOrBlank() ||
+            !embedUrl.isNullOrBlank() ||
+            !source.isNullOrBlank()
+}
+
+private fun AnimeThemeDetail.AnimeThemeVideo.hasUsablePayload(): Boolean {
+    return !link.isNullOrBlank() ||
+            !filename.isNullOrBlank() ||
+            !embedUrl.isNullOrBlank() ||
+            !source.isNullOrBlank()
 }
