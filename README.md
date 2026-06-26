@@ -51,6 +51,9 @@ Create a `.env` file or set the necessary environment variables for your applica
 ```
 MONGO_CONNECTION_STRING=mongodb://user:password@host:port
 MONGO_DATABASE_NAME=aruppi
+DANBOORU_BASE_URL=https://danbooru.donmai.us
+DANBOORU_LOGIN=your_danbooru_login
+DANBOORU_API_KEY=your_danbooru_api_key
 ```
 
 You will be able to find an `example.env` file in the project, simply rename the file by removing ‘example’ and edit the variables
@@ -117,6 +120,8 @@ Use these URLs to browse the API docs:
 
 Base path: `/api/v5`. All endpoints use `GET`.
 
+Paginated endpoints return `page`, `size`, `totalPages`, `totalItems`, and `data`. The unified `/search` endpoint also exposes per-category pagination metadata with `animePagination`, `mangaPagination`, and `charactersPagination`.
+
 | Endpoint | Example request | Required params | Optional params |
 |---|---|---|---|
 | `/docs` | `/api/v5/docs` | None | None |
@@ -124,19 +129,19 @@ Base path: `/api/v5`. All endpoints use `GET`.
 | `/openapi.yaml` | `/api/v5/openapi.yaml` | None | None |
 | `/news/es` | `/api/v5/news/es` | None | None |
 | `/news/en` | `/api/v5/news/en` | None | None |
-| `/anime` | `/api/v5/anime?type=tv&status=finished&nsfw=false&page=1&size=25` | `type`, `status` | `nsfw` (default: `false`), `page`, `size` (max: `100`; response stays as legacy array when `page`/`size` are omitted) |
-| `/anime/{id}` | `/api/v5/anime/1` | `id` (path, MAL ID) | None |
-| `/anime/random` | `/api/v5/anime/random?nsfw=false` | None | `nsfw` (default: `false`) |
+| `/anime` | `/api/v5/anime?type=tv&status=finished&sfw=true&page=1&size=25` | `type`, `status` | `sfw` (default: `true`, use `sfw=false` to allow NSFW; legacy `nsfw` alias still accepted), `page`, `size` (max: `100`; response stays as legacy array when `page`/`size` are omitted) |
+| `/anime/{id}` | `/api/v5/anime/1?sfw=true` | `id` (path, MAL ID) | `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
+| `/anime/random` | `/api/v5/anime/random?sfw=true` | None | `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
 | `/manga` | `/api/v5/manga?page=1&size=25` | None | `q`, `type`, `status`, `sfw` (default: `true`), `page`, `size` (max: `25`) |
-| `/manga/{id}` | `/api/v5/manga/1` | `id` (path, MAL ID) | None |
-| `/manga/random` | `/api/v5/manga/random` | None | None |
+| `/manga/{id}` | `/api/v5/manga/1?sfw=true` | `id` (path, MAL ID) | `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
+| `/manga/random` | `/api/v5/manga/random?sfw=true` | None | `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
 | `/manga/directory` | `/api/v5/manga/directory?q=berserk&page=1&size=10` | None | `q`, `type`, `status`, `sfw` (default: `true`), `page`, `size` (max: `25`) |
-| `/search` | `/api/v5/search?q=naruto&type=anime,manga,characters&page=1&size=5` | `q` | `type` (csv), `page`, `size` (max: `10`) |
-| `/anime/lastEpisodes` | `/api/v5/anime/lastEpisodes` | None | None |
-| `/anime/suggestions` | `/api/v5/anime/suggestions?tags=action,comedy&nsfw=false` | `tags` (csv) | `nsfw` (default: `false`) |
-| `/anime/season` | `/api/v5/anime/season?year=2026&station=spring` | None | `year` (default: current year), `station` (default: current season) |
+| `/search` | `/api/v5/search?q=naruto&type=anime,manga,characters&page=1&size=5&sfw=true` | `q` | `type` (csv), `sfw` (default: `true`), `page`, `size` (max: `10`) |
+| `/anime/lastEpisodes` | `/api/v5/anime/lastEpisodes?sfw=true` | None | `sfw` (default: `true`) |
+| `/anime/suggestions` | `/api/v5/anime/suggestions?tags=action,comedy&sfw=true` | `tags` (csv) | `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
+| `/anime/season` | `/api/v5/anime/season?year=2026&station=spring&sfw=true` | None | `year` (default: current year), `station` (default: current season), `sfw` (default: `true`) |
 | `/anime/season/yearIndex` | `/api/v5/anime/season/yearIndex` | None | None |
-| `/anime/directory` | `/api/v5/anime/directory?type=tv&page=1&size=10` | None | `type`, `page` (default: `1`), `size` (default: `10`) |
+| `/anime/directory` | `/api/v5/anime/directory?types=tv,movie&season=spring&years=2024,2025&sortBy=recent&page=1&size=10&sfw=true` | None | `type`, `types` (csv), `status`, `statuses` (csv), `sfw` (default: `true`, legacy `nsfw` alias still accepted), `season` or `station`, `year`, `years` (csv), `yearFrom`, `yearTo`, `sortBy` (`recent`, `score`, `title`, `year`, `malId`), `sortOrder` (`asc`, `desc`), `page` (default: `1`), `size` (default: `25`, max: `100`) |
 | `/anime/directory/{type}` | `/api/v5/anime/directory/tv?page=1&size=10` | `type` (path) | `page` (default: `1`), `size` (default: `10`) |
 | `/themes/anime` | `/api/v5/themes/anime?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`) |
 | `/themes/anime/{slug}` | `/api/v5/themes/anime/cowboy_bebop` | `slug` (path) | None |
@@ -145,11 +150,11 @@ Base path: `/api/v5`. All endpoints use `GET`.
 | `/themes/artists/{slug}` | `/api/v5/themes/artists/yoko_kanno` | `slug` (path) | None |
 | `/themes/songs` | `/api/v5/themes/songs?q=tank&page=1&size=25` | None | `q`, `page` (default: `1`), `size` (default: `25`) |
 | `/themes/songs/random` | `/api/v5/themes/songs/random` | None | None |
-| `/gallery` | `/api/v5/gallery?query=hatsune%20miku&page=1` | None | `query` (default: empty), `page` (default: `1`) |
-| `/gallery/lastPosts` | `/api/v5/gallery/lastPosts?page=1` | None | `page` (default: `1`) |
-| `/top/anime` | `/api/v5/top/anime?type=tv&filter=airing&page=1&size=25` | `type` | `filter` (default: `airing`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
-| `/top/anime/topTen` | `/api/v5/top/anime/topTen?type=tv&filter=airing` | `type` | `filter` (default: `airing`) |
-| `/top/manga` | `/api/v5/top/manga?type=manga&filter=publishing&page=1&size=25` | `type` | `filter` (default: `publishing`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/gallery` | `/api/v5/gallery?query=hatsune%20miku&page=1&provider=danbooru&sfw=true` | None | `query` (default: empty), `page` (default: `1`), `provider` (`anime-pictures` by default, also supports `danbooru`, `safebooru`), `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
+| `/gallery/lastPosts` | `/api/v5/gallery/lastPosts?page=1&provider=danbooru&sfw=true` | None | `page` (default: `1`), `provider` (`anime-pictures` by default, also supports `danbooru`, `safebooru`), `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
+| `/top/anime` | `/api/v5/top/anime?type=tv&filter=airing&page=1&size=25&sfw=true` | `type` | `filter` (default: `airing`), `sfw` (default: `true`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/top/anime/topTen` | `/api/v5/top/anime/topTen?type=tv&filter=airing&sfw=true` | `type` | `filter` (default: `airing`), `sfw` (default: `true`) |
+| `/top/manga` | `/api/v5/top/manga?type=manga&filter=publishing&page=1&size=25&sfw=true` | `type` | `filter` (default: `publishing`), `sfw` (default: `true`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/top/people` | `/api/v5/top/people?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/top/characters` | `/api/v5/top/characters?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/schedule` | `/api/v5/schedule` | None | None |

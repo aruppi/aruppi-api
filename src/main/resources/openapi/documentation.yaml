@@ -39,11 +39,11 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime list filtered by type/status"
-      description: "Lists anime stored in the directory and allows filtering by type, status and NSFW flag. When page or size is provided, the response is paginated; otherwise it keeps the legacy array response."
+      description: "Lists anime stored in the directory and allows filtering by type, status and safe-content flag. When page or size is provided, the response is paginated; otherwise it keeps the legacy array response."
       parameters:
         - $ref: "#/components/parameters/AnimeTypeQuery"
         - $ref: "#/components/parameters/AnimeStatusQuery"
-        - $ref: "#/components/parameters/NsfwQuery"
+        - $ref: "#/components/parameters/SfwQuery"
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/AnimeSizeQuery"
       responses:
@@ -56,9 +56,10 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime detail by MAL id"
-      description: "Fetches a single anime by MyAnimeList identifier and returns the detailed metadata object."
+      description: "Fetches a single anime by MyAnimeList identifier and returns the detailed metadata object. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/IdPath"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkObject"
@@ -69,9 +70,9 @@ paths:
     get:
       tags: ["anime"]
       summary: "Random anime"
-      description: "Returns one random anime from the directory, with an optional NSFW filter."
+      description: "Returns one random anime from the directory, with safe filtering enabled by default."
       parameters:
-        - $ref: "#/components/parameters/NsfwQuery"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkObject"
@@ -100,9 +101,10 @@ paths:
     get:
       tags: ["manga"]
       summary: "Manga detail by MAL id"
-      description: "Fetches a manga detail by MyAnimeList identifier and caches it in MongoDB."
+      description: "Fetches a manga detail by MyAnimeList identifier and caches it in MongoDB. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/IdPath"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkObject"
@@ -113,7 +115,9 @@ paths:
     get:
       tags: ["manga"]
       summary: "Random manga"
-      description: "Returns one random manga from Jikan. Random responses are not cached."
+      description: "Returns one random manga from Jikan. Random responses are not cached. Safe filtering is enabled by default."
+      parameters:
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkObject"
@@ -142,10 +146,11 @@ paths:
     get:
       tags: ["search"]
       summary: "Unified search"
-      description: "Searches anime, manga and characters through a single endpoint."
+      description: "Searches anime, manga and characters through a single endpoint. Anime and manga results are safe by default."
       parameters:
         - $ref: "#/components/parameters/SearchQuery"
         - $ref: "#/components/parameters/SearchTypeQuery"
+        - $ref: "#/components/parameters/SfwQuery"
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SearchSizeQuery"
       responses:
@@ -158,7 +163,9 @@ paths:
     get:
       tags: ["anime"]
       summary: "Latest episodes"
-      description: "Returns the airing anime with latest episodes cached per current day."
+      description: "Returns the airing anime with latest episodes cached per current day. Safe filtering is enabled by default."
+      parameters:
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -167,10 +174,10 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime suggestions by tags"
-      description: "Finds anime matching one or more tags, excluding unsupported content types."
+      description: "Finds anime matching one or more tags, excluding unsupported content types. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/TagsQuery"
-        - $ref: "#/components/parameters/NsfwQuery"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -181,10 +188,11 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime by season"
-      description: "Returns the anime released in a given year and season."
+      description: "Returns the anime released in a given year and season. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/YearQuery"
         - $ref: "#/components/parameters/StationQuery"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -220,9 +228,60 @@ paths:
     get:
       tags: ["anime"]
       summary: "Anime directory"
-      description: "Returns the paginated anime directory, optionally filtered by type."
+      description: "Returns the paginated anime directory with combinable filters for type, status, safe-content, season, exact years or year ranges, plus configurable sorting."
       parameters:
         - $ref: "#/components/parameters/AnimeTypeQuery"
+        - name: "types"
+          in: "query"
+          schema:
+            type: "string"
+          description: "Comma-separated list of anime types. Example: tv,movie,ova"
+        - $ref: "#/components/parameters/AnimeStatusQuery"
+        - name: "statuses"
+          in: "query"
+          schema:
+            type: "string"
+          description: "Comma-separated list of anime statuses. Example: ongoing,upcoming"
+        - $ref: "#/components/parameters/SfwQuery"
+        - name: "season"
+          in: "query"
+          schema:
+            type: "string"
+            enum: ["winter", "spring", "summer", "fall"]
+          description: "Season/station filter. Alias of station."
+        - $ref: "#/components/parameters/StationQuery"
+        - $ref: "#/components/parameters/YearQuery"
+        - name: "years"
+          in: "query"
+          schema:
+            type: "string"
+          description: "Comma-separated list of years. Useful with season to fetch the same season across multiple years."
+        - name: "yearFrom"
+          in: "query"
+          schema:
+            type: "integer"
+            format: "int32"
+          description: "Start year for an inclusive range filter."
+        - name: "yearTo"
+          in: "query"
+          schema:
+            type: "integer"
+            format: "int32"
+          description: "End year for an inclusive range filter."
+        - name: "sortBy"
+          in: "query"
+          schema:
+            type: "string"
+            enum: ["recent", "score", "title", "year", "malId"]
+            default: "recent"
+          description: "Sorting field."
+        - name: "sortOrder"
+          in: "query"
+          schema:
+            type: "string"
+            enum: ["asc", "desc"]
+            default: "desc"
+          description: "Sorting direction."
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
       responses:
@@ -335,10 +394,12 @@ paths:
     get:
       tags: ["gallery"]
       summary: "Image search in gallery"
-      description: "Searches anime-pictures images by query text and returns paginated results."
+      description: "Searches gallery images by query text and returns paginated results from the selected provider. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/QueryQuery"
         - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/GalleryProviderQuery"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkPagination"
@@ -347,9 +408,11 @@ paths:
     get:
       tags: ["gallery"]
       summary: "Latest gallery posts"
-      description: "Returns the latest gallery posts cached by page."
+      description: "Returns the latest gallery posts cached by page for the selected provider. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/GalleryProviderQuery"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkPagination"
@@ -358,10 +421,11 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Anime ranking"
-      description: "Requires `type`, `filter`, `page` and `size` as query values."
+      description: "Requires `type`, `filter`, `page` and `size` as query values. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/TopTypeQuery"
         - $ref: "#/components/parameters/FilterQuery"
+        - $ref: "#/components/parameters/SfwQuery"
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
       responses:
@@ -374,10 +438,11 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Anime top ten"
-      description: "Returns the top ten anime for the requested type and filter combination."
+      description: "Returns the top ten anime for the requested type and filter combination. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/TopTypeQuery"
         - $ref: "#/components/parameters/FilterQuery"
+        - $ref: "#/components/parameters/SfwQuery"
       responses:
         "200":
           $ref: "#/components/responses/OkArray"
@@ -386,10 +451,11 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Manga ranking"
-      description: "Returns the paginated manga ranking for a given type and filter."
+      description: "Returns the paginated manga ranking for a given type and filter. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/TopTypeQuery"
         - $ref: "#/components/parameters/FilterQuery"
+        - $ref: "#/components/parameters/SfwQuery"
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
       responses:
@@ -529,6 +595,15 @@ components:
       required: false
       schema:
         type: "string"
+    GalleryProviderQuery:
+      name: "provider"
+      in: "query"
+      required: false
+      description: "Gallery provider. Defaults to anime-pictures."
+      schema:
+        type: "string"
+        enum: ["anime-pictures", "danbooru", "safebooru"]
+        default: "anime-pictures"
     QQuery:
       name: "q"
       in: "query"
@@ -584,6 +659,7 @@ components:
       name: "nsfw"
       in: "query"
       required: false
+      description: "Legacy alias for `sfw`. Use `nsfw=true` to allow adult results."
       schema:
         type: "boolean"
         default: false
@@ -591,6 +667,7 @@ components:
       name: "sfw"
       in: "query"
       required: false
+      description: "Safe-for-work filter. Defaults to `true`. Set `sfw=false` to allow adult/NSFW results. Legacy `nsfw` alias is still accepted."
       schema:
         type: "boolean"
         default: true
