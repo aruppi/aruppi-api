@@ -2,6 +2,7 @@ package com.jeluchu.core.connection
 
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -16,11 +17,13 @@ object RestClient {
 
     suspend fun <T> request(
         url: String,
-        deserializer: DeserializationStrategy<T>
+        deserializer: DeserializationStrategy<T>,
+        builder: HttpRequestBuilder.() -> Unit = {}
     ): T {
         return runCatching {
             val response = client.get(url) {
                 headers { append(HttpHeaders.Accept, ContentType.Application.Json.toString()) }
+                builder()
             }
 
             json.decodeFromString(deserializer, response.bodyAsText())

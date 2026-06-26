@@ -14,6 +14,15 @@ data class ProcessedPost(
     @SerialName("thumbnail")
     val thumbnail: String,
 
+    @SerialName("provider")
+    val provider: String = "anime-pictures",
+
+    @SerialName("source_url")
+    val sourceUrl: String = "",
+
+    @SerialName("original_url")
+    val originalUrl: String = "",
+
     @SerialName("width")
     val width: Int,
 
@@ -35,8 +44,20 @@ data class ProcessedPost(
     @SerialName("have_alpha")
     val haveAlpha: Boolean,
 
+    @SerialName("rating")
+    val rating: String = "",
+
+    @SerialName("tags")
+    val tags: List<String> = emptyList(),
+
     @SerialName("page")
     val page: Int = 0,
+
+    @SerialName("totalPages")
+    val totalPages: Int = 0,
+
+    @SerialName("totalItems")
+    val totalItems: Int = 0,
 
     @SerialName("query")
     val query: String = "0"

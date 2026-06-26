@@ -4,6 +4,8 @@ object BaseUrls {
     const val JIKAN = "https://api.jikan.moe/v4/"
     const val ANIME_THEMES = "https://api.animethemes.moe/"
     const val ANIME_PICTURES = "https://api.anime-pictures.net/api/v3/"
+    const val DANBOORU = "https://danbooru.donmai.us"
+    const val SAFEBOORU = "https://safebooru.org"
 }
 
 object RssUrls {
@@ -11,7 +13,7 @@ object RssUrls {
     const val ANITAKUME = "https://www.ivoox.com/feed_fg_f1660716_filtro_1.xml"
 
     // Spanish news
-    const val SOMOSKUDASAI = "https://somoskudasai.com/feed/"
+    const val SOMOSKUDASAI = "https://somoskudasai.com/noticias/feed/"
     const val MANGALATAM = "https://www.mangalatam.com/feeds/posts/default?alt=rss"
     const val CRUNCHYROLL = "https://cr-news-api-service.prd.crunchyrollsvc.com/v1/es-ES/rss"
     const val RAMENPARADOS = "https://ramenparados.com/feed/"
