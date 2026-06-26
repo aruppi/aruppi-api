@@ -2,7 +2,10 @@ package com.jeluchu.features.rankings.services
 
 import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.*
+import com.jeluchu.core.extensions.isSafeAnimeData
+import com.jeluchu.core.extensions.isSafeMangaData
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.parseSfwPreference
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
@@ -48,6 +51,7 @@ class RankingsService(
     private val animeRankingTopTen = database.getCollection(Collections.ANIME_RANKING_TOP_TEN)
 
     suspend fun getAnimeRanking(call: RoutingCall) {
+        val sfw = call.parseSfwPreference() ?: return
         val filter = call.request.queryParameters["filter"] ?: "airing"
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
@@ -57,7 +61,7 @@ class RankingsService(
         if (parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
         if (parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
 
-        val timerKey = "${Collections.ANIME_RANKING}_${type}_${filter}_${page}"
+        val timerKey = "${Collections.ANIME_RANKING}_${type}_${filter}_${page}_sfw_$sfw"
 
         val needsUpdate = timers.needsUpdate(
             amount = 30,
@@ -72,7 +76,8 @@ class RankingsService(
                 Filters.and(
                     Filters.eq("page", page),
                     Filters.eq("type", type),
-                    Filters.eq("subtype", filter)
+                    Filters.eq("subtype", filter),
+                    Filters.eq("sfw", sfw)
                 )
             )
 
@@ -81,19 +86,28 @@ class RankingsService(
             params.add("page=$page")
             params.add("filter=$filter")
 
-            val response = RestClient.request(
+            val rawResponse = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
                 AnimeSearch.serializer()
-            ).data.map { anime ->
+            )
+            val totalItems = rawResponse.pagination.itemsPage?.total ?: 0
+            val totalPages = rawResponse.pagination.lastPage ?: 0
+            val response = rawResponse.data
+                .filter { anime -> !sfw || anime.isSafeAnimeData() }
+                .map { anime ->
                 anime.toAnimeTopEntity(
                     top = "anime",
                     page = page,
                     type = type,
                     subType = filter
                 )
-            }
+                }
 
-            val documentsToInsert = parseDataToDocuments(response, AnimeTopEntity.serializer())
+            val documentsToInsert = parseDataToDocuments(response, AnimeTopEntity.serializer()).onEach {
+                it.append("sfw", sfw)
+                it.append("totalPages", totalPages)
+                it.append("totalItems", totalItems)
+            }
             if (documentsToInsert.isNotEmpty()) animeRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
@@ -107,6 +121,8 @@ class RankingsService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = totalPages,
+                totalItems = totalItems,
                 data = elements
             )
 
@@ -117,11 +133,13 @@ class RankingsService(
                     Filters.and(
                         Filters.eq("page", page),
                         Filters.eq("type", type),
-                        Filters.eq("subtype", filter)
+                        Filters.eq("subtype", filter),
+                        Filters.eq("sfw", sfw)
                     )
                 )
                 .limit(size)
                 .toList()
+            val first = animes.firstOrNull()
 
             val elements = animes.mapIndexed { index, document ->
                 documentToAnimeTopEntity(
@@ -133,6 +151,8 @@ class RankingsService(
             val response = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = first?.getInteger("totalPages", 0) ?: 0,
+                totalItems = first?.getInteger("totalItems", 0) ?: 0,
                 data = elements
             )
 
@@ -141,6 +161,7 @@ class RankingsService(
     }
 
     suspend fun getMangaRanking(call: RoutingCall) {
+        val sfw = call.parseSfwPreference() ?: return
         val filter = call.request.queryParameters["filter"] ?: "publishing"
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
@@ -150,7 +171,7 @@ class RankingsService(
         if (parseMangaType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaType.message)
         if (parseMangaFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaFilterType.message)
 
-        val timerKey = "${Collections.MANGA_RANKING}_${type}_${filter}_${page}"
+        val timerKey = "${Collections.MANGA_RANKING}_${type}_${filter}_${page}_sfw_$sfw"
 
         val needsUpdate = timers.needsUpdate(
             amount = 30,
@@ -165,7 +186,8 @@ class RankingsService(
                 Filters.and(
                     Filters.eq("page", page),
                     Filters.eq("type", type),
-                    Filters.eq("subtype", filter)
+                    Filters.eq("subtype", filter),
+                    Filters.eq("sfw", sfw)
                 )
             )
 
@@ -174,19 +196,28 @@ class RankingsService(
             params.add("page=$page")
             params.add("filter=$filter")
 
-            val response = RestClient.request(
+            val rawResponse = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_MANGA + "?${params.joinToString("&")}",
                 MangaSearch.serializer()
-            ).data?.map { anime ->
+            )
+            val totalItems = rawResponse.pagination?.itemsPage?.total ?: 0
+            val totalPages = rawResponse.pagination?.lastPage ?: 0
+            val response = rawResponse.data
+                ?.filter { manga -> !sfw || manga.isSafeMangaData() }
+                ?.map { anime ->
                 anime.toMangaTopEntity(
                     top = "manga",
                     page = page,
                     type = type,
                     subType = filter
                 )
-            }
+                }
 
-            val documentsToInsert = parseDataToDocuments(response, MangaTopEntity.serializer())
+            val documentsToInsert = parseDataToDocuments(response, MangaTopEntity.serializer()).onEach {
+                it.append("sfw", sfw)
+                it.append("totalPages", totalPages)
+                it.append("totalItems", totalItems)
+            }
             if (documentsToInsert.isNotEmpty()) mangaRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
@@ -200,6 +231,8 @@ class RankingsService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = totalPages,
+                totalItems = totalItems,
                 data = elements
             )
 
@@ -210,11 +243,13 @@ class RankingsService(
                     Filters.and(
                         Filters.eq("page", page),
                         Filters.eq("type", type),
-                        Filters.eq("subtype", filter)
+                        Filters.eq("subtype", filter),
+                        Filters.eq("sfw", sfw)
                     )
                 )
                 .limit(size)
                 .toList()
+            val first = mangas.firstOrNull()
 
             val elements = mangas.mapIndexed { index, document ->
                 documentToMangaTopEntity(
@@ -226,6 +261,8 @@ class RankingsService(
             val response = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = first?.getInteger("totalPages", 0) ?: 0,
+                totalItems = first?.getInteger("totalItems", 0) ?: 0,
                 data = elements
             )
 
@@ -250,17 +287,23 @@ class RankingsService(
         if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             peopleRanking.deleteMany(Filters.and(Filters.eq("page", page)))
-            val response = RestClient.request(
+            val rawResponse = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_PEOPLE + "?page=$page",
                 PeopleSearch.serializer()
-            ).data?.map { anime ->
+            )
+            val totalItems = rawResponse.pagination?.itemsPage?.total ?: 0
+            val totalPages = rawResponse.pagination?.lastPage ?: 0
+            val response = rawResponse.data?.map { anime ->
                 anime.toPeopleTopEntity(
                     top = "people",
                     page = page
                 )
             }
 
-            val documentsToInsert = parseDataToDocuments(response, PeopleTopEntity.serializer())
+            val documentsToInsert = parseDataToDocuments(response, PeopleTopEntity.serializer()).onEach {
+                it.append("totalPages", totalPages)
+                it.append("totalItems", totalItems)
+            }
             if (documentsToInsert.isNotEmpty()) peopleRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
@@ -274,6 +317,8 @@ class RankingsService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = totalPages,
+                totalItems = totalItems,
                 data = elements
             )
 
@@ -283,6 +328,7 @@ class RankingsService(
                 .find(Filters.and(Filters.eq("page", page)))
                 .limit(size)
                 .toList()
+            val first = peoples.firstOrNull()
 
             val elements = peoples.mapIndexed { index, document ->
                 documentToPeopleTopEntity(
@@ -294,6 +340,8 @@ class RankingsService(
             val response = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = first?.getInteger("totalPages", 0) ?: 0,
+                totalItems = first?.getInteger("totalItems", 0) ?: 0,
                 data = elements
             )
 
@@ -318,17 +366,23 @@ class RankingsService(
         if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
         if (needsUpdate) {
             characterRanking.deleteMany(Filters.and(Filters.eq("page", page)))
-            val response = RestClient.request(
+            val rawResponse = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_CHARACTER + "?page=$page",
                 CharacterSearch.serializer()
-            ).data?.map { anime ->
+            )
+            val totalItems = rawResponse.pagination?.itemsPage?.total ?: 0
+            val totalPages = rawResponse.pagination?.lastPage ?: 0
+            val response = rawResponse.data?.map { anime ->
                 anime.toCharacterTopEntity(
                     top = "character",
                     page = page
                 )
             }
 
-            val documentsToInsert = parseDataToDocuments(response, CharacterTopEntity.serializer())
+            val documentsToInsert = parseDataToDocuments(response, CharacterTopEntity.serializer()).onEach {
+                it.append("totalPages", totalPages)
+                it.append("totalItems", totalItems)
+            }
             if (documentsToInsert.isNotEmpty()) characterRanking.insertMany(documentsToInsert)
             timers.update(timerKey)
 
@@ -342,6 +396,8 @@ class RankingsService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = totalPages,
+                totalItems = totalItems,
                 data = elements
             )
 
@@ -351,6 +407,7 @@ class RankingsService(
                 .find(Filters.and(Filters.eq("page", page)))
                 .limit(size)
                 .toList()
+            val first = characters.firstOrNull()
 
             val elements = characters.mapIndexed { index, document ->
                 documentToCharacterTopEntity(
@@ -362,6 +419,8 @@ class RankingsService(
             val response = PaginationResponse(
                 page = page,
                 size = size,
+                totalPages = first?.getInteger("totalPages", 0) ?: 0,
+                totalItems = first?.getInteger("totalItems", 0) ?: 0,
                 data = elements
             )
 
@@ -370,13 +429,14 @@ class RankingsService(
     }
 
     suspend fun getAnimeTopTenRanking(call: RoutingCall) {
+        val sfw = call.parseSfwPreference() ?: return
         val filter = call.request.queryParameters["filter"] ?: "airing"
         val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
 
         if (parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
         if (parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
 
-        val timerKey = "${Collections.ANIME_RANKING}_${Collections.TOP_TEN}_${type}_${filter}"
+        val timerKey = "${Collections.ANIME_RANKING}_${Collections.TOP_TEN}_${type}_${filter}_sfw_$sfw"
 
         val needsUpdate = timers.needsUpdate(
             amount = 7,
@@ -388,7 +448,8 @@ class RankingsService(
             animeRankingTopTen.deleteMany(
                 Filters.and(
                     Filters.eq("type", type),
-                    Filters.eq("subtype", filter)
+                    Filters.eq("subtype", filter),
+                    Filters.eq("sfw", sfw)
                 )
             )
 
@@ -399,16 +460,20 @@ class RankingsService(
             val response = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
                 AnimeSearch.serializer()
-            ).data?.map { anime ->
+            ).data
+                .filter { anime -> !sfw || anime.isSafeAnimeData() }
+                .map { anime ->
                 anime.toAnimeTopEntity(
                     page = 0,
                     top = "anime",
                     type = type,
                     subType = filter
                 )
-            }.orEmpty().take(11).distinctBy { it.malId }
+                }.orEmpty().take(11).distinctBy { it.malId }
 
-            val documentsToInsert = parseDataToDocuments(response, AnimeTopEntity.serializer())
+            val documentsToInsert = parseDataToDocuments(response, AnimeTopEntity.serializer()).onEach {
+                it.append("sfw", sfw)
+            }
             if (documentsToInsert.isNotEmpty()) animeRankingTopTen.insertMany(documentsToInsert)
             timers.update(timerKey)
 
@@ -425,7 +490,8 @@ class RankingsService(
                 .find(
                     Filters.and(
                         Filters.eq("type", type),
-                        Filters.eq("subtype", filter)
+                        Filters.eq("subtype", filter),
+                        Filters.eq("sfw", sfw)
                     )
                 )
                 .toList()

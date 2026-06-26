@@ -35,6 +35,15 @@ class DirectoryService(
         if (page < 1 || size < 1) return call.badRequestError(ErrorMessages.InvalidSizeAndPage.message)
         if (parseAnimeType(param) == null) return call.badRequestError(ErrorMessages.InvalidAnimeType.message)
 
+        directory
+
+        val elements = directory
+            .find()
+            .skip(skipCount)
+            .limit(size)
+            .toList()
+
+
         if (timers.needsUpdate(timerKey, 30, TimeUnit.DAY)) {
             getRemoteData(
                 newCollection = collection,

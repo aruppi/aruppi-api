@@ -268,7 +268,8 @@ fun documentToAnimeLastEpisodeEntity(doc: Document) = LastEpisodeEntity(
     day = doc.getStringSafe("day"),
     time = doc.getStringSafe("time"),
     score = doc.getStringSafe("score"),
-    timezone = doc.getStringSafe("timezone")
+    timezone = doc.getStringSafe("timezone"),
+    sfw = doc.getBooleanSafe("sfw")
 )
 
 fun documentToUpcomingAnimeSeason(doc: Document) = UpcomingAnimeSeasonEntity(
@@ -326,23 +327,24 @@ fun documentToCharacterTopEntity(position: Int, doc: Document) = CharacterTopEnt
 )
 
 fun documentToAnimeTypeEntity(doc: Document) = AnimeTypeEntity(
-    year = doc.getIntSafe("year"),
+    year = doc.getDocumentSafe("season")?.getIntSafe("year")?.takeIf { it > 0 } ?: doc.getIntSafe("year"),
     malId = doc.getIntSafe("malId"),
     type = doc.getStringSafe("type"),
-    score = doc.getStringSafe("score"),
+    score = doc.getStringSafe("score").ifBlank { null },
     title = doc.getStringSafe("title"),
     image = doc.getStringSafe("poster"),
-    season = doc.getStringSafe("season")
+    nsfw = doc.getBooleanSafe("nsfw"),
+    season = doc.getDocumentSafe("season")?.getStringSafe("station")?.ifBlank { null } ?: doc.getStringSafe("season")
 )
 
 fun documentToAnimeDirectoryEntity(doc: Document) = AnimeTypeEntity(
-    year = doc.getIntSafe("year"),
+    year = doc.getDocumentSafe("season")?.getIntSafe("year")?.takeIf { it > 0 } ?: doc.getIntSafe("year"),
     malId = doc.getIntSafe("malId"),
     type = doc.getStringSafe("type"),
-    score = doc.getStringSafe("score"),
+    score = doc.getStringSafe("score").ifBlank { null },
     title = doc.getStringSafe("title"),
-    image = doc.getStringSafe("image"),
-    season = doc.getStringSafe("season")
+    image = doc.getStringSafe("image").ifBlank { doc.getStringSafe("poster") },
+    season = doc.getDocumentSafe("season")?.getStringSafe("station")?.ifBlank { null } ?: doc.getStringSafe("season")
 )
 
 fun documentToAnimesThemeEntity(doc: Document) = Anime(

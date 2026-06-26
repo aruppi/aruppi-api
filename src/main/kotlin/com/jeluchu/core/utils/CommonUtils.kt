@@ -4,6 +4,7 @@ import com.jeluchu.core.models.PaginationResponse
 import com.mongodb.client.MongoCollection
 import org.bson.Document
 import org.bson.conversions.Bson
+import kotlin.math.ceil
 
 fun <T> getRemoteData(
     filters: Bson,
@@ -36,11 +37,15 @@ suspend fun <T> getLocalData(
         .limit(size)
         .toList()
         .map { mapper(it) }
+    val totalItems = collection.countDocuments().toInt()
+    val totalPages = if (totalItems == 0) 0 else ceil(totalItems.toDouble() / size).toInt()
 
     val paginate = PaginationResponse(
         page = page,
         data = query,
-        size = query.size
+        size = size,
+        totalPages = totalPages,
+        totalItems = totalItems
     )
 
     onQuerySuccess(paginate)

@@ -2,6 +2,7 @@ package com.jeluchu.features.anime.services
 
 import com.jeluchu.core.enums.AnimeStatusTypes
 import com.jeluchu.core.enums.AnimeTypes
+import com.jeluchu.core.extensions.parseSfwPreference
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.messages.ErrorMessages
 import com.jeluchu.core.models.documentToSimpleAnimeEntity
@@ -22,7 +23,7 @@ class TagsService(
 ) {
     suspend fun getAnimeByAnyTag(call: RoutingCall) {
         val tags = call.request.queryParameters["tags"].orEmpty()
-        val nsfw = call.request.queryParameters["nsfw"].toBoolean()
+        val sfw = call.parseSfwPreference() ?: return
 
         val tagsList = if (tags.isNotEmpty()) {
             tags.split(",").map { it.trim() }
@@ -44,7 +45,11 @@ class TagsService(
             add(Filters.ne("type", AnimeTypes.PV))
             add(Filters.ne("type", AnimeTypes.CM))
 
-            if (!nsfw) add(Filters.eq("nsfw", false))
+            if (sfw) {
+                add(Filters.eq("nsfw", false))
+                add(Filters.nin("ageRating", listOf("R+ - Mild Nudity", "Rx - Hentai")))
+                add(Filters.nin("rating", listOf("R+ - Mild Nudity", "Rx - Hentai")))
+            }
         }
 
         val query = directory.find(Filters.and(filters))

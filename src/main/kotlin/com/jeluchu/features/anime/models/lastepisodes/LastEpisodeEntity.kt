@@ -12,16 +12,18 @@ data class LastEpisodeEntity(
     val day: String?,
     val time: String?,
     val timezone: String?,
+    val sfw: Boolean,
 ) {
     companion object {
-        fun AnimeData.toLastEpisodeData() = LastEpisodeEntity(
+        fun AnimeData.toLastEpisodeData(sfw: Boolean) = LastEpisodeEntity(
             malId = malId ?: 0,
             day = broadcast?.day.orEmpty(),
             time = broadcast?.time.orEmpty(),
             score = score?.toString().orEmpty(),
             image = images?.webp?.large.orEmpty(),
             timezone = broadcast?.timezone.orEmpty(),
-            title = titles?.first()?.title.orEmpty()
+            title = titles?.first()?.title.orEmpty(),
+            sfw = sfw
         )
     }
 }

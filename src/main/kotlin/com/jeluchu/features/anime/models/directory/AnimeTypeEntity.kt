@@ -14,5 +14,7 @@ data class AnimeTypeEntity(
     val title: String? = "",
     val image: String? = "",
     @EncodeDefault(mode = EncodeDefault.Mode.ALWAYS)
-    val score: String? = ""
+    val nsfw: Boolean? = false,
+    @EncodeDefault(mode = EncodeDefault.Mode.ALWAYS)
+    val score: String? = null
 )

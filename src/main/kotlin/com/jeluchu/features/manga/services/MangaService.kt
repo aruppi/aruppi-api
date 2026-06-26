@@ -4,7 +4,9 @@ import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.TimeUnit
 import com.jeluchu.core.enums.parseMangaStatusType
 import com.jeluchu.core.enums.parseMangaType
+import com.jeluchu.core.extensions.isSafeMangaData
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.parseSfwPreference
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
@@ -44,6 +46,7 @@ class MangaService(
 
     suspend fun getMangaByMalId(call: RoutingCall) {
         try {
+            val sfw = call.parseSfwPreference() ?: return
             val id = call.parameters["id"]?.toIntOrNull()
                 ?: return call.respondError(
                     status = HttpStatusCode.BadRequest,
@@ -55,14 +58,24 @@ class MangaService(
             val needsUpdate = timers.needsUpdate(key = timerKey, amount = 30, unit = TimeUnit.DAY)
 
             val manga = if (needsUpdate) {
-                val detail = RestClient.request(
+                val detailData = RestClient.request(
                     "${BaseUrls.JIKAN}manga/$id/full",
                     MangaDataResponse.serializer()
-                ).data?.toMangaDetail() ?: return call.respondError(
+                ).data ?: return call.respondError(
                     status = HttpStatusCode.NotFound,
                     message = ErrorMessages.MangaNotFound.message,
                     code = "MANGA_NOT_FOUND"
                 )
+
+                if (sfw && !detailData.isSafeMangaData()) {
+                    return call.respondError(
+                        status = HttpStatusCode.NotFound,
+                        message = ErrorMessages.MangaNotFound.message,
+                        code = "MANGA_NOT_FOUND"
+                    )
+                }
+
+                val detail = detailData.toMangaDetail()
 
                 detailCollection.deleteMany(Filters.eq("malId", id))
                 val documents = parseDataToDocuments(listOf(detail), MangaDetail.serializer())
@@ -70,11 +83,13 @@ class MangaService(
                 timers.update(timerKey)
                 detail
             } else {
-                detailCollection.find(Filters.eq("malId", id)).firstOrNull()?.let { documentToMangaDetail(it) }
+                detailCollection.find(Filters.eq("malId", id)).firstOrNull()?.let { documentToMangaDetail(it) }?.takeIf { detail ->
+                    !sfw || detail.isSafe()
+                }
                     ?: RestClient.request(
                         "${BaseUrls.JIKAN}manga/$id/full",
                         MangaDataResponse.serializer()
-                    ).data?.toMangaDetail()
+                    ).data?.takeIf { mangaData -> !sfw || mangaData.isSafeMangaData() }?.toMangaDetail()
                     ?: return call.respondError(
                         status = HttpStatusCode.NotFound,
                         message = ErrorMessages.MangaNotFound.message,
@@ -90,17 +105,29 @@ class MangaService(
 
     suspend fun getRandomManga(call: RoutingCall) {
         try {
-            val manga = RestClient.request(
-                "${BaseUrls.JIKAN}random/manga",
-                MangaDataResponse.serializer()
-            ).data ?: return call.respondError(
-                status = HttpStatusCode.NotFound,
-                message = ErrorMessages.MangaNotFound.message,
-                code = "MANGA_NOT_FOUND"
-            )
+            val sfw = call.parseSfwPreference() ?: return
+            var manga = null as com.jeluchu.core.models.jikan.manga.MangaData?
+
+            for (attempt in 1..10) {
+                val candidate = RestClient.request(
+                    "${BaseUrls.JIKAN}random/manga",
+                    MangaDataResponse.serializer()
+                ).data
+
+                if (candidate != null && (!sfw || candidate.isSafeMangaData())) {
+                    manga = candidate
+                    break
+                }
+            }
+
+            val safeManga = manga ?: return call.respondError(
+                    status = HttpStatusCode.NotFound,
+                    message = ErrorMessages.MangaNotFound.message,
+                    code = "MANGA_NOT_FOUND"
+                )
 
             call.response.headers.append("Cache-Control", "no-store")
-            call.respond(HttpStatusCode.OK, Json.encodeToString(manga.toMangaDetail()))
+            call.respond(HttpStatusCode.OK, Json.encodeToString(safeManga.toMangaDetail()))
         } catch (ex: Exception) {
             call.respondError(HttpStatusCode.NotFound, ErrorMessages.MangaNotFound.message, code = "MANGA_NOT_FOUND")
         }
@@ -110,7 +137,7 @@ class MangaService(
         try {
             val type = request.queryParameters["type"].orEmpty()
             val status = request.queryParameters["status"].orEmpty()
-            val sfw = request.queryParameters["sfw"]?.toBooleanStrictOrNull() ?: true
+            val sfw = parseSfwPreference() ?: return
             val query = request.queryParameters["q"].orEmpty()
             val page = request.queryParameters["page"]?.toIntOrNull() ?: 1
             val size = request.queryParameters["size"]?.toIntOrNull() ?: 25
@@ -159,7 +186,9 @@ class MangaService(
 
             val totalItems = response.pagination?.itemsPage?.total ?: 0
             val totalPages = response.pagination?.lastPage ?: 0
-            val elements = response.data.orEmpty().map { it.toMangaSummary() }
+            val elements = response.data.orEmpty()
+                .filter { manga -> !sfw || manga.isSafeMangaData() }
+                .map { it.toMangaSummary() }
             val documents = parseDataToDocuments(elements, MangaSummary.serializer()).onEach {
                 it.append("cacheQuery", query)
                 it.append("cacheType", type)
@@ -204,4 +233,6 @@ class MangaService(
         Filters.eq("cachePage", page),
         Filters.eq("cacheSize", size)
     )
+
+    private fun MangaDetail.isSafe(): Boolean = explicitGenres.isEmpty()
 }

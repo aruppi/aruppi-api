@@ -28,7 +28,7 @@ import com.jeluchu.core.utils.TimerKey
 import com.jeluchu.core.utils.parseDataToDocuments
 import com.jeluchu.features.anime.mappers.documentToAnimeDirectoryEntity
 import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity
-import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity.Companion.toLastEpisodeData
+import com.jeluchu.features.anime.utils.fetchLastEpisodesFromJikan
 import com.jeluchu.features.anitakume.mappers.toPodcast
 import com.jeluchu.features.anitakume.models.AnitakumeEntity
 import com.jeluchu.features.gallery.mappers.toProcessedPost
@@ -193,18 +193,12 @@ class PreloadService(
     private suspend fun refreshLastEpisodes(force: Boolean): Boolean {
         if (!shouldRefresh(TimerKey.LAST_EPISODES, 6, TimeUnit.HOUR, force)) return false
         val collection = database.getCollection(TimerKey.LAST_EPISODES)
-        collection.deleteMany(Document())
-        val animes = mutableListOf<LastEpisodeEntity>()
-        val firstPage = RestClient.request(BaseUrls.JIKAN + "anime?status=airing&type=tv&page=1", AnimeSearch.serializer())
-        val totalPage = firstPage.pagination?.lastPage ?: 2
-        firstPage.data?.let { animes.addAll(it.map { anime -> anime.toLastEpisodeData() }) }
-        for (page in 2..totalPage) {
-            delay(pauseMillis.milliseconds)
-            RestClient.request(BaseUrls.JIKAN + "anime?status=airing&type=tv&page=$page", AnimeSearch.serializer())
-                .data?.let { animes.addAll(it.map { anime -> anime.toLastEpisodeData() }) }
-        }
-        parseDataToDocuments(animes.distinctBy { it.malId }, LastEpisodeEntity.serializer()).also {
-            if (it.isNotEmpty()) collection.insertMany(it)
+        val animes = fetchLastEpisodesFromJikan(pauseMillis = pauseMillis)
+        parseDataToDocuments(animes, LastEpisodeEntity.serializer()).also {
+            if (it.isNotEmpty()) {
+                collection.deleteMany(Document())
+                collection.insertMany(it)
+            }
         }
         timers.update(TimerKey.LAST_EPISODES)
         return true

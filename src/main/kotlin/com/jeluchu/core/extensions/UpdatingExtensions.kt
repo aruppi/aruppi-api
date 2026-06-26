@@ -72,3 +72,8 @@ fun MongoCollection<Document>.update(key: String) {
         ReplaceOptions().upsert(true)
     )
 }
+
+fun MongoCollection<Document>.delete(key: String): Boolean {
+    val result = deleteOne(eq(TimerKey.KEY, key))
+    return result.deletedCount > 0
+}

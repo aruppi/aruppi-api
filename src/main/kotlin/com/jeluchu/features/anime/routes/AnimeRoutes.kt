@@ -33,6 +33,6 @@ fun Route.animeEndpoints(
 
     route(Routes.DIRECTORY) {
         getToJson { service.getDirectory(call) }
-        getToJson(Routes.TYPE) { directoryService.getAnimeByType(call) }
+        //getToJson(Routes.TYPE) { service.getAnimeByType(call) }
     }
 }

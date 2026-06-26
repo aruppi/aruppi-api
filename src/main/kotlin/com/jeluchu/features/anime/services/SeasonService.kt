@@ -2,8 +2,10 @@ package com.jeluchu.features.anime.services
 
 import com.jeluchu.core.connection.RestClient
 import com.jeluchu.core.enums.TimeUnit
+import com.jeluchu.core.extensions.isSafeAnimeData
 import com.jeluchu.core.enums.parseSeasons
 import com.jeluchu.core.extensions.needsUpdate
+import com.jeluchu.core.extensions.parseSfwPreference
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
@@ -36,18 +38,25 @@ class SeasonService(
     private val upcomingSeasonFilters = setOf("tv", "movie", "ova", "special", "ona", "music")
 
     suspend fun getAnimeBySeason(call: RoutingCall) {
+        val sfw = call.parseSfwPreference() ?: return
         val year = call.request.queryParameters["year"]?.toInt() ?: SeasonCalendar.currentYear
         val station = parseSeasons(call.request.queryParameters["station"] ?: SeasonCalendar.currentSeason.name)
             ?: SeasonCalendar.currentSeason
 
-        val query = directory.find(
-            Filters.and(
-                Filters.eq("season.year", year),
-                Filters.eq("season.station", station),
-                Filters.ne("type", "MUSIC"),
-                Filters.ne("type", "PV"),
-            )
+        val filters = mutableListOf(
+            Filters.eq("season.year", year),
+            Filters.eq("season.station", station),
+            Filters.ne("type", "MUSIC"),
+            Filters.ne("type", "PV"),
         )
+
+        if (sfw) {
+            filters += Filters.eq("nsfw", false)
+            filters += Filters.nin("ageRating", listOf("R+ - Mild Nudity", "Rx - Hentai"))
+            filters += Filters.nin("rating", listOf("R+ - Mild Nudity", "Rx - Hentai"))
+        }
+
+        val query = directory.find(Filters.and(filters))
             .toList()
             .map { documentToSimpleAnimeEntity(it) }
 
@@ -55,7 +64,7 @@ class SeasonService(
     }
 
     suspend fun getUpcomingAnimeSeason(call: RoutingCall) {
-        val sfw = call.request.queryParameters["sfw"].toBoolean()
+        val sfw = call.parseSfwPreference() ?: return
         val filter = call.request.queryParameters["filter"]?.lowercase() ?: "tv"
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["limit"]?.toIntOrNull()
@@ -94,22 +103,31 @@ class SeasonService(
             val paramsPath = if (sfw) "?sfw&${params.joinToString(separator = "&")}"
             else "?${params.joinToString(separator = "&")}"
 
-            val raw = RestClient.request(
+            val rawResponse = RestClient.request(
                 url = "${BaseUrls.JIKAN}seasons/upcoming$paramsPath",
                 deserializer = AnimeSearch.serializer()
-            ).data.map {
+            )
+            val totalItems = rawResponse.pagination.itemsPage?.total ?: 0
+            val totalPages = rawResponse.pagination.lastPage ?: 0
+            val raw = rawResponse.data
+                .filter { anime -> !sfw || anime.isSafeAnimeData() }
+                .map {
                 it.toUpcomingAnime(
                     sfw = sfw,
                     page = page,
                     limit = size,
                     filter = filter
                 )
-            }.distinctBy { it.malId }
+                }.distinctBy { it.malId }
 
             val documentsToInsert = parseDataToDocuments(
                 data = raw,
                 serializer = UpcomingAnimeSeasonEntity.serializer()
             )
+                .onEach {
+                    it.append("totalPages", totalPages)
+                    it.append("totalItems", totalItems)
+                }
 
             if (documentsToInsert.isNotEmpty()) collection.insertMany(documentsToInsert)
             timers.update(timerKey)
@@ -119,12 +137,14 @@ class SeasonService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 data = elements,
-                size = elements.size
+                size = size,
+                totalPages = totalPages,
+                totalItems = totalItems
             )
 
             call.respond(status = HttpStatusCode.OK, message = Json.encodeToString(value = paginationResponse))
         } else {
-            val elements = collection
+            val documents = collection
                 .find(
                     Filters.and(
                         Filters.eq("sfw", sfw),
@@ -134,14 +154,18 @@ class SeasonService(
                     )
                 )
                 .toList()
+            val elements = documents
                 .map { documentToUpcomingAnimeSeason(it) }
                 .distinctBy { it.malId }
                 .take(size)
+            val first = documents.firstOrNull()
 
             val response = PaginationResponse(
                 page = page,
                 data = elements,
-                size = elements.size
+                size = size,
+                totalPages = first?.getInteger("totalPages", 0) ?: 0,
+                totalItems = first?.getInteger("totalItems", 0) ?: 0
             )
 
             call.respond(status = HttpStatusCode.OK, message = Json.encodeToString(value = response))

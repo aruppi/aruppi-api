@@ -10,9 +10,18 @@ data class UnifiedSearchResponse(
     val query: String,
     val page: Int,
     val size: Int,
+    val animePagination: SearchPagination = SearchPagination(),
+    val mangaPagination: SearchPagination = SearchPagination(),
+    val charactersPagination: SearchPagination = SearchPagination(),
     val anime: List<SearchResult> = emptyList(),
     val manga: List<SearchResult> = emptyList(),
     val characters: List<SearchResult> = emptyList()
+)
+
+@Serializable
+data class SearchPagination(
+    val totalPages: Int = 0,
+    val totalItems: Int = 0
 )
 
 @Serializable
