@@ -11,6 +11,9 @@ import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.parseSfwPreference
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.isSafeAnimeDocument
+import com.jeluchu.core.extensions.getDocumentSafe
+import com.jeluchu.core.extensions.getListSafe
+import com.jeluchu.core.extensions.getStringSafe
 import com.jeluchu.core.extensions.toJson
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
@@ -24,6 +27,7 @@ import com.jeluchu.features.anime.mappers.documentToAnimeLastEpisodeEntity
 import com.jeluchu.features.anime.mappers.documentToAnimeTypeEntity
 import com.jeluchu.features.anime.mappers.documentToMoreInfoEntity
 import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity
+import com.jeluchu.features.anime.models.discovery.DiscoveryRecommendationEntity
 import com.jeluchu.features.anime.utils.fetchLastEpisodesFromJikan
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Aggregates
@@ -144,6 +148,94 @@ class AnimeService(
         }
     }
 
+    suspend fun getDiscovery(call: RoutingCall) {
+        try {
+            val favoriteIds = call.request.queryParameters["favoriteIds"].toAnimeIds()
+            val excludeIds = call.request.queryParameters["excludeIds"].toAnimeIds()
+            val sfw = call.parseSfwPreference() ?: return
+            val size = call.request.queryParameters["size"]?.toIntOrNull()?.coerceIn(1, 30) ?: 20
+
+            if (favoriteIds.isEmpty()) {
+                return call.respond(HttpStatusCode.OK, Json.encodeToString(emptyList<DiscoveryRecommendationEntity>()))
+            }
+
+            val favoriteDocuments = directoryCollection
+                .find(Filters.`in`("malId", favoriteIds))
+                .toList()
+
+            val profile = SmartDiscoveryEngine.profile(favoriteDocuments)
+
+            val filters = mutableListOf<Bson>(
+                Filters.nin("malId", (favoriteIds + excludeIds).distinct()),
+                Filters.nin("status", listOf(AnimeStatusTypes.UPCOMING)),
+            )
+
+            val affinityFilters = mutableListOf<Bson>()
+            if (profile.preferredGenres.isNotEmpty()) {
+                val genres = profile.preferredGenres
+                affinityFilters += Filters.`in`("tags.es", genres)
+                affinityFilters += Filters.`in`("tags.en", genres)
+                affinityFilters += Filters.`in`("genres.es", genres)
+                affinityFilters += Filters.`in`("genres.en", genres)
+            }
+            if (profile.preferredStudios.isNotEmpty()) {
+                affinityFilters += Filters.`in`("studios.name", profile.preferredStudios)
+            }
+            if (profile.preferredTypes.isNotEmpty()) {
+                affinityFilters += Filters.`in`("type", profile.preferredTypes)
+                affinityFilters += Filters.`in`("type", profile.preferredTypes.map(String::uppercase))
+            }
+            if (affinityFilters.isNotEmpty()) {
+                filters += Filters.or(affinityFilters)
+            }
+
+            if (sfw) {
+                filters += Filters.eq("nsfw", false)
+                filters += Filters.nin("ageRating", listOf("R+ - Mild Nudity", "Rx - Hentai"))
+                filters += Filters.nin("rating", listOf("R+ - Mild Nudity", "Rx - Hentai"))
+            }
+
+            val recommendations = directoryCollection
+                .find(Filters.and(filters))
+                .limit(1000)
+                .toList()
+                .map { anime ->
+                    val score = SmartDiscoveryEngine.score(anime, profile)
+                    val quality = anime.getStringSafe("score").toDoubleOrNull() ?: 0.0
+                    DiscoveryCandidate(
+                        anime = anime,
+                        affinity = score.affinity,
+                        quality = quality,
+                        basedOnTitle = SmartDiscoveryEngine.bestSourceTitle(anime, favoriteDocuments),
+                        matchedGenres = score.matchedGenres,
+                        matchedStudios = score.matchedStudios,
+                    )
+                }
+                .filter { it.affinity > 0 }
+                .sortedWith(
+                    compareByDescending<DiscoveryCandidate> { it.affinity }
+                        .thenByDescending { it.quality }
+                )
+                .take(size)
+                .map { candidate ->
+                    val anime = documentToSimpleAnimeEntity(candidate.anime)
+                    DiscoveryRecommendationEntity(
+                        malId = anime.malId,
+                        title = anime.title,
+                        image = anime.image,
+                        type = anime.type,
+                        basedOnTitle = candidate.basedOnTitle,
+                        matchedGenres = candidate.matchedGenres,
+                        matchedStudios = candidate.matchedStudios,
+                    )
+                }
+
+            call.respond(HttpStatusCode.OK, Json.encodeToString(recommendations))
+        } catch (_: Exception) {
+            call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidInput.message)
+        }
+    }
+
     suspend fun getLastEpisodes(call: RoutingCall) {
         try {
             val sfw = call.parseSfwPreference() ?: return
@@ -208,6 +300,22 @@ class AnimeService(
             call.respondError(HttpStatusCode.Unauthorized, ErrorMessages.UnauthorizedMongo.message)
         }
     }
+
+    private fun String?.toAnimeIds(): List<Int> = orEmpty()
+        .split(',')
+        .mapNotNull(String::toIntOrNull)
+        .filter { it > 0 }
+        .distinct()
+        .take(50)
+
+    private data class DiscoveryCandidate(
+        val anime: Document,
+        val affinity: Int,
+        val quality: Double,
+        val basedOnTitle: String,
+        val matchedGenres: List<String>,
+        val matchedStudios: List<String>,
+    )
 
     suspend fun getAnimeByType(call: RoutingCall) {
         try {

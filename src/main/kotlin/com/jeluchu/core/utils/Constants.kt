@@ -66,6 +66,7 @@ object Routes {
     const val RADIO_STATIONS = "/radio"
     const val LAST_POST = "/lastPosts"
     const val DIRECTORY = "/directory"
+    const val DISCOVERY = "/discovery"
     const val ANITAKUME = "/anitakume"
     const val CHARACTER = "/characters"
     const val LAST_EPISODES = "/lastEpisodes"
