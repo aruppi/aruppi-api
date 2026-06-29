@@ -11,5 +11,9 @@ fun Route.galleryEndpoints(
     service: GalleryService = GalleryService(mongoDatabase)
 ) = route(Routes.GALLERY) {
     getToJson(Routes.LAST_POST) { service.getLastPosts(call) }
+    getToJson("/trending") { service.getTrendingPosts(call) }
+    getToJson("/random") { service.getRandomPost(call) }
+    getToJson("/related") { service.getRelatedPosts(call) }
+    getToJson("/tags") { service.getTagSuggestions(call) }
     getToJson { service.getQueryImages(call) }
 }

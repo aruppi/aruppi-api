@@ -47,6 +47,9 @@ data class ProcessedPost(
     @SerialName("rating")
     val rating: String = "",
 
+    @SerialName("score")
+    val score: Int = 0,
+
     @SerialName("tags")
     val tags: List<String> = emptyList(),
 

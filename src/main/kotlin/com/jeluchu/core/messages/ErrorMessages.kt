@@ -37,7 +37,10 @@ sealed class ErrorMessages(val message: String) {
     data object InvalidThemesAnimeEndpoint : ErrorMessages("Invalid anime themes endpoint. Valid endpoints are: /api/v5/themes/anime, /api/v5/themes/anime/{slug}, and /api/v5/themes/anime/{slug}/random")
     data object InvalidThemesArtistsEndpoint : ErrorMessages("Invalid themes artists endpoint. Valid endpoints are: /api/v5/themes/artists and /api/v5/themes/artists/{slug}")
     data object InvalidThemesEndpoint : ErrorMessages("Invalid themes endpoint. Valid endpoints are: /api/v5/themes/anime, /api/v5/themes/anime/{slug}, /api/v5/themes/anime/{slug}/random, /api/v5/themes/artists, /api/v5/themes/artists/{slug}, /api/v5/themes/songs, and /api/v5/themes/songs/random")
-    data object InvalidGalleryEndpoint : ErrorMessages("Invalid gallery endpoint. Valid endpoints are: /api/v5/gallery and /api/v5/gallery/lastPosts")
+    data object InvalidGalleryEndpoint : ErrorMessages(
+        "Invalid gallery endpoint. Valid endpoints are: /api/v5/gallery, /api/v5/gallery/lastPosts, " +
+            "/api/v5/gallery/trending, /api/v5/gallery/random, /api/v5/gallery/related and /api/v5/gallery/tags"
+    )
     data object InvalidMangaEndpoint : ErrorMessages("Invalid manga endpoint. Valid endpoints are: /api/v5/manga, /api/v5/manga/{id}, /api/v5/manga/random, and /api/v5/manga/directory")
     data object InvalidSearchEndpoint : ErrorMessages("Invalid search endpoint. Valid endpoint is: /api/v5/search")
     data object InvalidTopEndpoint : ErrorMessages("Invalid rankings endpoint. Valid endpoints are: /api/v5/top/anime, /api/v5/top/anime/topTen, /api/v5/top/manga, /api/v5/top/people, and /api/v5/top/characters")

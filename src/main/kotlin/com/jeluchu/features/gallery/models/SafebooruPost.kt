@@ -7,6 +7,7 @@ data class SafebooruPost(
     val createdAt: String = "",
     val fileSize: Int = 0,
     val rating: String = "s",
+    val score: Int = 0,
     val tags: String = "",
     val fileUrl: String = "",
     val sampleUrl: String = "",

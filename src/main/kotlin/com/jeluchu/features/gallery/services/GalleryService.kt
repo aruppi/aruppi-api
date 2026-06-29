@@ -19,6 +19,8 @@ import com.jeluchu.features.gallery.mappers.documentToProcessedPost
 import com.jeluchu.features.gallery.mappers.toProcessedPost
 import com.jeluchu.features.gallery.mappers.toProcessedPostQuery
 import com.jeluchu.features.gallery.models.DanbooruPost
+import com.jeluchu.features.gallery.models.DanbooruTag
+import com.jeluchu.features.gallery.models.GalleryTagSuggestion
 import com.jeluchu.features.gallery.models.PostsResponse
 import com.jeluchu.features.gallery.models.ProcessedPost
 import com.jeluchu.features.gallery.models.SafebooruPost
@@ -34,8 +36,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 import java.util.Base64
+import kotlin.random.Random
 
 class GalleryService(
     database: MongoDatabase
@@ -47,6 +51,7 @@ class GalleryService(
     private val danbooruApiKey = System.getenv("DANBOORU_API_KEY").orEmpty()
     private val danbooruBaseUrl = System.getenv("DANBOORU_BASE_URL").takeUnless { it.isNullOrBlank() }
         ?: BaseUrls.DANBOORU
+    private val json = Json { ignoreUnknownKeys = true }
 
     suspend fun getLastPosts(call: RoutingCall) {
         val size = 80
@@ -195,6 +200,120 @@ class GalleryService(
         }
     }
 
+    suspend fun getTrendingPosts(call: RoutingCall) {
+        val size = 80
+        val page = (call.request.queryParameters["page"]?.toIntOrNull() ?: 1).coerceAtLeast(1)
+        val includeNsfw = parseGalleryNsfw(call) ?: return
+        val provider = parseGalleryProvider(call.request.queryParameters["provider"])
+        val fetched = when (provider) {
+            GalleryProvider.DANBOORU -> fetchDanbooruRecent(page, size, includeNsfw)
+            GalleryProvider.ANIME_PICTURES -> fetchAnimePicturesRecent(page)
+            GalleryProvider.SAFEBOORU -> fetchSafebooruRecent(page, size)
+        }
+        val posts = fetched.data
+            .filterByNsfw(includeNsfw)
+            .sortedByDescending(ProcessedPost::score)
+
+        call.respond(
+            HttpStatusCode.OK,
+            PaginationResponse(
+                page = page,
+                size = size,
+                totalPages = fetched.totalPages,
+                totalItems = fetched.totalItems,
+                data = posts
+            ).toJson()
+        )
+    }
+
+    suspend fun getRandomPost(call: RoutingCall) {
+        val size = 80
+        val includeNsfw = parseGalleryNsfw(call) ?: return
+        val provider = parseGalleryProvider(call.request.queryParameters["provider"])
+        val query = call.request.queryParameters["query"].orEmpty().trim()
+        val page = Random.nextInt(1, 11)
+        val fetched = if (query.isBlank()) {
+            when (provider) {
+                GalleryProvider.ANIME_PICTURES -> fetchAnimePicturesRecent(page)
+                GalleryProvider.DANBOORU -> fetchDanbooruRecent(page, size, includeNsfw)
+                GalleryProvider.SAFEBOORU -> fetchSafebooruRecent(page, size)
+            }
+        } else {
+            fetchProviderQuery(provider, query, page, size, includeNsfw)
+        }
+        val randomPost = fetched.data.filterByNsfw(includeNsfw).randomOrNull()
+        val data = randomPost?.let(::listOf).orEmpty()
+
+        call.respond(
+            HttpStatusCode.OK,
+            PaginationResponse(page = 1, size = 1, totalPages = 1, totalItems = data.size, data = data).toJson()
+        )
+    }
+
+    suspend fun getRelatedPosts(call: RoutingCall) {
+        val size = 80
+        val includeNsfw = parseGalleryNsfw(call) ?: return
+        val provider = parseGalleryProvider(call.request.queryParameters["provider"])
+        val page = (call.request.queryParameters["page"]?.toIntOrNull() ?: 1).coerceAtLeast(1)
+        val tags = call.request.queryParameters["tags"].orEmpty()
+            .split(',')
+            .map(String::trim)
+            .filter(String::isNotBlank)
+            .take(4)
+        if (tags.isEmpty()) {
+            call.respondError(
+                status = HttpStatusCode.BadRequest,
+                message = "At least one tag is required",
+                code = "GALLERY_TAGS_REQUIRED"
+            )
+            return
+        }
+
+        val fetched = fetchProviderQuery(provider, tags.joinToString(","), page, size, includeNsfw)
+        call.respond(
+            HttpStatusCode.OK,
+            PaginationResponse(
+                page = page,
+                size = size,
+                totalPages = fetched.totalPages,
+                totalItems = fetched.totalItems,
+                data = fetched.data.filterByNsfw(includeNsfw)
+            ).toJson()
+        )
+    }
+
+    suspend fun getTagSuggestions(call: RoutingCall) {
+        val query = call.request.queryParameters["query"].orEmpty().trim()
+        val limit = (call.request.queryParameters["limit"]?.toIntOrNull() ?: 12).coerceIn(1, 30)
+        if (query.length < 2) {
+            call.respond(HttpStatusCode.OK, emptyList<GalleryTagSuggestion>().toJson())
+            return
+        }
+        val encodedQuery = URLEncoder.encode("${normalizeDanbooruQuery(query)}*", "UTF-8")
+        val tags = RestClient.request(
+            "$danbooruBaseUrl/tags.json?search%5Bname_matches%5D=$encodedQuery&search%5Border%5D=count&limit=$limit",
+            ListSerializer(DanbooruTag.serializer())
+        ) {
+            applyDanbooruAuth()
+        }
+        val suggestions = tags
+            .filter { it.name.isNotBlank() }
+            .map { GalleryTagSuggestion(name = it.name, postCount = it.postCount, category = it.category) }
+        call.respond(HttpStatusCode.OK, suggestions.toJson())
+    }
+
+    private suspend fun fetchProviderQuery(
+        provider: GalleryProvider,
+        query: String,
+        page: Int,
+        size: Int,
+        includeNsfw: Boolean
+    ): GalleryFetchResult = when (provider) {
+        GalleryProvider.ANIME_PICTURES -> fetchAnimePicturesQuery(query, page)
+        GalleryProvider.DANBOORU -> fetchDanbooruQuery(query, page, size, includeNsfw)
+        GalleryProvider.SAFEBOORU -> fetchSafebooruQuery(query, page, size)
+    }
+
     private suspend fun fetchAnimePicturesRecent(page: Int): GalleryFetchResult {
         val rawResponse = RestClient.request(
             BaseUrls.ANIME_PICTURES + Endpoints.POSTS + "?page=$page",
@@ -225,12 +344,9 @@ class GalleryService(
 
     private suspend fun fetchDanbooruRecent(page: Int, size: Int, includeNsfw: Boolean): GalleryFetchResult {
         val safeTags = if (includeNsfw) "" else "&tags=rating%3Asafe"
-        val posts = RestClient.request(
-            "$danbooruBaseUrl/posts.json?page=$page&limit=$size$safeTags",
-            ListSerializer(DanbooruPost.serializer())
-        ) {
-            applyDanbooruAuth()
-        }
+        val posts = fetchDanbooruPosts(
+            "$danbooruBaseUrl/posts.json?page=$page&limit=$size$safeTags"
+        )
 
         return GalleryFetchResult(
             totalPages = 0,
@@ -243,12 +359,9 @@ class GalleryService(
         val normalizedQuery = normalizeDanbooruQuery(query)
         val tags = if (includeNsfw) normalizedQuery else listOf("rating:safe", normalizedQuery).filter { it.isNotBlank() }.joinToString(" ")
         val encodedQuery = URLEncoder.encode(tags, "UTF-8")
-        val posts = RestClient.request(
-            "$danbooruBaseUrl/posts.json?page=$page&limit=$size&tags=$encodedQuery",
-            ListSerializer(DanbooruPost.serializer())
-        ) {
-            applyDanbooruAuth()
-        }
+        val posts = fetchDanbooruPosts(
+            "$danbooruBaseUrl/posts.json?page=$page&limit=$size&tags=$encodedQuery"
+        )
 
         return GalleryFetchResult(
             totalPages = 0,
@@ -265,6 +378,22 @@ class GalleryService(
             totalItems = 0,
             data = posts.map { it.toProcessedPost(page = page) }
         )
+    }
+
+    private suspend fun fetchDanbooruPosts(url: String): List<DanbooruPost> {
+        val raw = RestClient.request(url, JsonElement.serializer()) {
+            applyDanbooruAuth()
+        }
+        return when (raw) {
+            is JsonArray -> json.decodeFromJsonElement(ListSerializer(DanbooruPost.serializer()), raw)
+            is JsonObject -> {
+                val message = raw.stringValue("message")
+                    .ifBlank { raw.stringValue("error") }
+                    .ifBlank { "Danbooru returned an unexpected response" }
+                throw IllegalStateException(message)
+            }
+            else -> throw IllegalStateException("Danbooru returned an invalid response")
+        }
     }
 
     private suspend fun fetchSafebooruQuery(query: String, page: Int, size: Int): GalleryFetchResult {
@@ -319,6 +448,7 @@ class GalleryService(
             createdAt = obj.stringValue("created_at"),
             fileSize = obj.intValue("file_size"),
             rating = obj.stringValue("rating", "s"),
+            score = obj.intValue("score"),
             tags = obj.stringValue("tags"),
             fileUrl = normalizeBooruUrl(obj.stringValue("file_url")),
             sampleUrl = normalizeBooruUrl(obj.stringValue("sample_url")),

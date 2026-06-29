@@ -23,6 +23,9 @@ data class DanbooruPost(
     @SerialName("rating")
     val rating: String = "",
 
+    @SerialName("score")
+    val score: Int = 0,
+
     @SerialName("tag_string")
     val tagString: String = "",
 

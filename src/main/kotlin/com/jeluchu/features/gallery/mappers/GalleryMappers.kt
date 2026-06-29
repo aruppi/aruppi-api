@@ -31,6 +31,7 @@ fun PostsResponse.Post.toProcessedPost(page: Int, totalPages: Int = 0, totalItem
         spoiler = spoiler,
         haveAlpha = haveAlpha,
         rating = if (erotics != 0) "explicit" else "safe",
+        score = score.toInt(),
         page = page,
         totalPages = totalPages,
         totalItems = totalItems
@@ -57,6 +58,7 @@ fun PostsResponse.Post.toProcessedPostQuery(page: Int, query: String, totalPages
         spoiler = spoiler,
         haveAlpha = haveAlpha,
         rating = if (erotics != 0) "explicit" else "safe",
+        score = score.toInt(),
         page = page,
         totalPages = totalPages,
         totalItems = totalItems,
@@ -93,6 +95,7 @@ fun DanbooruPost.toProcessedPost(
             "e" -> "explicit"
             else -> rating
         },
+        score = score,
         tags = tagString.split(" ").filter { it.isNotBlank() },
         page = page,
         totalPages = totalPages,
@@ -127,6 +130,7 @@ fun SafebooruPost.toProcessedPost(
         spoiler = false,
         haveAlpha = false,
         rating = "safe",
+        score = score,
         tags = tags.split(" ").filter { it.isNotBlank() },
         page = page,
         totalPages = totalPages,
@@ -150,6 +154,7 @@ fun documentToProcessedPost(doc: Document) = ProcessedPost(
     spoiler = doc.getBooleanSafe("spoiler"),
     haveAlpha = doc.getBooleanSafe("haveAlpha"),
     rating = doc.getStringSafe("rating"),
+    score = doc.getIntSafe("score"),
     tags = doc.getListSafe("tags"),
     page = doc.getIntSafe("page"),
     totalPages = doc.getIntSafe("totalPages"),
