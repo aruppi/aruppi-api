@@ -417,6 +417,64 @@ paths:
         "200":
           $ref: "#/components/responses/OkPagination"
 
+  /gallery/trending:
+    get:
+      tags: ["gallery"]
+      summary: "Trending gallery posts"
+      parameters:
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/GalleryProviderQuery"
+        - $ref: "#/components/parameters/SfwQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /gallery/random:
+    get:
+      tags: ["gallery"]
+      summary: "Random gallery post"
+      parameters:
+        - $ref: "#/components/parameters/QueryQuery"
+        - $ref: "#/components/parameters/GalleryProviderQuery"
+        - $ref: "#/components/parameters/SfwQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /gallery/related:
+    get:
+      tags: ["gallery"]
+      summary: "Gallery posts related by tags"
+      parameters:
+        - name: "tags"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+        - $ref: "#/components/parameters/PageQuery"
+        - $ref: "#/components/parameters/GalleryProviderQuery"
+        - $ref: "#/components/parameters/SfwQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkPagination"
+
+  /gallery/tags:
+    get:
+      tags: ["gallery"]
+      summary: "Gallery tag autocomplete"
+      parameters:
+        - $ref: "#/components/parameters/QueryQuery"
+        - name: "limit"
+          in: "query"
+          schema:
+            type: "integer"
+            minimum: 1
+            maximum: 30
+            default: 12
+      responses:
+        "200":
+          description: "Tag suggestions ordered by usage"
+
   /top/anime:
     get:
       tags: ["rankings"]
@@ -714,10 +772,10 @@ components:
     TopTypeQuery:
       name: "type"
       in: "query"
-      required: true
+      required: false
       schema:
         type: "string"
-      description: "For rankings, expected values depend on endpoint type."
+      description: "Optional format filter. Expected values depend on the ranking endpoint."
     FilterQuery:
       name: "filter"
       in: "query"

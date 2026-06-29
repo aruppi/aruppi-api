@@ -152,9 +152,13 @@ Paginated endpoints return `page`, `size`, `totalPages`, `totalItems`, and `data
 | `/themes/songs/random` | `/api/v5/themes/songs/random` | None | None |
 | `/gallery` | `/api/v5/gallery?query=hatsune%20miku&page=1&provider=danbooru&sfw=true` | None | `query` (default: empty), `page` (default: `1`), `provider` (`anime-pictures` by default, also supports `danbooru`, `safebooru`), `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
 | `/gallery/lastPosts` | `/api/v5/gallery/lastPosts?page=1&provider=danbooru&sfw=true` | None | `page` (default: `1`), `provider` (`anime-pictures` by default, also supports `danbooru`, `safebooru`), `sfw` (default: `true`, use `sfw=false` to allow NSFW) |
-| `/top/anime` | `/api/v5/top/anime?type=tv&filter=airing&page=1&size=25&sfw=true` | `type` | `filter` (default: `airing`), `sfw` (default: `true`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/gallery/trending` | `/api/v5/gallery/trending?page=1&provider=danbooru&sfw=true` | None | Ranked gallery results for the selected provider |
+| `/gallery/random` | `/api/v5/gallery/random?query=frieren&provider=danbooru&sfw=true` | None | One random safe result; `query` is optional |
+| `/gallery/related` | `/api/v5/gallery/related?tags=frieren,fern&page=1&provider=danbooru&sfw=true` | None | Related results using up to four comma-separated tags |
+| `/gallery/tags` | `/api/v5/gallery/tags?query=frie&limit=12` | None | Danbooru tag autocomplete ordered by post count |
+| `/top/anime` | `/api/v5/top/anime?type=tv&filter=airing&page=1&size=25&sfw=true` | — | `type`, `filter`, `sfw` (default: `true`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/top/anime/topTen` | `/api/v5/top/anime/topTen?type=tv&filter=airing&sfw=true` | `type` | `filter` (default: `airing`), `sfw` (default: `true`) |
-| `/top/manga` | `/api/v5/top/manga?type=manga&filter=publishing&page=1&size=25&sfw=true` | `type` | `filter` (default: `publishing`), `sfw` (default: `true`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
+| `/top/manga` | `/api/v5/top/manga?type=manga&filter=publishing&page=1&size=25&sfw=true` | — | `type`, `filter`, `sfw` (default: `true`), `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/top/people` | `/api/v5/top/people?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/top/characters` | `/api/v5/top/characters?page=1&size=25` | None | `page` (default: `1`), `size` (default: `25`, max: `25`) |
 | `/schedule` | `/api/v5/schedule` | None | None |
