@@ -52,39 +52,39 @@ class RankingsService(
 
     suspend fun getAnimeRanking(call: RoutingCall) {
         val sfw = call.parseSfwPreference() ?: return
-        val filter = call.request.queryParameters["filter"] ?: "airing"
+        val filter = call.request.queryParameters["filter"]
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
-        val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
+        val type = call.request.queryParameters["type"]
 
         if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
-        if (parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
-        if (parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
+        if (type != null && parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
+        if (filter != null && parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
 
-        val timerKey = "${Collections.ANIME_RANKING}_${type}_${filter}_${page}_sfw_$sfw"
+        val cacheType = type ?: DEFAULT_ANIME_TYPE
+        val cacheFilter = filter ?: DEFAULT_ANIME_FILTER
+        val timerKey = "${Collections.ANIME_RANKING}_${cacheType}_${cacheFilter}_${page}_sfw_$sfw"
 
         val needsUpdate = timers.needsUpdate(
             amount = 30,
             key = timerKey,
             unit = TimeUnit.DAY
         )
+        val cacheQuery = Filters.and(
+            Filters.eq("page", page),
+            Filters.eq("type", cacheType),
+            Filters.eq("subtype", cacheFilter),
+            Filters.eq("sfw", sfw)
+        )
+        val cachedAnimes = animeRanking.find(cacheQuery).limit(size).toList()
 
         val offset = (page - 1) * size
-        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        if (needsUpdate) {
-            animeRanking.deleteMany(
-                Filters.and(
-                    Filters.eq("page", page),
-                    Filters.eq("type", type),
-                    Filters.eq("subtype", filter),
-                    Filters.eq("sfw", sfw)
-                )
-            )
-
+        if (needsUpdate || cachedAnimes.isEmpty()) {
             val params = mutableListOf<String>()
-            params.add("type=$type")
+            params.add("type=$cacheType")
             params.add("page=$page")
-            params.add("filter=$filter")
+            params.add("filter=$cacheFilter")
 
             val rawResponse = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
@@ -98,8 +98,8 @@ class RankingsService(
                 anime.toAnimeTopEntity(
                     top = "anime",
                     page = page,
-                    type = type,
-                    subType = filter
+                    type = cacheType,
+                    subType = cacheFilter
                 )
                 }
 
@@ -108,10 +108,15 @@ class RankingsService(
                 it.append("totalPages", totalPages)
                 it.append("totalItems", totalItems)
             }
-            if (documentsToInsert.isNotEmpty()) animeRanking.insertMany(documentsToInsert)
-            timers.update(timerKey)
+            if (documentsToInsert.isNotEmpty()) {
+                animeRanking.deleteMany(cacheQuery)
+                animeRanking.insertMany(documentsToInsert)
+                timers.update(timerKey)
+            }
+            val responseDocuments = documentsToInsert.ifEmpty { cachedAnimes }
+            val cachedFirst = responseDocuments.firstOrNull()
 
-            val elements = documentsToInsert.mapIndexed { index, document ->
+            val elements = responseDocuments.mapIndexed { index, document ->
                 documentToAnimeTopEntity(
                     doc = document,
                     position = offset + index
@@ -121,27 +126,20 @@ class RankingsService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 size = size,
-                totalPages = totalPages,
-                totalItems = totalItems,
+                totalPages = totalPages.takeIf { it > 0 }
+                    ?: cachedFirst?.getInteger("totalPages", 0)
+                    ?: 0,
+                totalItems = totalItems.takeIf { it > 0 }
+                    ?: cachedFirst?.getInteger("totalItems", 0)
+                    ?: 0,
                 data = elements
             )
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(paginationResponse))
         } else {
-            val animes = animeRanking
-                .find(
-                    Filters.and(
-                        Filters.eq("page", page),
-                        Filters.eq("type", type),
-                        Filters.eq("subtype", filter),
-                        Filters.eq("sfw", sfw)
-                    )
-                )
-                .limit(size)
-                .toList()
-            val first = animes.firstOrNull()
+            val first = cachedAnimes.firstOrNull()
 
-            val elements = animes.mapIndexed { index, document ->
+            val elements = cachedAnimes.mapIndexed { index, document ->
                 documentToAnimeTopEntity(
                     doc = document,
                     position = offset + index
@@ -162,39 +160,39 @@ class RankingsService(
 
     suspend fun getMangaRanking(call: RoutingCall) {
         val sfw = call.parseSfwPreference() ?: return
-        val filter = call.request.queryParameters["filter"] ?: "publishing"
+        val filter = call.request.queryParameters["filter"]
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 25
-        val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopMangaType.message)
+        val type = call.request.queryParameters["type"]
 
         if (size > 25) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidValueTopPage.message)
-        if (parseMangaType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaType.message)
-        if (parseMangaFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaFilterType.message)
+        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
+        if (type != null && parseMangaType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaType.message)
+        if (filter != null && parseMangaFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopMangaFilterType.message)
 
-        val timerKey = "${Collections.MANGA_RANKING}_${type}_${filter}_${page}_sfw_$sfw"
+        val cacheType = type ?: DEFAULT_MANGA_TYPE
+        val cacheFilter = filter ?: DEFAULT_MANGA_FILTER
+        val timerKey = "${Collections.MANGA_RANKING}_${cacheType}_${cacheFilter}_${page}_sfw_$sfw"
 
         val needsUpdate = timers.needsUpdate(
             amount = 30,
             key = timerKey,
             unit = TimeUnit.DAY
         )
+        val cacheQuery = Filters.and(
+            Filters.eq("page", page),
+            Filters.eq("type", cacheType),
+            Filters.eq("subtype", cacheFilter),
+            Filters.eq("sfw", sfw)
+        )
+        val cachedMangas = mangaRanking.find(cacheQuery).limit(size).toList()
 
         val offset = (page - 1) * size
-        if (page < 1 || size < 1) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidSizeAndPage.message)
-        if (needsUpdate) {
-            mangaRanking.deleteMany(
-                Filters.and(
-                    Filters.eq("page", page),
-                    Filters.eq("type", type),
-                    Filters.eq("subtype", filter),
-                    Filters.eq("sfw", sfw)
-                )
-            )
-
+        if (needsUpdate || cachedMangas.isEmpty()) {
             val params = mutableListOf<String>()
-            params.add("type=$type")
+            params.add("type=$cacheType")
             params.add("page=$page")
-            params.add("filter=$filter")
+            params.add("filter=$cacheFilter")
 
             val rawResponse = RestClient.request(
                 BaseUrls.JIKAN + Endpoints.TOP_MANGA + "?${params.joinToString("&")}",
@@ -208,8 +206,8 @@ class RankingsService(
                 anime.toMangaTopEntity(
                     top = "manga",
                     page = page,
-                    type = type,
-                    subType = filter
+                    type = cacheType,
+                    subType = cacheFilter
                 )
                 }
 
@@ -218,10 +216,15 @@ class RankingsService(
                 it.append("totalPages", totalPages)
                 it.append("totalItems", totalItems)
             }
-            if (documentsToInsert.isNotEmpty()) mangaRanking.insertMany(documentsToInsert)
-            timers.update(timerKey)
+            if (documentsToInsert.isNotEmpty()) {
+                mangaRanking.deleteMany(cacheQuery)
+                mangaRanking.insertMany(documentsToInsert)
+                timers.update(timerKey)
+            }
+            val responseDocuments = documentsToInsert.ifEmpty { cachedMangas }
+            val cachedFirst = responseDocuments.firstOrNull()
 
-            val elements = documentsToInsert.mapIndexed { index, document ->
+            val elements = responseDocuments.mapIndexed { index, document ->
                 documentToMangaTopEntity(
                     doc = document,
                     position = offset + index
@@ -231,27 +234,20 @@ class RankingsService(
             val paginationResponse = PaginationResponse(
                 page = page,
                 size = size,
-                totalPages = totalPages,
-                totalItems = totalItems,
+                totalPages = totalPages.takeIf { it > 0 }
+                    ?: cachedFirst?.getInteger("totalPages", 0)
+                    ?: 0,
+                totalItems = totalItems.takeIf { it > 0 }
+                    ?: cachedFirst?.getInteger("totalItems", 0)
+                    ?: 0,
                 data = elements
             )
 
             call.respond(HttpStatusCode.OK, Json.encodeToString(paginationResponse))
         } else {
-            val mangas = mangaRanking
-                .find(
-                    Filters.and(
-                        Filters.eq("page", page),
-                        Filters.eq("type", type),
-                        Filters.eq("subtype", filter),
-                        Filters.eq("sfw", sfw)
-                    )
-                )
-                .limit(size)
-                .toList()
-            val first = mangas.firstOrNull()
+            val first = cachedMangas.firstOrNull()
 
-            val elements = mangas.mapIndexed { index, document ->
+            val elements = cachedMangas.mapIndexed { index, document ->
                 documentToMangaTopEntity(
                     doc = document,
                     position = offset + index
@@ -507,3 +503,8 @@ class RankingsService(
         }
     }
 }
+
+private const val DEFAULT_ANIME_TYPE = "tv"
+private const val DEFAULT_ANIME_FILTER = "bypopularity"
+private const val DEFAULT_MANGA_TYPE = "manga"
+private const val DEFAULT_MANGA_FILTER = "publishing"
