@@ -23,6 +23,7 @@ sealed class ErrorMessages(val message: String) {
     data object MissingTags : ErrorMessages("No tags provided")
     data object MissingQuery : ErrorMessages("Missing 'q' query parameter")
     data object InvalidRequest : ErrorMessages("The request could not be processed because one or more parameters are invalid")
+    data object InvalidApiKey : ErrorMessages("A valid API key is required")
     data object InvalidValueTopPage : ErrorMessages("Value 26 is higher than the configured '25' max value")
     data object UnauthorizedMongo : ErrorMessages("Check the MongoDb Connection String to be able to correctly access this request.")
     data object AnimeProviderUnavailable : ErrorMessages("The anime provider is temporarily unavailable")

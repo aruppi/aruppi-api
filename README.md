@@ -51,6 +51,7 @@ Create a `.env` file or set the necessary environment variables for your applica
 ```
 MONGO_CONNECTION_STRING=mongodb://user:password@host:port
 MONGO_DATABASE_NAME=aruppi
+ARUPPI_API_KEY=your_aruppi_api_key
 DANBOORU_BASE_URL=https://danbooru.donmai.us
 DANBOORU_LOGIN=your_danbooru_login
 DANBOORU_API_KEY=your_danbooru_api_key
@@ -115,6 +116,11 @@ Use these URLs to browse the API docs:
 - ReDoc (main): [http://0.0.0.0:8080/api/v5/docs](http://0.0.0.0:8080/api/v5/docs)
 - Swagger UI: [http://0.0.0.0:8080/api/v5/swagger](http://0.0.0.0:8080/api/v5/swagger)
 - OpenAPI YAML: [http://0.0.0.0:8080/api/v5/openapi.yaml](http://0.0.0.0:8080/api/v5/openapi.yaml)
+
+Data endpoints require the `x-api-key` header. Configure the same value in the
+`ARUPPI_API_KEY` environment variable used by the API and by the clients. The
+documentation endpoints above remain public so the contract can be consulted
+without credentials. Requests without a valid key receive `401 Unauthorized`.
 
 ### Endpoint examples
 

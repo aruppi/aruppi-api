@@ -5,6 +5,8 @@ info:
   version: "5.9.8"
 servers:
   - url: "http://0.0.0.0:8080/api/v5"
+security:
+  - ApiKeyAuth: []
 tags:
   - name: "news"
   - name: "anime"
@@ -115,7 +117,7 @@ paths:
     get:
       tags: ["manga"]
       summary: "Random manga"
-      description: "Returns one random manga from Jikan. Random responses are not cached. Safe filtering is enabled by default."
+      description: "Returns one random manga from Tenrai. Random responses are not cached. Safe filtering is enabled by default."
       parameters:
         - $ref: "#/components/parameters/SfwQuery"
       responses:
@@ -201,7 +203,7 @@ paths:
     get:
       tags: ["anime"]
       summary: "Upcoming anime season"
-      description: "Returns the upcoming anime season from Jikan, including pagination metadata."
+      description: "Returns the upcoming anime season from Tenrai, including pagination metadata."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/LimitQuery"
@@ -526,7 +528,7 @@ paths:
     get:
       tags: ["rankings"]
       summary: "People ranking"
-      description: "Returns the paginated people ranking from Jikan."
+      description: "Returns the paginated people ranking from Tenrai."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -538,7 +540,7 @@ paths:
     get:
       tags: ["rankings"]
       summary: "Character ranking"
-      description: "Returns the paginated character ranking from Jikan."
+      description: "Returns the paginated character ranking from Tenrai."
       parameters:
         - $ref: "#/components/parameters/PageQuery"
         - $ref: "#/components/parameters/SizeQuery"
@@ -587,6 +589,11 @@ paths:
           $ref: "#/components/responses/OkArray"
 
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: "apiKey"
+      in: "header"
+      name: "x-api-key"
   parameters:
     IdPath:
       name: "id"
