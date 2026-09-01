@@ -59,7 +59,7 @@ class MangaService(
 
             val manga = if (needsUpdate) {
                 val detailData = RestClient.request(
-                    "${BaseUrls.JIKAN}manga/$id/full",
+                    "${BaseUrls.TENRAI}manga/$id/full",
                     MangaDataResponse.serializer()
                 ).data ?: return call.respondError(
                     status = HttpStatusCode.NotFound,
@@ -87,7 +87,7 @@ class MangaService(
                     !sfw || detail.isSafe()
                 }
                     ?: RestClient.request(
-                        "${BaseUrls.JIKAN}manga/$id/full",
+                        "${BaseUrls.TENRAI}manga/$id/full",
                         MangaDataResponse.serializer()
                     ).data?.takeIf { mangaData -> !sfw || mangaData.isSafeMangaData() }?.toMangaDetail()
                     ?: return call.respondError(
@@ -106,19 +106,10 @@ class MangaService(
     suspend fun getRandomManga(call: RoutingCall) {
         try {
             val sfw = call.parseSfwPreference() ?: return
-            var manga = null as com.jeluchu.core.models.jikan.manga.MangaData?
-
-            for (attempt in 1..10) {
-                val candidate = RestClient.request(
-                    "${BaseUrls.JIKAN}random/manga",
-                    MangaDataResponse.serializer()
-                ).data
-
-                if (candidate != null && (!sfw || candidate.isSafeMangaData())) {
-                    manga = candidate
-                    break
-                }
-            }
+            val manga = RestClient.request(
+                "${BaseUrls.TENRAI}random/manga?sfw=$sfw",
+                MangaDataResponse.serializer()
+            ).data?.takeIf { !sfw || it.isSafeMangaData() }
 
             val safeManga = manga ?: return call.respondError(
                     status = HttpStatusCode.NotFound,
@@ -180,7 +171,7 @@ class MangaService(
             if (query.isNotBlank()) params.add("q=${URLEncoder.encode(query, "UTF-8")}")
 
             val response = RestClient.request(
-                "${BaseUrls.JIKAN}manga?${params.joinToString("&")}",
+                "${BaseUrls.TENRAI}manga?${params.joinToString("&")}",
                 MangaSearch.serializer()
             )
 

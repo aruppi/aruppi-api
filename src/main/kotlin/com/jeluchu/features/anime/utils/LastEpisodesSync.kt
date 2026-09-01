@@ -10,7 +10,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 private const val AIRING_TV_ENDPOINT = "anime?status=airing&type=tv&page="
 
-suspend fun fetchLastEpisodesFromJikan(
+suspend fun fetchLastEpisodesFromTenrai(
     sfw: Boolean = true,
     pauseMillis: Long = 1_000L
 ): List<LastEpisodeEntity> {
@@ -18,7 +18,7 @@ suspend fun fetchLastEpisodesFromJikan(
     val sfwQuery = "&sfw=$sfw"
 
     val firstPage = RestClient.request(
-        url = BaseUrls.JIKAN + AIRING_TV_ENDPOINT + "1" + sfwQuery,
+        url = BaseUrls.TENRAI + AIRING_TV_ENDPOINT + "1" + sfwQuery,
         deserializer = AnimeSearch.serializer()
     )
 
@@ -28,7 +28,7 @@ suspend fun fetchLastEpisodesFromJikan(
     for (page in 2..totalPages) {
         delay(pauseMillis.milliseconds)
         RestClient.request(
-            url = BaseUrls.JIKAN + AIRING_TV_ENDPOINT + page + sfwQuery,
+            url = BaseUrls.TENRAI + AIRING_TV_ENDPOINT + page + sfwQuery,
             deserializer = AnimeSearch.serializer()
         ).data.let { pageAnimes ->
             animes.addAll(pageAnimes.map { anime -> anime.toLastEpisodeData(sfw = sfw) })

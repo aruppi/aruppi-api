@@ -1,7 +1,7 @@
 package com.jeluchu.core.utils
 
 object BaseUrls {
-    const val JIKAN = "https://api.jikan.moe/v4/"
+    const val TENRAI = "https://api.tenrai.org/v1/"
     const val ANIME_THEMES = "https://api.animethemes.moe/"
     const val ANIME_PICTURES = "https://api.anime-pictures.net/api/v3/"
     const val DANBOORU = "https://danbooru.donmai.us"

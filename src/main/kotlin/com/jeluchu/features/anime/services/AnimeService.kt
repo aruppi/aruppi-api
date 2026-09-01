@@ -28,7 +28,7 @@ import com.jeluchu.features.anime.mappers.documentToAnimeTypeEntity
 import com.jeluchu.features.anime.mappers.documentToMoreInfoEntity
 import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity
 import com.jeluchu.features.anime.models.discovery.DiscoveryRecommendationEntity
-import com.jeluchu.features.anime.utils.fetchLastEpisodesFromJikan
+import com.jeluchu.features.anime.utils.fetchLastEpisodesFromTenrai
 import com.mongodb.client.MongoDatabase
 import com.mongodb.client.model.Aggregates
 import com.mongodb.client.model.Filters
@@ -261,9 +261,9 @@ class AnimeService(
             var refreshFailure: Throwable? = null
             if (needsUpdate) {
                 runCatching {
-                    val animes = fetchLastEpisodesFromJikan(sfw = sfw)
+                    val animes = fetchLastEpisodesFromTenrai(sfw = sfw)
                     call.application.environment.log.info(
-                        "Fetched ${animes.size} last episodes from Jikan for sfw=$sfw; " +
+                        "Fetched ${animes.size} last episodes from Tenrai for sfw=$sfw; " +
                             "requestedDay=$dayOfWeek, days=${animes.groupingBy { it.day }.eachCount()}"
                     )
                     val documentsToInsert = parseDataToDocuments(animes, serializer = LastEpisodeEntity.serializer())
@@ -277,7 +277,7 @@ class AnimeService(
                     if (cause is CancellationException) throw cause
                     refreshFailure = cause
                     call.application.environment.log.warn(
-                        "Unable to refresh last episodes from Jikan for sfw=$sfw; serving cached data",
+                        "Unable to refresh last episodes from Tenrai for sfw=$sfw; serving cached data",
                         cause
                     )
                 }

@@ -50,7 +50,7 @@ class SearchService {
 
             val animeResponse = if ("anime" in categories) {
                 RestClient.request(
-                    "${BaseUrls.JIKAN}anime?q=$encodedQuery&page=$page&limit=$size&sfw=$sfw",
+                    "${BaseUrls.TENRAI}anime?q=$encodedQuery&page=$page&limit=$size&sfw=$sfw",
                     AnimeSearch.serializer()
                 )
             } else {
@@ -59,7 +59,7 @@ class SearchService {
 
             val mangaResponse = if ("manga" in categories) {
                 RestClient.request(
-                    "${BaseUrls.JIKAN}manga?q=$encodedQuery&page=$page&limit=$size&sfw=$sfw",
+                    "${BaseUrls.TENRAI}manga?q=$encodedQuery&page=$page&limit=$size&sfw=$sfw",
                     MangaSearch.serializer()
                 )
             } else {
@@ -71,7 +71,7 @@ class SearchService {
 
             val characterResponse = if ("characters" in categories || "character" in categories) {
                 RestClient.request(
-                    "${BaseUrls.JIKAN}characters?q=$encodedQuery&page=$page&limit=$size",
+                    "${BaseUrls.TENRAI}characters?q=$encodedQuery&page=$page&limit=$size",
                     CharacterSearch.serializer()
                 )
             } else {

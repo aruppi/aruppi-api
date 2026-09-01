@@ -104,7 +104,7 @@ class SeasonService(
             else "?${params.joinToString(separator = "&")}"
 
             val rawResponse = RestClient.request(
-                url = "${BaseUrls.JIKAN}seasons/upcoming$paramsPath",
+                url = "${BaseUrls.TENRAI}seasons/upcoming$paramsPath",
                 deserializer = AnimeSearch.serializer()
             )
             val totalItems = rawResponse.pagination.itemsPage?.total ?: 0
