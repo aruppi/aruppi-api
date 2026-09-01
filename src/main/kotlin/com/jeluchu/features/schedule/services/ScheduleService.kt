@@ -8,7 +8,6 @@ import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.respondError
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.messages.ErrorMessages
-import com.jeluchu.core.models.ErrorResponse
 import com.jeluchu.core.models.jikan.anime.AnimeData.Companion.toDayEntity
 import com.jeluchu.core.utils.*
 import com.jeluchu.features.anime.mappers.documentToScheduleDayEntity
@@ -20,8 +19,6 @@ import com.mongodb.client.model.Filters
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.bson.Document
 
 class ScheduleService(
@@ -31,60 +28,77 @@ class ScheduleService(
     private val schedules = database.getCollection(Collections.SCHEDULES)
 
     suspend fun getSchedule(call: RoutingCall) {
+        val elements = loadSchedules()
+        call.respond(HttpStatusCode.OK, elements.documentWeekMapper())
+    }
+
+    suspend fun getScheduleByDay(call: RoutingCall) {
+        val param = call.parameters["day"] ?: throw IllegalArgumentException(ErrorMessages.InvalidMalId.message)
+        val day = parseDay(param)
+            ?: return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidDay.message)
+
+        loadSchedules()
+
+        val elements = schedules.find(Filters.eq("day", day.name.lowercase())).toList()
+        val directory = elements.map { documentToScheduleDayEntity(it) }
+        call.respond(HttpStatusCode.OK, directory)
+    }
+
+    private suspend fun loadSchedules(): List<Document> {
+        val cached = schedules.find().toList()
         val needsUpdate = timers.needsUpdate(
             amount = 7,
             unit = TimeUnit.DAY,
             key = TimerKey.SCHEDULE
         )
 
-        if (needsUpdate) {
-            schedules.deleteMany(Document())
-            val documents = mutableListOf<Document>()
+        // A valid timer must not hide an empty cache, for example after an interrupted refresh.
+        if (!needsUpdate && cached.isNotEmpty()) return cached
+
+        return try {
+            val schedule = mutableListOf<DayEntity>()
 
             Day.entries.forEach { day ->
-                val animes = getSchedule(day).data?.map { it.toDayEntity(day) }.orEmpty()
-                val documentsToInsert = parseDataToDocuments(animes, DayEntity.serializer())
-                if (documentsToInsert.isNotEmpty()) {
-                    documents.addAll(documentsToInsert)
-                    schedules.insertMany(documentsToInsert)
-                }
+                schedule += fetchSchedule(day).data?.map { it.toDayEntity(day) }.orEmpty()
             }
 
-            timers.update(TimerKey.SCHEDULE)
-
-            call.respond(HttpStatusCode.OK, documents.documentWeekMapper())
-        } else {
-            val elements = schedules.find().toList()
-            call.respond(HttpStatusCode.OK, elements.documentWeekMapper())
+            val documents = parseDataToDocuments(schedule, DayEntity.serializer())
+            if (documents.isEmpty()) {
+                cached
+            } else {
+                // Replace the cache only after all upstream days have been loaded successfully.
+                schedules.deleteMany(Document())
+                schedules.insertMany(documents)
+                timers.update(TimerKey.SCHEDULE)
+                documents
+            }
+        } catch (exception: Exception) {
+            // Keep serving the last known schedule when Tenrai is temporarily unavailable.
+            if (cached.isNotEmpty()) cached else throw exception
         }
     }
 
-    suspend fun getScheduleByDay(call: RoutingCall) {
-        val param = call.parameters["day"] ?: throw IllegalArgumentException(ErrorMessages.InvalidMalId.message)
-        if (parseDay(param) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidDay.message)
-
-        val elements = schedules.find(Filters.eq("day", param.lowercase())).toList()
-        val directory = elements.map { documentToScheduleDayEntity(it) }
-        val json = Json.encodeToString(directory)
-        call.respond(HttpStatusCode.OK, json)
-    }
-
-    private suspend fun getSchedule(day: Day) = RestClient.requestWithDelay(
-        url = BaseUrls.JIKAN + Endpoints.SCHEDULES + "/" + day,
+    private suspend fun fetchSchedule(day: Day) = RestClient.requestWithDelay(
+        url = BaseUrls.TENRAI + Endpoints.SCHEDULES + "?filter=" + day.name.lowercase(),
         deserializer = ScheduleEntity.serializer()
     )
 
-    private fun List<Document>.documentWeekMapper(): String {
-        val elements = map { documentToScheduleDayEntity(it) }
+    private fun List<Document>.documentWeekMapper(): ScheduleData {
+        return map { documentToScheduleDayEntity(it) }.toScheduleData()
+    }
 
-        return Json.encodeToString(ScheduleData(
-            monday = elements.filter { it.day == Day.MONDAY.name.lowercase() }.distinctBy { it.malId },
-            tuesday = elements.filter { it.day == Day.TUESDAY.name.lowercase() }.distinctBy { it.malId },
-            wednesday = elements.filter { it.day == Day.WEDNESDAY.name.lowercase() }.distinctBy { it.malId },
-            thursday = elements.filter { it.day == Day.THURSDAY.name.lowercase() }.distinctBy { it.malId },
-            friday = elements.filter { it.day == Day.FRIDAY.name.lowercase() }.distinctBy { it.malId },
-            saturday = elements.filter { it.day == Day.SATURDAY.name.lowercase() }.distinctBy { it.malId },
-            sunday = elements.filter { it.day == Day.SUNDAY.name.lowercase() }.distinctBy { it.malId }
-        ))
+    private fun List<DayEntity>.toScheduleData() = ScheduleData(
+        monday = forDay(Day.MONDAY),
+        tuesday = forDay(Day.TUESDAY),
+        wednesday = forDay(Day.WEDNESDAY),
+        thursday = forDay(Day.THURSDAY),
+        friday = forDay(Day.FRIDAY),
+        saturday = forDay(Day.SATURDAY),
+        sunday = forDay(Day.SUNDAY)
+    )
+
+    private fun List<DayEntity>.forDay(day: Day): List<DayEntity> {
+        return filter { it.day.equals(day.name, ignoreCase = true) }
+            .distinctBy { it.malId }
     }
 }

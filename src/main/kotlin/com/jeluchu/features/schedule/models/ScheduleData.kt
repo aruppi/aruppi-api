@@ -9,41 +9,41 @@ data class ScheduleData(
      * All current season entries scheduled for Monday.
      */
     @SerialName("monday")
-    val monday: List<DayEntity>? = emptyList(),
+    val monday: List<DayEntity> = emptyList(),
 
     /**
      * All current season entries scheduled for Tuesday.
      */
     @SerialName("tuesday")
-    val tuesday: List<DayEntity>? = emptyList(),
+    val tuesday: List<DayEntity> = emptyList(),
 
     /**
      * All current season entries scheduled for Wednesday.
      */
     @SerialName("wednesday")
-    val wednesday: List<DayEntity>? = emptyList(),
+    val wednesday: List<DayEntity> = emptyList(),
 
     /**
      * All current season entries scheduled for Thursday.
      */
     @SerialName("thursday")
-    val thursday: List<DayEntity>? = emptyList(),
+    val thursday: List<DayEntity> = emptyList(),
 
     /**
      * All current season entries scheduled for Friday.
      */
     @SerialName("friday")
-    val friday: List<DayEntity>? = emptyList(),
+    val friday: List<DayEntity> = emptyList(),
 
     /**
      * All current season entries scheduled for Saturday.
      */
     @SerialName("saturday")
-    val saturday: List<DayEntity>? = emptyList(),
+    val saturday: List<DayEntity> = emptyList(),
 
     /**
      * All current season entries scheduled for Sunday.
      */
     @SerialName("sunday")
-    val sunday: List<DayEntity>? = emptyList()
+    val sunday: List<DayEntity> = emptyList()
 )

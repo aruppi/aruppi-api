@@ -87,7 +87,7 @@ class RankingsService(
             params.add("filter=$cacheFilter")
 
             val rawResponse = RestClient.request(
-                BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
+                BaseUrls.TENRAI + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
                 AnimeSearch.serializer()
             )
             val totalItems = rawResponse.pagination.itemsPage?.total ?: 0
@@ -195,7 +195,7 @@ class RankingsService(
             params.add("filter=$cacheFilter")
 
             val rawResponse = RestClient.request(
-                BaseUrls.JIKAN + Endpoints.TOP_MANGA + "?${params.joinToString("&")}",
+                BaseUrls.TENRAI + Endpoints.TOP_MANGA + "?${params.joinToString("&")}",
                 MangaSearch.serializer()
             )
             val totalItems = rawResponse.pagination?.itemsPage?.total ?: 0
@@ -284,7 +284,7 @@ class RankingsService(
         if (needsUpdate) {
             peopleRanking.deleteMany(Filters.and(Filters.eq("page", page)))
             val rawResponse = RestClient.request(
-                BaseUrls.JIKAN + Endpoints.TOP_PEOPLE + "?page=$page",
+                BaseUrls.TENRAI + Endpoints.TOP_PEOPLE + "?page=$page",
                 PeopleSearch.serializer()
             )
             val totalItems = rawResponse.pagination?.itemsPage?.total ?: 0
@@ -363,7 +363,7 @@ class RankingsService(
         if (needsUpdate) {
             characterRanking.deleteMany(Filters.and(Filters.eq("page", page)))
             val rawResponse = RestClient.request(
-                BaseUrls.JIKAN + Endpoints.TOP_CHARACTER + "?page=$page",
+                BaseUrls.TENRAI + Endpoints.TOP_CHARACTER + "?page=$page",
                 CharacterSearch.serializer()
             )
             val totalItems = rawResponse.pagination?.itemsPage?.total ?: 0
@@ -426,8 +426,9 @@ class RankingsService(
 
     suspend fun getAnimeTopTenRanking(call: RoutingCall) {
         val sfw = call.parseSfwPreference() ?: return
-        val filter = call.request.queryParameters["filter"] ?: "airing"
-        val type = call.parameters["type"] ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
+        val filter = call.request.queryParameters["filter"]?.lowercase() ?: "airing"
+        val type = call.request.queryParameters["type"]?.lowercase()
+            ?: throw IllegalArgumentException(ErrorMessages.InvalidTopAnimeType.message)
 
         if (parseAnimeType(type) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeType.message)
         if (parseAnimeFilterType(filter) == null) return call.respondError(HttpStatusCode.BadRequest, ErrorMessages.InvalidTopAnimeFilterType.message)
@@ -440,67 +441,61 @@ class RankingsService(
             unit = TimeUnit.DAY
         )
 
-        if (needsUpdate) {
-            animeRankingTopTen.deleteMany(
-                Filters.and(
-                    Filters.eq("type", type),
-                    Filters.eq("subtype", filter),
-                    Filters.eq("sfw", sfw)
-                )
-            )
+        val cacheFilter = Filters.and(
+            Filters.eq("type", type),
+            Filters.eq("subtype", filter),
+            Filters.eq("sfw", sfw)
+        )
+        var animes = animeRankingTopTen.find(cacheFilter).toList()
 
-            val params = mutableListOf<String>()
-            params.add("type=$type")
-            params.add("filter=$filter")
+        if (needsUpdate || animes.isEmpty()) {
+            try {
+                val params = mutableListOf<String>()
+                params.add("type=$type")
+                params.add("filter=$filter")
 
-            val response = RestClient.request(
-                BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
-                AnimeSearch.serializer()
-            ).data
-                .filter { anime -> !sfw || anime.isSafeAnimeData() }
-                .map { anime ->
-                anime.toAnimeTopEntity(
-                    page = 0,
-                    top = "anime",
-                    type = type,
-                    subType = filter
-                )
-                }.orEmpty().take(11).distinctBy { it.malId }
+                val response = RestClient.request(
+                    BaseUrls.TENRAI + Endpoints.TOP_ANIME + "?${params.joinToString("&")}",
+                    AnimeSearch.serializer()
+                ).data
+                    .filter { anime -> !sfw || anime.isSafeAnimeData() }
+                    .map { anime ->
+                        anime.toAnimeTopEntity(
+                            page = 0,
+                            top = "anime",
+                            type = type,
+                            subType = filter
+                        )
+                    }
+                    .take(11)
+                    .distinctBy { it.malId }
 
-            val documentsToInsert = parseDataToDocuments(response, AnimeTopEntity.serializer()).onEach {
-                it.append("sfw", sfw)
-            }
-            if (documentsToInsert.isNotEmpty()) animeRankingTopTen.insertMany(documentsToInsert)
-            timers.update(timerKey)
-
-            val elements = documentsToInsert.mapIndexed { index, document ->
-                documentToAnimeTopEntity(
-                    doc = document,
-                    position = index
-                )
-            }
-
-            call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
-        } else {
-            val animes = animeRankingTopTen
-                .find(
-                    Filters.and(
-                        Filters.eq("type", type),
-                        Filters.eq("subtype", filter),
-                        Filters.eq("sfw", sfw)
-                    )
-                )
-                .toList()
-
-            val elements = animes.mapIndexed { index, document ->
-                documentToAnimeTopEntity(
-                    doc = document,
-                    position = index
+                val documentsToInsert = parseDataToDocuments(response, AnimeTopEntity.serializer()).onEach {
+                    it.append("sfw", sfw)
+                }
+                if (documentsToInsert.isNotEmpty()) {
+                    animeRankingTopTen.deleteMany(cacheFilter)
+                    animeRankingTopTen.insertMany(documentsToInsert)
+                    timers.update(timerKey)
+                    animes = documentsToInsert
+                }
+            } catch (exception: Exception) {
+                if (animes.isEmpty()) throw exception
+                call.application.environment.log.warn(
+                    "Unable to refresh anime top ten from Tenrai; serving cached data",
+                    exception
                 )
             }
-
-            call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
         }
+
+        val elements = animes.mapIndexed { index, document ->
+            documentToAnimeTopEntity(
+                doc = document,
+                position = index
+            )
+        }
+
+        call.respond(HttpStatusCode.OK, Json.encodeToString(elements))
     }
 }
 

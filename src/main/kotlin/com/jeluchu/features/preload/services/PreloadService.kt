@@ -7,6 +7,7 @@ import com.jeluchu.core.enums.Day
 import com.jeluchu.core.enums.MangaFilterTypes
 import com.jeluchu.core.enums.MangaTypes
 import com.jeluchu.core.enums.TimeUnit
+import com.jeluchu.core.extensions.isSafeAnimeData
 import com.jeluchu.core.extensions.needsUpdate
 import com.jeluchu.core.extensions.update
 import com.jeluchu.core.models.PreloadResponse
@@ -28,7 +29,7 @@ import com.jeluchu.core.utils.TimerKey
 import com.jeluchu.core.utils.parseDataToDocuments
 import com.jeluchu.features.anime.mappers.documentToAnimeDirectoryEntity
 import com.jeluchu.features.anime.models.lastepisodes.LastEpisodeEntity
-import com.jeluchu.features.anime.utils.fetchLastEpisodesFromJikan
+import com.jeluchu.features.anime.utils.fetchLastEpisodesFromTenrai
 import com.jeluchu.features.anitakume.mappers.toPodcast
 import com.jeluchu.features.anitakume.models.AnitakumeEntity
 import com.jeluchu.features.gallery.mappers.toProcessedPost
@@ -176,16 +177,26 @@ class PreloadService(
     }
 
     private suspend fun refreshSchedule(force: Boolean): Boolean {
-        if (!shouldRefresh(TimerKey.SCHEDULE, 7, TimeUnit.DAY, force)) return false
         val collection = database.getCollection(Collections.SCHEDULES)
-        collection.deleteMany(Document())
+        // Recover from an empty cache even when a previous run left a fresh timer behind.
+        if (!shouldRefresh(TimerKey.SCHEDULE, 7, TimeUnit.DAY, force) && collection.countDocuments() > 0) {
+            return false
+        }
+
+        val documents = mutableListOf<Document>()
         Day.entries.forEach { day ->
             val data = RestClient.requestWithDelay(
-                BaseUrls.JIKAN + Endpoints.SCHEDULES + "/" + day,
+                BaseUrls.TENRAI + Endpoints.SCHEDULES + "?filter=" + day.name.lowercase(),
                 deserializer = ScheduleEntity.serializer()
             ).data?.map { it.toDayEntity(day) }.orEmpty()
-            parseDataToDocuments(data, DayEntity.serializer()).also { if (it.isNotEmpty()) collection.insertMany(it) }
+            documents += parseDataToDocuments(data, DayEntity.serializer())
         }
+
+        if (documents.isEmpty()) return false
+
+        // Do not destroy the previous cache until the complete weekly refresh is ready.
+        collection.deleteMany(Document())
+        collection.insertMany(documents)
         timers.update(TimerKey.SCHEDULE)
         return true
     }
@@ -193,7 +204,7 @@ class PreloadService(
     private suspend fun refreshLastEpisodes(force: Boolean): Boolean {
         if (!shouldRefresh(TimerKey.LAST_EPISODES, 6, TimeUnit.HOUR, force)) return false
         val collection = database.getCollection(TimerKey.LAST_EPISODES)
-        val animes = fetchLastEpisodesFromJikan(pauseMillis = pauseMillis)
+        val animes = fetchLastEpisodesFromTenrai(pauseMillis = pauseMillis)
         parseDataToDocuments(animes, LastEpisodeEntity.serializer()).also {
             if (it.isNotEmpty()) {
                 collection.deleteMany(Document())
@@ -272,7 +283,7 @@ class PreloadService(
         val collection = database.getCollection(Collections.ANIME_RANKING)
         collection.deleteMany(Filters.and(Filters.eq("page", page), Filters.eq("type", type), Filters.eq("subtype", filter)))
         val response = RestClient.request(
-            BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?type=$type&page=$page&filter=$filter",
+            BaseUrls.TENRAI + Endpoints.TOP_ANIME + "?type=$type&page=$page&filter=$filter",
             AnimeSearch.serializer()
         ).data?.map { it.toAnimeTopEntity(page, "anime", type, filter) }
         parseDataToDocuments(response, AnimeTopEntity.serializer()).also { if (it.isNotEmpty()) collection.insertMany(it) }
@@ -281,15 +292,25 @@ class PreloadService(
     }
 
     private suspend fun refreshAnimeTopTenRanking(type: String, filter: String, force: Boolean): Boolean {
-        val key = "${Collections.ANIME_RANKING}_${Collections.TOP_TEN}_${type}_${filter}"
+        val key = "${Collections.ANIME_RANKING}_${Collections.TOP_TEN}_${type}_${filter}_sfw_true"
         if (!shouldRefresh(key, 7, TimeUnit.DAY, force)) return false
         val collection = database.getCollection(Collections.ANIME_RANKING_TOP_TEN)
-        collection.deleteMany(Filters.and(Filters.eq("type", type), Filters.eq("subtype", filter)))
         val response = RestClient.request(
-            BaseUrls.JIKAN + Endpoints.TOP_ANIME + "?type=$type&filter=$filter",
+            BaseUrls.TENRAI + Endpoints.TOP_ANIME + "?type=$type&filter=$filter",
             AnimeSearch.serializer()
-        ).data?.map { it.toAnimeTopEntity(0, "anime", type, filter) }.orEmpty().take(11).distinctBy { it.malId }
-        parseDataToDocuments(response, AnimeTopEntity.serializer()).also { if (it.isNotEmpty()) collection.insertMany(it) }
+        ).data
+            .filter { it.isSafeAnimeData() }
+            .map { it.toAnimeTopEntity(0, "anime", type, filter) }
+            .take(11)
+            .distinctBy { it.malId }
+        val documents = parseDataToDocuments(response, AnimeTopEntity.serializer()).onEach {
+            it.append("sfw", true)
+        }
+
+        if (documents.isEmpty()) return false
+
+        collection.deleteMany(Filters.and(Filters.eq("type", type), Filters.eq("subtype", filter)))
+        collection.insertMany(documents)
         timers.update(key)
         return true
     }
@@ -300,7 +321,7 @@ class PreloadService(
         val collection = database.getCollection(Collections.MANGA_RANKING)
         collection.deleteMany(Filters.and(Filters.eq("page", page), Filters.eq("type", type), Filters.eq("subtype", filter)))
         val response = RestClient.request(
-            BaseUrls.JIKAN + Endpoints.TOP_MANGA + "?type=$type&page=$page&filter=$filter",
+            BaseUrls.TENRAI + Endpoints.TOP_MANGA + "?type=$type&page=$page&filter=$filter",
             MangaSearch.serializer()
         ).data?.map { it.toMangaTopEntity(page, "manga", type, filter) }
         parseDataToDocuments(response, MangaTopEntity.serializer()).also { if (it.isNotEmpty()) collection.insertMany(it) }
@@ -313,7 +334,7 @@ class PreloadService(
         if (!shouldRefresh(key, 30, TimeUnit.DAY, force)) return false
         val collection = database.getCollection(Collections.PEOPLE_RANKING)
         collection.deleteMany(Filters.eq("page", page))
-        val response = RestClient.request(BaseUrls.JIKAN + Endpoints.TOP_PEOPLE + "?page=$page", PeopleSearch.serializer())
+        val response = RestClient.request(BaseUrls.TENRAI + Endpoints.TOP_PEOPLE + "?page=$page", PeopleSearch.serializer())
             .data?.map { it.toPeopleTopEntity(page, "people") }
         parseDataToDocuments(response, PeopleTopEntity.serializer()).also { if (it.isNotEmpty()) collection.insertMany(it) }
         timers.update(key)
@@ -325,7 +346,7 @@ class PreloadService(
         if (!shouldRefresh(key, 30, TimeUnit.DAY, force)) return false
         val collection = database.getCollection(Collections.CHARACTER_RANKING)
         collection.deleteMany(Filters.eq("page", page))
-        val response = RestClient.request(BaseUrls.JIKAN + Endpoints.TOP_CHARACTER + "?page=$page", CharacterSearch.serializer())
+        val response = RestClient.request(BaseUrls.TENRAI + Endpoints.TOP_CHARACTER + "?page=$page", CharacterSearch.serializer())
             .data?.map { it.toCharacterTopEntity(page, "character") }
         parseDataToDocuments(response, CharacterTopEntity.serializer()).also { if (it.isNotEmpty()) collection.insertMany(it) }
         timers.update(key)
