@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: "Aruppi API"
   description: "Public REST API for anime, themes, rankings, gallery and news."
-  version: "5.9.8"
+  version: "5.9.9"
 servers:
   - url: "http://0.0.0.0:8080/api/v5"
 security:
@@ -944,7 +944,7 @@ components:
         status: 404
         path: "/api/v5/gallery/unknown"
         requestId: "0f2d6d40-4b7a-4f4a-a1a1-f9d8cf8d6a21"
-        version: "5.9.8"
+        version: "5.9.9"
         documentation:
           redoc: "/api/v5/docs"
           swagger: "/api/v5/swagger"
