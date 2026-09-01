@@ -1,8 +1,6 @@
 package com.jeluchu.core.configuration
 
-import com.jeluchu.core.extensions.errorResponse
 import com.jeluchu.core.extensions.respondError
-import com.jeluchu.core.security.ApiKeyValidator
 import com.jeluchu.features.anime.routes.animeEndpoints
 import com.jeluchu.features.anitakume.routes.anitakumeEndpoints
 import com.jeluchu.features.gallery.routes.galleryEndpoints
@@ -20,32 +18,13 @@ import com.mongodb.client.MongoDatabase
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.initRoutes(
     mongoDatabase: MongoDatabase = connectToMongoDB()
 ) = routing {
-    val apiKeyValidator = ApiKeyValidator.fromEnvironment()
-
     route("api/v5") {
         initDocumentation()
-
-        intercept(ApplicationCallPipeline.Plugins) {
-            if (!isPublicDocumentationPath(call.request.path()) &&
-                !apiKeyValidator.isValid(call.request.headers[ApiKeyValidator.HEADER_NAME])
-            ) {
-                call.respond(
-                    status = HttpStatusCode.Unauthorized,
-                    message = call.errorResponse(
-                        status = HttpStatusCode.Unauthorized,
-                        message = ErrorMessages.InvalidApiKey.message,
-                        code = "INVALID_API_KEY"
-                    )
-                )
-                finish()
-            }
-        }
 
         newsEndpoints(mongoDatabase)
         animeEndpoints(mongoDatabase)
@@ -70,14 +49,6 @@ fun Application.initRoutes(
         }
     }
 }
-
-private fun isPublicDocumentationPath(path: String): Boolean =
-    path == "/api/v5" ||
-        path == "/api/v5/" ||
-        path == "/api/v5/docs" ||
-        path == "/api/v5/openapi.yaml" ||
-        path == "/api/v5/swagger" ||
-        path.startsWith("/api/v5/swagger/")
 
 private fun notFoundMessage(path: String): String {
     return when {
